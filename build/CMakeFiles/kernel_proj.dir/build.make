@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build
 
 # Utility rule file for kernel_proj.
 
@@ -76,49 +76,49 @@ CMakeFiles/kernel_proj-complete: kernel_proj-prefix/src/kernel_proj-stamp/kernel
 CMakeFiles/kernel_proj-complete: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure
 CMakeFiles/kernel_proj-complete: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build
 CMakeFiles/kernel_proj-complete: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Completed 'kernel_proj'"
-	/opt/homebrew/bin/cmake -E make_directory /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj-complete
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-done
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Completed 'kernel_proj'"
+	/opt/homebrew/bin/cmake -E make_directory /Users/bucha/dev/uefi_boot_system/build/CMakeFiles
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/CMakeFiles/kernel_proj-complete
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-done
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Performing build step for 'kernel_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && $(MAKE)
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Performing build step for 'kernel_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && $(MAKE)
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure: kernel_proj-prefix/tmp/kernel_proj-cfgcmd.txt
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Performing configure step for 'kernel_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -DCMAKE_SYSTEM_NAME=Generic -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_ASM_COMPILER=clang "-GUnix Makefiles" -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel -B /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Performing configure step for 'kernel_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -DCMAKE_SYSTEM_NAME=Generic -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_ASM_COMPILER=clang "-GUnix Makefiles" -S /Users/bucha/dev/uefi_boot_system/kernel -B /Users/bucha/dev/uefi_boot_system/build/kernel
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-source_dirinfo.txt
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "No download step for 'kernel_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "No download step for 'kernel_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "No install step for 'kernel_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E echo_append
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "No install step for 'kernel_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E echo_append
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Creating directories for 'kernel_proj'"
-	/opt/homebrew/bin/cmake -Dcfgdir= -P /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/tmp/kernel_proj-mkdirs.cmake
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Creating directories for 'kernel_proj'"
+	/opt/homebrew/bin/cmake -Dcfgdir= -P /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/tmp/kernel_proj-mkdirs.cmake
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch-info.txt
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "No patch step for 'kernel_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "No patch step for 'kernel_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch
 
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update-info.txt
 kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update: kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "No update step for 'kernel_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "No update step for 'kernel_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update
 
 CMakeFiles/kernel_proj.dir/codegen:
 .PHONY : CMakeFiles/kernel_proj.dir/codegen
@@ -144,6 +144,6 @@ CMakeFiles/kernel_proj.dir/clean:
 .PHONY : CMakeFiles/kernel_proj.dir/clean
 
 CMakeFiles/kernel_proj.dir/depend:
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj.dir/DependInfo.cmake "--color=$(COLOR)" kernel_proj
+	cd /Users/bucha/dev/uefi_boot_system/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/dev/uefi_boot_system /Users/bucha/dev/uefi_boot_system /Users/bucha/dev/uefi_boot_system/build /Users/bucha/dev/uefi_boot_system/build /Users/bucha/dev/uefi_boot_system/build/CMakeFiles/kernel_proj.dir/DependInfo.cmake "--color=$(COLOR)" kernel_proj
 .PHONY : CMakeFiles/kernel_proj.dir/depend
 

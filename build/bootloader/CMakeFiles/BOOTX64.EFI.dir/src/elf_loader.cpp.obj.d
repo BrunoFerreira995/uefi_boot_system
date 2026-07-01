@@ -1,7 +1,7 @@
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/elf_loader.cpp \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/elf_loader.hpp \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/efi_defs.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/src/elf_loader.cpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/elf_loader.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/efi_defs.hpp \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint-gcc.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
@@ -12,10 +12,10 @@ CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/x86_64-w64-mingw32/include/_mingw_mac.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/x86_64-w64-mingw32/include/_mingw_secapi.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/x86_64-w64-mingw32/include/vadefs.h \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/file.hpp \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/simple_file_system.hpp \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/uefi_application.hpp \
- /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/include/efi_console.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/file.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/simple_file_system.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/uefi_application.hpp \
+ /Users/bucha/dev/uefi_boot_system/bootloader/include/efi_console.hpp \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdarg.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/x86_64-w64-mingw32/include/stdarg.h \
  /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/x86_64-w64-mingw32/include/_mingw_stdarg.h

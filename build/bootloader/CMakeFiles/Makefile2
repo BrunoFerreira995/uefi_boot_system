@@ -54,10 +54,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system/bootloader
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build/bootloader
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -85,14 +85,14 @@ clean: CMakeFiles/BOOTX64.EFI.dir/clean
 CMakeFiles/BOOTX64.EFI.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BOOTX64.EFI.dir/build.make CMakeFiles/BOOTX64.EFI.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BOOTX64.EFI.dir/build.make CMakeFiles/BOOTX64.EFI.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target BOOTX64.EFI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target BOOTX64.EFI"
 .PHONY : CMakeFiles/BOOTX64.EFI.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/BOOTX64.EFI.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/BOOTX64.EFI.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles 0
 .PHONY : CMakeFiles/BOOTX64.EFI.dir/rule
 
 # Convenience name for target.
@@ -102,7 +102,7 @@ BOOTX64.EFI: CMakeFiles/BOOTX64.EFI.dir/rule
 # codegen rule for target.
 CMakeFiles/BOOTX64.EFI.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BOOTX64.EFI.dir/build.make CMakeFiles/BOOTX64.EFI.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Finished codegen for target BOOTX64.EFI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Finished codegen for target BOOTX64.EFI"
 .PHONY : CMakeFiles/BOOTX64.EFI.dir/codegen
 
 # clean rule for target.

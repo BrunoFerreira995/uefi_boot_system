@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build
 
 # Utility rule file for bootloader_proj.
 
@@ -76,49 +76,49 @@ CMakeFiles/bootloader_proj-complete: bootloader_proj-prefix/src/bootloader_proj-
 CMakeFiles/bootloader_proj-complete: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure
 CMakeFiles/bootloader_proj-complete: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build
 CMakeFiles/bootloader_proj-complete: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Completed 'bootloader_proj'"
-	/opt/homebrew/bin/cmake -E make_directory /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-done
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Completed 'bootloader_proj'"
+	/opt/homebrew/bin/cmake -E make_directory /Users/bucha/dev/uefi_boot_system/build/CMakeFiles
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-done
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Performing build step for 'bootloader_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && $(MAKE)
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Performing build step for 'bootloader_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && $(MAKE)
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure: bootloader_proj-prefix/tmp/bootloader_proj-cfgcmd.txt
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Performing configure step for 'bootloader_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/x86_64-w64-mingw32-g++ -DCMAKE_C_COMPILER=/opt/homebrew/bin/x86_64-w64-mingw32-gcc "-GUnix Makefiles" -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader -B /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Performing configure step for 'bootloader_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/x86_64-w64-mingw32-g++ -DCMAKE_C_COMPILER=/opt/homebrew/bin/x86_64-w64-mingw32-gcc "-GUnix Makefiles" -S /Users/bucha/dev/uefi_boot_system/bootloader -B /Users/bucha/dev/uefi_boot_system/build/bootloader
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-source_dirinfo.txt
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "No download step for 'bootloader_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "No download step for 'bootloader_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "No install step for 'bootloader_proj'"
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E echo_append
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "No install step for 'bootloader_proj'"
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E echo_append
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && /opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Creating directories for 'bootloader_proj'"
-	/opt/homebrew/bin/cmake -Dcfgdir= -P /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/tmp/bootloader_proj-mkdirs.cmake
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Creating directories for 'bootloader_proj'"
+	/opt/homebrew/bin/cmake -Dcfgdir= -P /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/tmp/bootloader_proj-mkdirs.cmake
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch-info.txt
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "No patch step for 'bootloader_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "No patch step for 'bootloader_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch
 
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update-info.txt
 bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update: bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "No update step for 'bootloader_proj'"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "No update step for 'bootloader_proj'"
 	/opt/homebrew/bin/cmake -E echo_append
-	/opt/homebrew/bin/cmake -E touch /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update
+	/opt/homebrew/bin/cmake -E touch /Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update
 
 CMakeFiles/bootloader_proj.dir/codegen:
 .PHONY : CMakeFiles/bootloader_proj.dir/codegen
@@ -144,6 +144,6 @@ CMakeFiles/bootloader_proj.dir/clean:
 .PHONY : CMakeFiles/bootloader_proj.dir/clean
 
 CMakeFiles/bootloader_proj.dir/depend:
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj.dir/DependInfo.cmake "--color=$(COLOR)" bootloader_proj
+	cd /Users/bucha/dev/uefi_boot_system/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/dev/uefi_boot_system /Users/bucha/dev/uefi_boot_system /Users/bucha/dev/uefi_boot_system/build /Users/bucha/dev/uefi_boot_system/build /Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj.dir/DependInfo.cmake "--color=$(COLOR)" bootloader_proj
 .PHONY : CMakeFiles/bootloader_proj.dir/depend
 

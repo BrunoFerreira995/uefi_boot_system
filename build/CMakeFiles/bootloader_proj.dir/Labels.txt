@@ -1,13 +1,13 @@
 # Target labels
  bootloader_proj
 # Source files and their labels
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch.rule
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update.rule
+/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj
+/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj.rule
+/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch.rule
+/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update.rule

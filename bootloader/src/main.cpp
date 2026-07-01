@@ -171,6 +171,9 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
         // Close root volume file protocol handle before exiting
         File::CloseRootVolume();
 
+        EFIConsole::Print("Memory map summary:\n");
+        memMap.Print();
+
         EFI_STATUS status = systemTable->BootServices->ExitBootServices(imageHandle, memMap.GetMapKey());
         if (status == EFI_SUCCESS) {
             exitSuccess = true;

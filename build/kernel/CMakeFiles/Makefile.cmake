@@ -10,7 +10,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/4.3.3/CMakeASMCompiler.cmake"
   "CMakeFiles/4.3.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.3.3/CMakeSystem.cmake"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/CMakeLists.txt"
+  "/Users/bucha/dev/uefi_boot_system/kernel/CMakeLists.txt"
   "/opt/homebrew/share/cmake/Modules/CMakeASMCompiler.cmake.in"
   "/opt/homebrew/share/cmake/Modules/CMakeASMInformation.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeCXXCompiler.cmake.in"

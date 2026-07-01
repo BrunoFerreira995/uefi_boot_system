@@ -156,23 +156,70 @@ static void KernelDrawString(const FramebufferInfo& fb, uint32_t x, uint32_t y, 
     }
 }
 
+static void KernelDrawUnsigned(const FramebufferInfo& fb, uint32_t x, uint32_t y, uint64_t value, uint32_t color) {
+    char buffer[32];
+    int index = 0;
+
+    if (value == 0) {
+        buffer[index++] = '0';
+    } else {
+        while (value > 0 && index < 31) {
+            buffer[index++] = static_cast<char>('0' + (value % 10));
+            value /= 10;
+        }
+    }
+
+    for (int i = index - 1; i >= 0; --i) {
+        KernelDrawChar(fb, x, y, buffer[i], color);
+        x += 18;
+    }
+}
+
+static void KernelDrawBootInfo(const FramebufferInfo& fb, const BootInfo& boot_info) {
+    const uint32_t textColor = 0xFFFFFFFF;
+    const uint32_t accentColor = 0xFF00FF00;
+
+    KernelDrawRectangle(fb, 20, 20, 760, 120, 0xFF001122);
+    KernelDrawRectangle(fb, 25, 25, 750, 110, 0xFF000000);
+    KernelDrawString(fb, 40, 40, "Phase 2 - Hardware Initialization", accentColor);
+    KernelDrawString(fb, 40, 70, "Framebuffer:", textColor);
+    KernelDrawString(fb, 150, 70, "res=", textColor);
+    KernelDrawUnsigned(fb, 190, 70, boot_info.framebuffer.width, textColor);
+    KernelDrawString(fb, 250, 70, "x", textColor);
+    KernelDrawUnsigned(fb, 270, 70, boot_info.framebuffer.height, textColor);
+
+    KernelDrawString(fb, 40, 95, "CPU:", textColor);
+    KernelDrawString(fb, 90, 95, boot_info.cpu.vendor, textColor);
+    KernelDrawString(fb, 220, 95, "Fam=", textColor);
+    KernelDrawUnsigned(fb, 270, 95, boot_info.cpu.family, textColor);
+    KernelDrawString(fb, 330, 95, " Mod=", textColor);
+    KernelDrawUnsigned(fb, 390, 95, boot_info.cpu.model, textColor);
+    KernelDrawString(fb, 450, 95, " Step=", textColor);
+    KernelDrawUnsigned(fb, 520, 95, boot_info.cpu.stepping, textColor);
+
+    KernelDrawString(fb, 40, 120, "ACPI RSDP:", textColor);
+    KernelDrawString(fb, 150, 120, boot_info.rsdp ? "present" : "missing", boot_info.rsdp ? accentColor : 0xFFFF4444);
+
+    KernelDrawRectangle(fb, 20, 160, 760, 200, 0xFF112233);
+    KernelDrawRectangle(fb, 25, 165, 750, 190, 0xFF000000);
+    KernelDrawString(fb, 40, 185, "Memory Info:", accentColor);
+    KernelDrawString(fb, 40, 210, "Map buffer:", textColor);
+    KernelDrawUnsigned(fb, 150, 210, reinterpret_cast<uint64_t>(boot_info.memory.buffer), textColor);
+    KernelDrawString(fb, 40, 235, "Entries:", textColor);
+    KernelDrawUnsigned(fb, 120, 235, boot_info.memory.map_size / (boot_info.memory.descriptor_size ? boot_info.memory.descriptor_size : 1), textColor);
+    KernelDrawString(fb, 260, 235, "Conventional bytes:", textColor);
+    KernelDrawUnsigned(fb, 430, 235, boot_info.memory.map_size, textColor);
+}
+
 extern "C" void kernel_main(BootInfo* boot_info) {
-    // Handover check: Draw bright green status bar and message confirming kernel is active
     FramebufferInfo& fb = boot_info->framebuffer;
 
-    // Draw Kernel Confirmation HUD
-    KernelDrawRectangle(fb, 150, 320, 400, 100, 0xFF00FF00); // Bright Green rect
-    KernelDrawRectangle(fb, 155, 325, 390, 90, 0xFF000000);  // Inner Black rect
+    KernelDrawBootInfo(fb, *boot_info);
 
-    // Draw status messages
-    KernelDrawString(fb, 170, 340, "Kernel Main Active!", 0xFF00FF00); // Green text
-    KernelDrawString(fb, 170, 375, "Handover complete. CPU: x86_64", 0xFFFFFFFF); // White text
+    KernelDrawRectangle(fb, 20, 420, 760, 80, 0xFF003300);
+    KernelDrawString(fb, 40, 440, "Kernel handover complete. Phase 2 initialized.", 0xFF00FF00);
+    KernelDrawString(fb, 40, 470, "Bootloader passed framebuffer, CPU, ACPI, and memory data.", 0xFFFFFFFF);
 
-    // Print small indicator at the top left corner (as a check)
-    KernelDrawRectangle(fb, 10, 10, 80, 20, 0xFF00FF00);
-    KernelDrawString(fb, 15, 12, "KERNEL", 0xFF000000);
-
-    // Infinite halt loop
     while (true) {
         asm volatile("hlt");
     }

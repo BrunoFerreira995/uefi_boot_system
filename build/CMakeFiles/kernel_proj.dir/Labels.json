@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/kernel_proj"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/kernel_proj.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj-complete.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/kernel_proj-complete.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update.rule"
 		}
 	],
 	"target" : 

@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system/kernel
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build/kernel
 
 # Utility rule file for kernel.elf.
 
@@ -67,8 +67,8 @@ include CMakeFiles/kernel.elf.dir/compiler_depend.make
 include CMakeFiles/kernel.elf.dir/progress.make
 
 CMakeFiles/kernel.elf:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Linking kernel.elf using x86_64-elf-ld..."
-	/opt/homebrew/bin/x86_64-elf-ld -Ttext 0x1000000 -entry _start -o /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/kernel.elf /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/src/entry.S.obj /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Linking kernel.elf using x86_64-elf-ld..."
+	/opt/homebrew/bin/x86_64-elf-ld -Ttext 0x1000000 -entry _start -o /Users/bucha/dev/uefi_boot_system/build/kernel/kernel.elf /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/src/entry.S.obj /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj
 
 CMakeFiles/kernel.elf.dir/codegen:
 .PHONY : CMakeFiles/kernel.elf.dir/codegen
@@ -86,6 +86,6 @@ CMakeFiles/kernel.elf.dir/clean:
 .PHONY : CMakeFiles/kernel.elf.dir/clean
 
 CMakeFiles/kernel.elf.dir/depend:
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles/kernel.elf.dir/DependInfo.cmake "--color=$(COLOR)" kernel.elf
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/dev/uefi_boot_system/kernel /Users/bucha/dev/uefi_boot_system/kernel /Users/bucha/dev/uefi_boot_system/build/kernel /Users/bucha/dev/uefi_boot_system/build/kernel /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/kernel.elf.dir/DependInfo.cmake "--color=$(COLOR)" kernel.elf
 .PHONY : CMakeFiles/kernel.elf.dir/depend
 

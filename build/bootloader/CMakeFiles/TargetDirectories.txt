@@ -1,3 +1,3 @@
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles/BOOTX64.EFI.dir
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles/edit_cache.dir
-/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles/rebuild_cache.dir
+/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/BOOTX64.EFI.dir
+/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/edit_cache.dir
+/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/rebuild_cache.dir

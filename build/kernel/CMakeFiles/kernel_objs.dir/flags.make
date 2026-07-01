@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/clang++
 ASM_DEFINES = 
 
-ASM_INCLUDES = -I/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/include
+ASM_INCLUDES = -I/Users/bucha/dev/uefi_boot_system/kernel/include
 
 ASM_FLAGS = -target x86_64-unknown-elf -nostdlib -ffreestanding -fno-exceptions -fno-rtti -mno-red-zone -Wall -Wextra
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/include
+CXX_INCLUDES = -I/Users/bucha/dev/uefi_boot_system/kernel/include
 
 CXX_FLAGS = -std=gnu++23 -target x86_64-unknown-elf -nostdlib -ffreestanding -fno-exceptions -fno-rtti -mno-red-zone -Wall -Wextra
 

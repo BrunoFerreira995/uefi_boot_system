@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system/bootloader
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build/bootloader
 
 # Include any dependencies generated for this target.
 include CMakeFiles/BOOTX64.EFI.dir/depend.make
@@ -74,108 +74,108 @@ CMakeFiles/BOOTX64.EFI.dir/codegen:
 
 CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/main.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/main.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/main.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/main.cpp > CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/main.cpp > CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/main.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/main.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/main.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/uefi_application.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/uefi_application.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/uefi_application.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/uefi_application.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/uefi_application.cpp > CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/uefi_application.cpp > CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/uefi_application.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/uefi_application.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/uefi_application.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/efi_console.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/efi_console.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/efi_console.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/efi_console.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/efi_console.cpp > CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/efi_console.cpp > CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/efi_console.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/efi_console.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/efi_console.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/file.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/file.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/file.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/file.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/file.cpp > CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/file.cpp > CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/file.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/file.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/file.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/elf_loader.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/elf_loader.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/elf_loader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/elf_loader.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/elf_loader.cpp > CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/elf_loader.cpp > CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/elf_loader.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/elf_loader.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/elf_loader.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/memory_map.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/memory_map.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/memory_map.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/memory_map.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/memory_map.cpp > CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/memory_map.cpp > CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/memory_map.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/memory_map.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/memory_map.cpp.s
 
 CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/flags.make
 CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/includes_CXX.rsp
-CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/framebuffer.cpp
+CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj: /Users/bucha/dev/uefi_boot_system/bootloader/src/framebuffer.cpp
 CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj: CMakeFiles/BOOTX64.EFI.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/framebuffer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj"
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj -MF CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj.d -o CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.obj -c /Users/bucha/dev/uefi_boot_system/bootloader/src/framebuffer.cpp
 
 CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.i"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/framebuffer.cpp > CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.i
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/bootloader/src/framebuffer.cpp > CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.i
 
 CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.s"
-	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/src/framebuffer.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.s
+	/opt/homebrew/bin/x86_64-w64-mingw32-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/bootloader/src/framebuffer.cpp -o CMakeFiles/BOOTX64.EFI.dir/src/framebuffer.cpp.s
 
 # Object files for target BOOTX64.EFI
 BOOTX64_EFI_OBJECTS = \
@@ -201,7 +201,7 @@ BOOTX64.EFI.exe: CMakeFiles/BOOTX64.EFI.dir/build.make
 BOOTX64.EFI.exe: CMakeFiles/BOOTX64.EFI.dir/linkLibs.rsp
 BOOTX64.EFI.exe: CMakeFiles/BOOTX64.EFI.dir/objects1.rsp
 BOOTX64.EFI.exe: CMakeFiles/BOOTX64.EFI.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable BOOTX64.EFI.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable BOOTX64.EFI.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/BOOTX64.EFI.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -213,6 +213,6 @@ CMakeFiles/BOOTX64.EFI.dir/clean:
 .PHONY : CMakeFiles/BOOTX64.EFI.dir/clean
 
 CMakeFiles/BOOTX64.EFI.dir/depend:
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader/CMakeFiles/BOOTX64.EFI.dir/DependInfo.cmake "--color=$(COLOR)" BOOTX64.EFI
+	cd /Users/bucha/dev/uefi_boot_system/build/bootloader && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/dev/uefi_boot_system/bootloader /Users/bucha/dev/uefi_boot_system/bootloader /Users/bucha/dev/uefi_boot_system/build/bootloader /Users/bucha/dev/uefi_boot_system/build/bootloader /Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/BOOTX64.EFI.dir/DependInfo.cmake "--color=$(COLOR)" BOOTX64.EFI
 .PHONY : CMakeFiles/BOOTX64.EFI.dir/depend
 

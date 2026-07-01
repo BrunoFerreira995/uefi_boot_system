@@ -54,10 +54,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system/kernel
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build/kernel
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -88,14 +88,14 @@ clean: CMakeFiles/kernel.elf.dir/clean
 CMakeFiles/kernel_objs.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Built target kernel_objs"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Built target kernel_objs"
 .PHONY : CMakeFiles/kernel_objs.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/kernel_objs.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kernel_objs.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 0
 .PHONY : CMakeFiles/kernel_objs.dir/rule
 
 # Convenience name for target.
@@ -105,7 +105,7 @@ kernel_objs: CMakeFiles/kernel_objs.dir/rule
 # codegen rule for target.
 CMakeFiles/kernel_objs.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Finished codegen for target kernel_objs"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Finished codegen for target kernel_objs"
 .PHONY : CMakeFiles/kernel_objs.dir/codegen
 
 # clean rule for target.
@@ -120,14 +120,14 @@ CMakeFiles/kernel_objs.dir/clean:
 CMakeFiles/kernel.elf.dir/all: CMakeFiles/kernel_objs.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel.elf.dir/build.make CMakeFiles/kernel.elf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel.elf.dir/build.make CMakeFiles/kernel.elf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=1 "Built target kernel.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=1 "Built target kernel.elf"
 .PHONY : CMakeFiles/kernel.elf.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/kernel.elf.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kernel.elf.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 0
 .PHONY : CMakeFiles/kernel.elf.dir/rule
 
 # Convenience name for target.
@@ -137,7 +137,7 @@ kernel.elf: CMakeFiles/kernel.elf.dir/rule
 # codegen rule for target.
 CMakeFiles/kernel.elf.dir/codegen: CMakeFiles/kernel_objs.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel.elf.dir/build.make CMakeFiles/kernel.elf.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=1 "Finished codegen for target kernel.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=1 "Finished codegen for target kernel.elf"
 .PHONY : CMakeFiles/kernel.elf.dir/codegen
 
 # clean rule for target.

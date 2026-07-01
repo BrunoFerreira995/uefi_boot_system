@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/CMakeFiles/bootloader_proj-complete.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-build.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-configure.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-download.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-install.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-mkdir.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-patch.rule"
 		},
 		{
-			"file" : "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update.rule"
+			"file" : "/Users/bucha/dev/uefi_boot_system/build/bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update.rule"
 		}
 	],
 	"target" : 

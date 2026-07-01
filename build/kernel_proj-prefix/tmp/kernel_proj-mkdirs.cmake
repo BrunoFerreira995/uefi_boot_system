@@ -6,22 +6,22 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION}) # this file comes with cmake
 # If CMAKE_DISABLE_SOURCE_CHANGES is set to true and the source directory is an
 # existing directory in our source tree, calling file(MAKE_DIRECTORY) on it
 # would cause a fatal error, even though it would be a no-op.
-if(NOT EXISTS "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel")
-  file(MAKE_DIRECTORY "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel")
+if(NOT EXISTS "/Users/bucha/dev/uefi_boot_system/kernel")
+  file(MAKE_DIRECTORY "/Users/bucha/dev/uefi_boot_system/kernel")
 endif()
 file(MAKE_DIRECTORY
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/tmp"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/tmp"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src"
+  "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/Users/bucha/dev/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp${cfgdir}") # cfgdir has leading slash
 endif()

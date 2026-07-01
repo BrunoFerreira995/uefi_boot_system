@@ -7,7 +7,7 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/bootloader/CMakeLists.txt"
+  "/Users/bucha/dev/uefi_boot_system/bootloader/CMakeLists.txt"
   "CMakeFiles/4.3.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.3.3/CMakeRCCompiler.cmake"
   "CMakeFiles/4.3.3/CMakeSystem.cmake"

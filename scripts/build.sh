@@ -8,15 +8,17 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 BUILD_DIR="$ROOT_DIR/build"
 
-echo "Creating build directory..."
+echo "Resetting build directory..."
+rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
+
 cd "$BUILD_DIR"
 
 echo "Configuring projects with CMake..."
-cmake "$ROOT_DIR"
+cmake -S "$ROOT_DIR" -B "$BUILD_DIR"
 
 echo "Building bootloader and kernel..."
-cmake --build .
+cmake --build "$BUILD_DIR"
 
 echo "=============================================="
 echo " Build successful!"

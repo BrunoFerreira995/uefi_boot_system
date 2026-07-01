@@ -4,6 +4,6 @@
 
 method=source_dir
 command=
-source_dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel
+source_dir=/Users/bucha/dev/uefi_boot_system/kernel
 work_dir=
 

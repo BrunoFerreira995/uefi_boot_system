@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel
+CMAKE_SOURCE_DIR = /Users/bucha/dev/uefi_boot_system/kernel
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel
+CMAKE_BINARY_DIR = /Users/bucha/dev/uefi_boot_system/build/kernel
 
 # Include any dependencies generated for this target.
 include CMakeFiles/kernel_objs.dir/depend.make
@@ -73,31 +73,31 @@ CMakeFiles/kernel_objs.dir/codegen:
 .PHONY : CMakeFiles/kernel_objs.dir/codegen
 
 CMakeFiles/kernel_objs.dir/src/entry.S.obj: CMakeFiles/kernel_objs.dir/flags.make
-CMakeFiles/kernel_objs.dir/src/entry.S.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/entry.S
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building ASM object CMakeFiles/kernel_objs.dir/src/entry.S.obj"
-	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/kernel_objs.dir/src/entry.S.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/entry.S
+CMakeFiles/kernel_objs.dir/src/entry.S.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/entry.S
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building ASM object CMakeFiles/kernel_objs.dir/src/entry.S.obj"
+	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/kernel_objs.dir/src/entry.S.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/entry.S
 
 CMakeFiles/kernel_objs.dir/src/entry.S.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing ASM source to CMakeFiles/kernel_objs.dir/src/entry.S.i"
-	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/entry.S > CMakeFiles/kernel_objs.dir/src/entry.S.i
+	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -E /Users/bucha/dev/uefi_boot_system/kernel/src/entry.S > CMakeFiles/kernel_objs.dir/src/entry.S.i
 
 CMakeFiles/kernel_objs.dir/src/entry.S.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling ASM source to assembly CMakeFiles/kernel_objs.dir/src/entry.S.s"
-	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/entry.S -o CMakeFiles/kernel_objs.dir/src/entry.S.s
+	/usr/bin/clang $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -S /Users/bucha/dev/uefi_boot_system/kernel/src/entry.S -o CMakeFiles/kernel_objs.dir/src/entry.S.s
 
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
-CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/kernel.cpp
+CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -c /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/kernel.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp
 
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kernel_objs.dir/src/kernel.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/kernel.cpp > CMakeFiles/kernel_objs.dir/src/kernel.cpp.i
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp > CMakeFiles/kernel_objs.dir/src/kernel.cpp.i
 
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kernel_objs.dir/src/kernel.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel/src/kernel.cpp -o CMakeFiles/kernel_objs.dir/src/kernel.cpp.s
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp -o CMakeFiles/kernel_objs.dir/src/kernel.cpp.s
 
 kernel_objs: CMakeFiles/kernel_objs.dir/src/entry.S.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj
@@ -113,6 +113,6 @@ CMakeFiles/kernel_objs.dir/clean:
 .PHONY : CMakeFiles/kernel_objs.dir/clean
 
 CMakeFiles/kernel_objs.dir/depend:
-	cd /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel /Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/DependInfo.cmake "--color=$(COLOR)" kernel_objs
+	cd /Users/bucha/dev/uefi_boot_system/build/kernel && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/bucha/dev/uefi_boot_system/kernel /Users/bucha/dev/uefi_boot_system/kernel /Users/bucha/dev/uefi_boot_system/build/kernel /Users/bucha/dev/uefi_boot_system/build/kernel /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/kernel_objs.dir/DependInfo.cmake "--color=$(COLOR)" kernel_objs
 .PHONY : CMakeFiles/kernel_objs.dir/depend
 
