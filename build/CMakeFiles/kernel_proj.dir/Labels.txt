@@ -1,0 +1,13 @@
+# Target labels
+ kernel_proj
+# Source files and their labels
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj-complete.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-build.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-configure.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-download.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-install.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-mkdir.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-patch.rule
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel_proj-prefix/src/kernel_proj-stamp/kernel_proj-update.rule

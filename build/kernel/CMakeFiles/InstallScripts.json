@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/kernel/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

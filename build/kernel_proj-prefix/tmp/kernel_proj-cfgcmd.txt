@@ -1,0 +1,1 @@
+cmd='/opt/homebrew/bin/cmake;-DCMAKE_SYSTEM_NAME=Generic;-DCMAKE_CXX_COMPILER=clang++;-DCMAKE_C_COMPILER=clang;-DCMAKE_ASM_COMPILER=clang;-GUnix Makefiles;-S;<SOURCE_DIR><SOURCE_SUBDIR>;-B;<BINARY_DIR>'

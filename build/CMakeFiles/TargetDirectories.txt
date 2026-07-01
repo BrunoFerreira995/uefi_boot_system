@@ -1,0 +1,4 @@
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/bootloader_proj.dir
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/kernel_proj.dir
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/edit_cache.dir
+/Users/bucha/.gemini/antigravity/scratch/uefi_boot_system/build/CMakeFiles/rebuild_cache.dir
