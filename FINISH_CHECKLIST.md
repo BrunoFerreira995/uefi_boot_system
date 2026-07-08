@@ -39,10 +39,10 @@
 - [x] Criar estrutura de BootInfo
 
 ### Fase 3 — Kernel
-- [ ] Inicializar o kernel corretamente
-- [ ] Implementar console de saída
-- [ ] Adicionar sistema de logging
-- [ ] Criar mecanismo de kernel panic
+- [x] Inicializar o kernel corretamente
+- [x] Implementar console de saída
+- [x] Adicionar sistema de logging
+- [x] Criar mecanismo de kernel panic
 
 ### Fase 4 — Gerenciamento de Memória
 - [ ] Implementar Physical Memory Manager

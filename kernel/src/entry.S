@@ -25,3 +25,5 @@ halt:
 stack_bottom:
     .skip 16384 # 16KB stack space
 stack_top:
+
+.section .note.GNU-stack,"",@progbits

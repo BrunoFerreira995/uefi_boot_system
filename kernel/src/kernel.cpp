@@ -68,7 +68,7 @@ static const uint8_t font8x8_kernel[128][8] = {
     {0x7e, 0x06, 0x0c, 0x18, 0x30, 0x60, 0x7e, 0x00}, // Z
     // [ \ ] ^ _ `
     {0x3c, 0x30, 0x30, 0x30, 0x30, 0x30, 0x3c, 0x00}, // [
-    {0x00, 0x60, 0x30, 0x18, 0x0c, 0x06, 0x03, 0x00}, // \
+    {0x00, 0x60, 0x30, 0x18, 0x0c, 0x06, 0x03, 0x00}, // Backslash
     {0x3c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x3c, 0x00}, // ]
     {0x08, 0x1c, 0x36, 0x63, 0x00, 0x00, 0x00, 0x00}, // ^
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00}, // _
@@ -108,117 +108,292 @@ static const uint8_t font8x8_kernel[128][8] = {
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}  // DEL
 };
 
-// Freestanding Drawing helper functions using raw linear framebuffer pointers
-static void KernelDrawPixel(const FramebufferInfo& fb, uint32_t x, uint32_t y, uint32_t color) {
-    if (x >= fb.width || y >= fb.height) return;
-    uint32_t* base = reinterpret_cast<uint32_t*>(fb.base_address);
-    base[y * fb.pixels_per_scanline + x] = color;
-}
+enum class LogLevel {
+    Info,
+    Warn,
+    Error,
+    Panic,
+};
 
-static void KernelDrawRectangle(const FramebufferInfo& fb, uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color) {
-    for (uint32_t cy = y; cy < y + h && cy < fb.height; cy++) {
-        for (uint32_t cx = x; cx < x + w && cx < fb.width; cx++) {
-            KernelDrawPixel(fb, cx, cy, color);
-        }
+static constexpr uint32_t kColorBackground = 0xFF050505;
+static constexpr uint32_t kColorPanel = 0xFF101820;
+static constexpr uint32_t kColorText = 0xFFE8E8E8;
+static constexpr uint32_t kColorInfo = 0xFF4CC9F0;
+static constexpr uint32_t kColorWarn = 0xFFFFC857;
+static constexpr uint32_t kColorError = 0xFFFF4D4D;
+static constexpr uint32_t kColorOk = 0xFF00D084;
+
+static void KernelHalt() {
+    while (true) {
+        asm volatile("cli; hlt");
     }
 }
 
-static void KernelDrawChar(const FramebufferInfo& fb, uint32_t x, uint32_t y, char c, uint32_t color) {
-    uint8_t code = static_cast<uint8_t>(c);
-    if (code >= 128) return;
+class KernelConsole {
+public:
+    bool Init(const FramebufferInfo* framebuffer) {
+        if (!framebuffer || framebuffer->base_address == 0 || framebuffer->width == 0 || framebuffer->height == 0) {
+            return false;
+        }
 
-    const uint8_t* glyph = font8x8_kernel[code];
-    for (int gy = 0; gy < 8; gy++) {
-        uint8_t row = glyph[gy];
-        for (int gx = 0; gx < 8; gx++) {
-            if (row & (1 << gx)) {
-                // Scale 2x2
-                KernelDrawPixel(fb, x + gx * 2,     y + gy * 2,     color);
-                KernelDrawPixel(fb, x + gx * 2 + 1, y + gy * 2,     color);
-                KernelDrawPixel(fb, x + gx * 2,     y + gy * 2 + 1, color);
-                KernelDrawPixel(fb, x + gx * 2 + 1, y + gy * 2 + 1, color);
+        m_Framebuffer = framebuffer;
+        m_CursorX = kMarginX;
+        m_CursorY = kMarginY;
+        Clear(kColorBackground);
+        return true;
+    }
+
+    bool IsReady() const {
+        return m_Framebuffer != nullptr;
+    }
+
+    void Clear(uint32_t color) {
+        FillRect(0, 0, m_Framebuffer->width, m_Framebuffer->height, color);
+        m_CursorX = kMarginX;
+        m_CursorY = kMarginY;
+    }
+
+    void PutChar(char c, uint32_t color = kColorText) {
+        if (!m_Framebuffer) {
+            return;
+        }
+
+        if (c == '\n') {
+            NewLine();
+            return;
+        }
+
+        if (m_CursorX + kGlyphWidth > m_Framebuffer->width - kMarginX) {
+            NewLine();
+        }
+        if (m_CursorY + kGlyphHeight > m_Framebuffer->height - kMarginY) {
+            Scroll();
+        }
+
+        DrawChar(m_CursorX, m_CursorY, c, color);
+        m_CursorX += kAdvanceX;
+    }
+
+    void Write(const char* text, uint32_t color = kColorText) {
+        if (!text) {
+            return;
+        }
+
+        while (*text) {
+            PutChar(*text, color);
+            text++;
+        }
+    }
+
+    void WriteUnsigned(uint64_t value, uint32_t color = kColorText) {
+        char buffer[32];
+        int index = 0;
+
+        if (value == 0) {
+            buffer[index++] = '0';
+        } else {
+            while (value > 0 && index < 31) {
+                buffer[index++] = static_cast<char>('0' + (value % 10));
+                value /= 10;
+            }
+        }
+
+        for (int i = index - 1; i >= 0; --i) {
+            PutChar(buffer[i], color);
+        }
+    }
+
+    void WriteHex(uint64_t value, uint32_t color = kColorText) {
+        Write("0x", color);
+
+        bool started = false;
+        for (int shift = 60; shift >= 0; shift -= 4) {
+            uint8_t nibble = static_cast<uint8_t>((value >> shift) & 0xF);
+            if (nibble != 0 || started || shift == 0) {
+                started = true;
+                PutChar(static_cast<char>(nibble < 10 ? '0' + nibble : 'A' + (nibble - 10)), color);
             }
         }
     }
-}
 
-static void KernelDrawString(const FramebufferInfo& fb, uint32_t x, uint32_t y, const char* str, uint32_t color) {
-    uint32_t cx = x;
-    while (*str) {
-        if (*str == '\n') {
-            y += 20;
-            cx = x;
-        } else {
-            KernelDrawChar(fb, cx, y, *str, color);
-            cx += 18; // Char width (8 * 2) + spacing (2)
+    void FillRect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color) {
+        if (!m_Framebuffer) {
+            return;
         }
-        str++;
-    }
-}
 
-static void KernelDrawUnsigned(const FramebufferInfo& fb, uint32_t x, uint32_t y, uint64_t value, uint32_t color) {
-    char buffer[32];
-    int index = 0;
-
-    if (value == 0) {
-        buffer[index++] = '0';
-    } else {
-        while (value > 0 && index < 31) {
-            buffer[index++] = static_cast<char>('0' + (value % 10));
-            value /= 10;
+        for (uint32_t cy = y; cy < y + h && cy < m_Framebuffer->height; cy++) {
+            for (uint32_t cx = x; cx < x + w && cx < m_Framebuffer->width; cx++) {
+                DrawPixel(cx, cy, color);
+            }
         }
     }
 
-    for (int i = index - 1; i >= 0; --i) {
-        KernelDrawChar(fb, x, y, buffer[i], color);
-        x += 18;
+private:
+    static constexpr uint32_t kMarginX = 32;
+    static constexpr uint32_t kMarginY = 28;
+    static constexpr uint32_t kGlyphWidth = 16;
+    static constexpr uint32_t kGlyphHeight = 16;
+    static constexpr uint32_t kAdvanceX = 18;
+    static constexpr uint32_t kAdvanceY = 22;
+
+    void DrawPixel(uint32_t x, uint32_t y, uint32_t color) {
+        if (x >= m_Framebuffer->width || y >= m_Framebuffer->height) {
+            return;
+        }
+
+        uint32_t* base = reinterpret_cast<uint32_t*>(m_Framebuffer->base_address);
+        base[y * m_Framebuffer->pixels_per_scanline + x] = color;
     }
+
+    void DrawChar(uint32_t x, uint32_t y, char c, uint32_t color) {
+        uint8_t code = static_cast<uint8_t>(c);
+        if (code >= 128) {
+            code = '?';
+        }
+
+        const uint8_t* glyph = font8x8_kernel[code];
+        for (int gy = 0; gy < 8; gy++) {
+            uint8_t row = glyph[gy];
+            for (int gx = 0; gx < 8; gx++) {
+                if (row & (1 << gx)) {
+                    DrawPixel(x + gx * 2, y + gy * 2, color);
+                    DrawPixel(x + gx * 2 + 1, y + gy * 2, color);
+                    DrawPixel(x + gx * 2, y + gy * 2 + 1, color);
+                    DrawPixel(x + gx * 2 + 1, y + gy * 2 + 1, color);
+                }
+            }
+        }
+    }
+
+    void NewLine() {
+        m_CursorX = kMarginX;
+        m_CursorY += kAdvanceY;
+    }
+
+    void Scroll() {
+        Clear(kColorBackground);
+        Write("[INFO] Console scroll reset\n", kColorInfo);
+    }
+
+    const FramebufferInfo* m_Framebuffer = nullptr;
+    uint32_t m_CursorX = kMarginX;
+    uint32_t m_CursorY = kMarginY;
+};
+
+static KernelConsole g_Console;
+
+static uint32_t LogColor(LogLevel level) {
+    switch (level) {
+        case LogLevel::Info:
+            return kColorInfo;
+        case LogLevel::Warn:
+            return kColorWarn;
+        case LogLevel::Error:
+        case LogLevel::Panic:
+            return kColorError;
+    }
+
+    return kColorText;
 }
 
-static void KernelDrawBootInfo(const FramebufferInfo& fb, const BootInfo& boot_info) {
-    const uint32_t textColor = 0xFFFFFFFF;
-    const uint32_t accentColor = 0xFF00FF00;
+static const char* LogPrefix(LogLevel level) {
+    switch (level) {
+        case LogLevel::Info:
+            return "[INFO] ";
+        case LogLevel::Warn:
+            return "[WARN] ";
+        case LogLevel::Error:
+            return "[ERROR] ";
+        case LogLevel::Panic:
+            return "[PANIC] ";
+    }
 
-    KernelDrawRectangle(fb, 20, 20, 760, 120, 0xFF001122);
-    KernelDrawRectangle(fb, 25, 25, 750, 110, 0xFF000000);
-    KernelDrawString(fb, 40, 40, "Phase 2 - Hardware Initialization", accentColor);
-    KernelDrawString(fb, 40, 70, "Framebuffer:", textColor);
-    KernelDrawString(fb, 150, 70, "res=", textColor);
-    KernelDrawUnsigned(fb, 190, 70, boot_info.framebuffer.width, textColor);
-    KernelDrawString(fb, 250, 70, "x", textColor);
-    KernelDrawUnsigned(fb, 270, 70, boot_info.framebuffer.height, textColor);
+    return "[LOG] ";
+}
 
-    KernelDrawString(fb, 40, 95, "CPU:", textColor);
-    KernelDrawString(fb, 90, 95, boot_info.cpu.vendor, textColor);
-    KernelDrawString(fb, 220, 95, "Fam=", textColor);
-    KernelDrawUnsigned(fb, 270, 95, boot_info.cpu.family, textColor);
-    KernelDrawString(fb, 330, 95, " Mod=", textColor);
-    KernelDrawUnsigned(fb, 390, 95, boot_info.cpu.model, textColor);
-    KernelDrawString(fb, 450, 95, " Step=", textColor);
-    KernelDrawUnsigned(fb, 520, 95, boot_info.cpu.stepping, textColor);
+static void KernelLog(LogLevel level, const char* message) {
+    g_Console.Write(LogPrefix(level), LogColor(level));
+    g_Console.Write(message, kColorText);
+    g_Console.PutChar('\n');
+}
 
-    KernelDrawString(fb, 40, 120, "ACPI RSDP:", textColor);
-    KernelDrawString(fb, 150, 120, boot_info.rsdp ? "present" : "missing", boot_info.rsdp ? accentColor : 0xFFFF4444);
+static void KernelPanic(const char* reason) {
+    if (g_Console.IsReady()) {
+        g_Console.FillRect(0, 0, 800, 120, 0xFF330000);
+        KernelLog(LogLevel::Panic, reason);
+        g_Console.Write("System halted.\n", kColorError);
+    }
 
-    KernelDrawRectangle(fb, 20, 160, 760, 200, 0xFF112233);
-    KernelDrawRectangle(fb, 25, 165, 750, 190, 0xFF000000);
-    KernelDrawString(fb, 40, 185, "Memory Info:", accentColor);
-    KernelDrawString(fb, 40, 210, "Map buffer:", textColor);
-    KernelDrawUnsigned(fb, 150, 210, reinterpret_cast<uint64_t>(boot_info.memory.buffer), textColor);
-    KernelDrawString(fb, 40, 235, "Entries:", textColor);
-    KernelDrawUnsigned(fb, 120, 235, boot_info.memory.map_size / (boot_info.memory.descriptor_size ? boot_info.memory.descriptor_size : 1), textColor);
-    KernelDrawString(fb, 260, 235, "Conventional bytes:", textColor);
-    KernelDrawUnsigned(fb, 430, 235, boot_info.memory.map_size, textColor);
+    KernelHalt();
+}
+
+static bool KernelInit(BootInfo* boot_info) {
+    if (!boot_info) {
+        return false;
+    }
+
+    if (!g_Console.Init(&boot_info->framebuffer)) {
+        return false;
+    }
+
+    KernelLog(LogLevel::Info, "Phase 3 kernel initialized");
+    KernelLog(LogLevel::Info, "Framebuffer console online");
+    return true;
+}
+
+static void PrintBootInfo(const BootInfo& boot_info) {
+    g_Console.FillRect(20, 18, 760, 120, kColorPanel);
+    g_Console.Write("Phase 3 - Kernel\n", kColorOk);
+    g_Console.Write("Framebuffer: ");
+    g_Console.WriteUnsigned(boot_info.framebuffer.width);
+    g_Console.Write("x");
+    g_Console.WriteUnsigned(boot_info.framebuffer.height);
+    g_Console.Write(" stride=");
+    g_Console.WriteUnsigned(boot_info.framebuffer.pixels_per_scanline);
+    g_Console.PutChar('\n');
+
+    g_Console.Write("CPU: ");
+    g_Console.Write(boot_info.cpu.vendor);
+    g_Console.Write(" Fam=");
+    g_Console.WriteUnsigned(boot_info.cpu.family);
+    g_Console.Write(" Mod=");
+    g_Console.WriteUnsigned(boot_info.cpu.model);
+    g_Console.Write(" Step=");
+    g_Console.WriteUnsigned(boot_info.cpu.stepping);
+    g_Console.PutChar('\n');
+
+    g_Console.Write("ACPI RSDP: ", kColorText);
+    g_Console.Write(boot_info.rsdp ? "present" : "missing", boot_info.rsdp ? kColorOk : kColorWarn);
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Memory map: buffer=");
+    g_Console.WriteHex(reinterpret_cast<uint64_t>(boot_info.memory.buffer));
+    g_Console.Write(" entries=");
+    g_Console.WriteUnsigned(boot_info.memory.map_size / (boot_info.memory.descriptor_size ? boot_info.memory.descriptor_size : 1));
+    g_Console.Write(" descriptor=");
+    g_Console.WriteUnsigned(boot_info.memory.descriptor_size);
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Kernel image: base=");
+    g_Console.WriteHex(boot_info.kernel_base);
+    g_Console.Write(" size=");
+    g_Console.WriteUnsigned(boot_info.kernel_size);
+    g_Console.Write(" bytes\n");
 }
 
 extern "C" void kernel_main(BootInfo* boot_info) {
-    FramebufferInfo& fb = boot_info->framebuffer;
+    if (!KernelInit(boot_info)) {
+        KernelHalt();
+    }
 
-    KernelDrawBootInfo(fb, *boot_info);
+    if (boot_info->memory.descriptor_size == 0) {
+        KernelPanic("Invalid UEFI memory map descriptor size");
+    }
 
-    KernelDrawRectangle(fb, 20, 420, 760, 80, 0xFF003300);
-    KernelDrawString(fb, 40, 440, "Kernel handover complete. Phase 2 initialized.", 0xFF00FF00);
-    KernelDrawString(fb, 40, 470, "Bootloader passed framebuffer, CPU, ACPI, and memory data.", 0xFFFFFFFF);
+    PrintBootInfo(*boot_info);
+    KernelLog(LogLevel::Info, "Bootloader handoff data accepted");
+    KernelLog(LogLevel::Info, "Logging system online");
+    KernelLog(LogLevel::Info, "Panic handler armed");
 
     while (true) {
         asm volatile("hlt");
