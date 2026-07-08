@@ -22,6 +22,8 @@ set(CMAKE_ASM_TARGET_INCLUDE_PATH
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/bucha/dev/uefi_boot_system/kernel/src/cpu.cpp" "CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/drivers.cpp" "CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/filesystem.cpp" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/scheduler.cpp" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj.d"
   )

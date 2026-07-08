@@ -10,6 +10,8 @@ add_library(kernel_objs OBJECT
     src/interrupt_stubs.S
     src/context_switch.S
     src/cpu.cpp
+    src/drivers.cpp
+    src/filesystem.cpp
     src/scheduler.cpp
     src/kernel.cpp
 )
@@ -30,7 +32,7 @@ target_include_directories(kernel_objs PRIVATE include)
 
 # Link the compiled object files using x86_64-elf-ld directly
 add_custom_target(kernel.elf ALL
-    COMMAND /opt/homebrew/bin/x86_64-elf-ld -Ttext 0x1000000 -entry _start -o ${CMAKE_CURRENT_BINARY_DIR}/kernel.elf ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/entry.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/interrupt_stubs.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/context_switch.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj
+    COMMAND /opt/homebrew/bin/x86_64-elf-ld -Ttext 0x1000000 -entry _start -o ${CMAKE_CURRENT_BINARY_DIR}/kernel.elf ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/entry.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/interrupt_stubs.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/context_switch.S.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj
     DEPENDS kernel_objs
     COMMENT "Linking kernel.elf using x86_64-elf-ld..."
 )

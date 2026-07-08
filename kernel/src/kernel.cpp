@@ -1,5 +1,7 @@
 #include "kernel.hpp"
 #include "cpu.hpp"
+#include "drivers.hpp"
+#include "filesystem.hpp"
 #include "scheduler.hpp"
 
 // Simple 8x8 font bitmap for the kernel printout (basic printable ASCII subset)
@@ -701,6 +703,18 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Phase 6 scheduler initialized");
     KernelSchedulerRunSelfTest();
     PrintSchedulerInfo();
+
+    if (!KernelDriversInit(*boot_info)) {
+        KernelPanic("Driver initialization failed");
+    }
+
+    PrintDriverInfo();
+
+    if (!KernelFileSystemInit()) {
+        KernelPanic("Filesystem initialization failed");
+    }
+
+    PrintFileSystemInfo();
 
     while (true) {
         asm volatile("hlt");

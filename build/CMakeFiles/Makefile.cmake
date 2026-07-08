@@ -11,13 +11,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/4.3.3/CMakeSystem.cmake"
   "bootloader_proj-prefix/tmp/bootloader_proj-mkdirs.cmake"
   "kernel_proj-prefix/tmp/kernel_proj-mkdirs.cmake"
-  "/opt/homebrew/share/cmake/Modules/CMakeDetermineSystem.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeGenericSystem.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeInitializeConfigs.cmake"
-  "/opt/homebrew/share/cmake/Modules/CMakeSystem.cmake.in"
   "/opt/homebrew/share/cmake/Modules/CMakeSystemSpecificInformation.cmake"
   "/opt/homebrew/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake"
-  "/opt/homebrew/share/cmake/Modules/CMakeUnixFindMake.cmake"
   "/opt/homebrew/share/cmake/Modules/ExternalProject.cmake"
   "/opt/homebrew/share/cmake/Modules/ExternalProject/PatchInfo.txt.in"
   "/opt/homebrew/share/cmake/Modules/ExternalProject/RepositoryInfo.txt.in"
@@ -38,7 +35,6 @@ set(CMAKE_MAKEFILE_OUTPUTS
 
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
-  "CMakeFiles/4.3.3/CMakeSystem.cmake"
   "bootloader_proj-prefix/tmp/bootloader_proj-mkdirs.cmake"
   "bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-source_dirinfo.txt"
   "bootloader_proj-prefix/src/bootloader_proj-stamp/bootloader_proj-update-info.txt"

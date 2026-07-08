@@ -174,6 +174,30 @@ src/cpu.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/cpu.cpp.s
 .PHONY : src/cpu.cpp.s
 
+src/drivers.obj: src/drivers.cpp.obj
+.PHONY : src/drivers.obj
+
+# target to build an object file
+src/drivers.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj
+.PHONY : src/drivers.cpp.obj
+
+src/drivers.i: src/drivers.cpp.i
+.PHONY : src/drivers.i
+
+# target to preprocess a source file
+src/drivers.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/drivers.cpp.i
+.PHONY : src/drivers.cpp.i
+
+src/drivers.s: src/drivers.cpp.s
+.PHONY : src/drivers.s
+
+# target to generate assembly for a file
+src/drivers.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/drivers.cpp.s
+.PHONY : src/drivers.cpp.s
+
 src/entry.obj: src/entry.S.obj
 .PHONY : src/entry.obj
 
@@ -181,6 +205,30 @@ src/entry.obj: src/entry.S.obj
 src/entry.S.obj:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/entry.S.obj
 .PHONY : src/entry.S.obj
+
+src/filesystem.obj: src/filesystem.cpp.obj
+.PHONY : src/filesystem.obj
+
+# target to build an object file
+src/filesystem.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj
+.PHONY : src/filesystem.cpp.obj
+
+src/filesystem.i: src/filesystem.cpp.i
+.PHONY : src/filesystem.i
+
+# target to preprocess a source file
+src/filesystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/filesystem.cpp.i
+.PHONY : src/filesystem.cpp.i
+
+src/filesystem.s: src/filesystem.cpp.s
+.PHONY : src/filesystem.s
+
+# target to generate assembly for a file
+src/filesystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/filesystem.cpp.s
+.PHONY : src/filesystem.cpp.s
 
 src/interrupt_stubs.obj: src/interrupt_stubs.S.obj
 .PHONY : src/interrupt_stubs.obj
@@ -252,7 +300,13 @@ help:
 	@echo "... src/cpu.obj"
 	@echo "... src/cpu.i"
 	@echo "... src/cpu.s"
+	@echo "... src/drivers.obj"
+	@echo "... src/drivers.i"
+	@echo "... src/drivers.s"
 	@echo "... src/entry.obj"
+	@echo "... src/filesystem.obj"
+	@echo "... src/filesystem.i"
+	@echo "... src/filesystem.s"
 	@echo "... src/interrupt_stubs.obj"
 	@echo "... src/kernel.obj"
 	@echo "... src/kernel.i"

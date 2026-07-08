@@ -63,18 +63,18 @@
 - [x] Adicionar Round Robin
 
 ### Fase 7 — Drivers
-- [ ] Implementar driver de framebuffer
-- [ ] Implementar teclado
-- [ ] Implementar mouse
-- [ ] Adicionar suporte a PCI
-- [ ] Adicionar suporte a USB
-- [ ] Adicionar suporte a NVMe
-- [ ] Adicionar suporte a rede
+- [x] Implementar driver de framebuffer
+- [x] Implementar teclado
+- [x] Implementar mouse
+- [x] Adicionar suporte a PCI
+- [x] Adicionar suporte a USB
+- [x] Adicionar suporte a NVMe
+- [x] Adicionar suporte a rede
 
 ### Fase 8 — Sistema de Arquivos
-- [ ] Implementar VFS
-- [ ] Adicionar suporte a FAT32
-- [ ] Adicionar suporte a EXT2
+- [x] Implementar VFS
+- [x] Adicionar suporte a FAT32
+- [x] Adicionar suporte a EXT2
 
 ### Fase 9 — Userspace
 - [ ] Implementar system calls
