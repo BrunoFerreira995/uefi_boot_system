@@ -45,10 +45,10 @@
 - [x] Criar mecanismo de kernel panic
 
 ### Fase 4 — Gerenciamento de Memória
-- [ ] Implementar Physical Memory Manager
-- [ ] Implementar Virtual Memory
-- [ ] Adicionar Paging
-- [ ] Criar Kernel Heap
+- [x] Implementar Physical Memory Manager
+- [x] Implementar Virtual Memory
+- [x] Adicionar Paging
+- [x] Criar Kernel Heap
 
 ### Fase 5 — CPU
 - [ ] Configurar GDT

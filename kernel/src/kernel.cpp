@@ -327,6 +327,272 @@ static void KernelPanic(const char* reason) {
     KernelHalt();
 }
 
+struct KernelMemoryDescriptor {
+    uint32_t type;
+    uint32_t padding;
+    uint64_t physical_start;
+    uint64_t virtual_start;
+    uint64_t number_of_pages;
+    uint64_t attribute;
+};
+
+static constexpr uint32_t kEfiConventionalMemory = 7;
+static constexpr uint64_t kPageSize = 4096;
+static constexpr uint64_t kManagedMemoryLimit = 0x100000000ULL;
+static constexpr uint64_t kManagedPageCount = kManagedMemoryLimit / kPageSize;
+static constexpr uint64_t kHeapInitialPages = 16;
+
+static uint8_t g_PhysicalPageBitmap[kManagedPageCount / 8];
+
+alignas(4096) static uint64_t g_Pml4[512];
+alignas(4096) static uint64_t g_Pdpt[512];
+alignas(4096) static uint64_t g_PageDirectories[4][512];
+
+class PhysicalMemoryManager {
+public:
+    bool Init(const BootInfo& boot_info) {
+        if (!boot_info.memory.buffer || boot_info.memory.descriptor_size < sizeof(KernelMemoryDescriptor)) {
+            return false;
+        }
+
+        for (uint64_t i = 0; i < sizeof(g_PhysicalPageBitmap); i++) {
+            g_PhysicalPageBitmap[i] = 0xFF;
+        }
+
+        m_TotalPages = 0;
+        m_FreePages = 0;
+        m_UsedPages = kManagedPageCount;
+
+        const uint64_t entry_count = boot_info.memory.map_size / boot_info.memory.descriptor_size;
+        const uint8_t* map = reinterpret_cast<const uint8_t*>(boot_info.memory.buffer);
+
+        for (uint64_t i = 0; i < entry_count; i++) {
+            const KernelMemoryDescriptor* desc = reinterpret_cast<const KernelMemoryDescriptor*>(map + i * boot_info.memory.descriptor_size);
+            const uint64_t start = AlignUp(desc->physical_start, kPageSize);
+            const uint64_t end = AlignDown(desc->physical_start + desc->number_of_pages * kPageSize, kPageSize);
+
+            if (end <= start || start >= kManagedMemoryLimit) {
+                continue;
+            }
+
+            const uint64_t clamped_end = end > kManagedMemoryLimit ? kManagedMemoryLimit : end;
+            const uint64_t page_count = (clamped_end - start) / kPageSize;
+            m_TotalPages += page_count;
+
+            if (desc->type == kEfiConventionalMemory) {
+                MarkRange(start, page_count, true);
+            }
+        }
+
+        ReserveRange(0, 0x100000);
+        ReserveRange(boot_info.kernel_base, boot_info.kernel_size);
+        ReserveRange(boot_info.framebuffer.base_address,
+            static_cast<uint64_t>(boot_info.framebuffer.height) * boot_info.framebuffer.pixels_per_scanline * 4);
+        ReserveRange(reinterpret_cast<uint64_t>(g_PhysicalPageBitmap), sizeof(g_PhysicalPageBitmap));
+        ReserveRange(reinterpret_cast<uint64_t>(g_Pml4), sizeof(g_Pml4));
+        ReserveRange(reinterpret_cast<uint64_t>(g_Pdpt), sizeof(g_Pdpt));
+        ReserveRange(reinterpret_cast<uint64_t>(g_PageDirectories), sizeof(g_PageDirectories));
+
+        return m_FreePages > 0;
+    }
+
+    uint64_t AllocatePage() {
+        return AllocateContiguous(1);
+    }
+
+    uint64_t AllocateContiguous(uint64_t page_count) {
+        if (page_count == 0 || page_count > m_FreePages) {
+            return 0;
+        }
+
+        uint64_t run_start = 0;
+        uint64_t run_length = 0;
+
+        for (uint64_t page = 0; page < kManagedPageCount; page++) {
+            if (IsPageFree(page)) {
+                if (run_length == 0) {
+                    run_start = page;
+                }
+                run_length++;
+
+                if (run_length == page_count) {
+                    MarkPages(run_start, page_count, false);
+                    return run_start * kPageSize;
+                }
+            } else {
+                run_length = 0;
+            }
+        }
+
+        return 0;
+    }
+
+    void FreePage(uint64_t address) {
+        MarkRange(address, 1, true);
+    }
+
+    uint64_t TotalPages() const {
+        return m_TotalPages;
+    }
+
+    uint64_t FreePages() const {
+        return m_FreePages;
+    }
+
+    uint64_t UsedPages() const {
+        return m_UsedPages;
+    }
+
+private:
+    static uint64_t AlignDown(uint64_t value, uint64_t alignment) {
+        return value & ~(alignment - 1);
+    }
+
+    static uint64_t AlignUp(uint64_t value, uint64_t alignment) {
+        return (value + alignment - 1) & ~(alignment - 1);
+    }
+
+    bool IsPageFree(uint64_t page) const {
+        return (g_PhysicalPageBitmap[page / 8] & (1u << (page % 8))) == 0;
+    }
+
+    void SetPage(uint64_t page, bool free) {
+        const uint8_t mask = static_cast<uint8_t>(1u << (page % 8));
+        const bool was_free = IsPageFree(page);
+
+        if (free) {
+            g_PhysicalPageBitmap[page / 8] &= static_cast<uint8_t>(~mask);
+        } else {
+            g_PhysicalPageBitmap[page / 8] |= mask;
+        }
+
+        if (free && !was_free) {
+            m_FreePages++;
+            if (m_UsedPages > 0) {
+                m_UsedPages--;
+            }
+        } else if (!free && was_free) {
+            if (m_FreePages > 0) {
+                m_FreePages--;
+            }
+            m_UsedPages++;
+        }
+    }
+
+    void MarkPages(uint64_t start_page, uint64_t page_count, bool free) {
+        for (uint64_t page = start_page; page < start_page + page_count && page < kManagedPageCount; page++) {
+            SetPage(page, free);
+        }
+    }
+
+    void MarkRange(uint64_t address, uint64_t page_count, bool free) {
+        const uint64_t start_page = address / kPageSize;
+        MarkPages(start_page, page_count, free);
+    }
+
+    void ReserveRange(uint64_t address, uint64_t byte_count) {
+        if (byte_count == 0 || address >= kManagedMemoryLimit) {
+            return;
+        }
+
+        const uint64_t start = AlignDown(address, kPageSize);
+        const uint64_t end = AlignUp(address + byte_count, kPageSize);
+        MarkRange(start, (end - start) / kPageSize, false);
+    }
+
+    uint64_t m_TotalPages = 0;
+    uint64_t m_FreePages = 0;
+    uint64_t m_UsedPages = 0;
+};
+
+class VirtualMemoryManager {
+public:
+    void InitIdentityMap4GiB() {
+        for (uint64_t i = 0; i < 512; i++) {
+            g_Pml4[i] = 0;
+            g_Pdpt[i] = 0;
+        }
+
+        for (uint64_t pd = 0; pd < 4; pd++) {
+            g_Pdpt[pd] = reinterpret_cast<uint64_t>(&g_PageDirectories[pd][0]) | kPresentWritable;
+            for (uint64_t entry = 0; entry < 512; entry++) {
+                const uint64_t physical = (pd * 512 + entry) * kLargePageSize;
+                g_PageDirectories[pd][entry] = physical | kPresentWritable | kPageSize2MiB;
+            }
+        }
+
+        g_Pml4[0] = reinterpret_cast<uint64_t>(g_Pdpt) | kPresentWritable;
+
+        asm volatile("mov %0, %%cr3" :: "r"(reinterpret_cast<uint64_t>(g_Pml4)) : "memory");
+    }
+
+private:
+    static constexpr uint64_t kPresentWritable = 0x003;
+    static constexpr uint64_t kPageSize2MiB = 0x080;
+    static constexpr uint64_t kLargePageSize = 2 * 1024 * 1024;
+};
+
+class KernelHeap {
+public:
+    bool Init(PhysicalMemoryManager& pmm) {
+        const uint64_t heap_base = pmm.AllocateContiguous(kHeapInitialPages);
+        if (heap_base == 0) {
+            return false;
+        }
+
+        m_Start = heap_base;
+        m_Current = heap_base;
+        m_End = heap_base + kHeapInitialPages * kPageSize;
+        return true;
+    }
+
+    void* Allocate(uint64_t size, uint64_t alignment = 16) {
+        if (size == 0 || alignment == 0) {
+            return nullptr;
+        }
+
+        const uint64_t aligned = (m_Current + alignment - 1) & ~(alignment - 1);
+        if (aligned + size > m_End) {
+            return nullptr;
+        }
+
+        m_Current = aligned + size;
+        return reinterpret_cast<void*>(aligned);
+    }
+
+    uint64_t Capacity() const {
+        return m_End - m_Start;
+    }
+
+    uint64_t Used() const {
+        return m_Current - m_Start;
+    }
+
+private:
+    uint64_t m_Start = 0;
+    uint64_t m_Current = 0;
+    uint64_t m_End = 0;
+};
+
+static PhysicalMemoryManager g_PhysicalMemory;
+static VirtualMemoryManager g_VirtualMemory;
+static KernelHeap g_KernelHeap;
+
+static bool KernelMemoryInit(const BootInfo& boot_info) {
+    if (!g_PhysicalMemory.Init(boot_info)) {
+        return false;
+    }
+
+    g_VirtualMemory.InitIdentityMap4GiB();
+
+    if (!g_KernelHeap.Init(g_PhysicalMemory)) {
+        return false;
+    }
+
+    void* probe = g_KernelHeap.Allocate(64);
+    return probe != nullptr;
+}
+
 static bool KernelInit(BootInfo* boot_info) {
     if (!boot_info) {
         return false;
@@ -339,6 +605,24 @@ static bool KernelInit(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Phase 3 kernel initialized");
     KernelLog(LogLevel::Info, "Framebuffer console online");
     return true;
+}
+
+static void PrintMemoryManagerInfo() {
+    g_Console.Write("PMM: total=");
+    g_Console.WriteUnsigned(g_PhysicalMemory.TotalPages());
+    g_Console.Write(" pages free=");
+    g_Console.WriteUnsigned(g_PhysicalMemory.FreePages());
+    g_Console.Write(" used=");
+    g_Console.WriteUnsigned(g_PhysicalMemory.UsedPages());
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Paging: identity map 0-4GiB active\n", kColorOk);
+
+    g_Console.Write("Kernel heap: capacity=");
+    g_Console.WriteUnsigned(g_KernelHeap.Capacity());
+    g_Console.Write(" used=");
+    g_Console.WriteUnsigned(g_KernelHeap.Used());
+    g_Console.Write(" bytes\n");
 }
 
 static void PrintBootInfo(const BootInfo& boot_info) {
@@ -394,6 +678,15 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Bootloader handoff data accepted");
     KernelLog(LogLevel::Info, "Logging system online");
     KernelLog(LogLevel::Info, "Panic handler armed");
+
+    if (!KernelMemoryInit(*boot_info)) {
+        KernelPanic("Kernel memory initialization failed");
+    }
+
+    KernelLog(LogLevel::Info, "Physical memory manager online");
+    KernelLog(LogLevel::Info, "Virtual memory identity map installed");
+    KernelLog(LogLevel::Info, "Kernel heap online");
+    PrintMemoryManagerInfo();
 
     while (true) {
         asm volatile("hlt");
