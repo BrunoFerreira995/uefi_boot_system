@@ -56,6 +56,8 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
     EFIConsole::SetColor(EFI_GREEN, EFI_BACKGROUND_BLACK);
     EFIConsole::Print("SUCCESS\n");
     EFIConsole::SetColor(EFI_LIGHTGRAY, EFI_BACKGROUND_BLACK);
+    EFIConsole::PrintFormatted("ESP root volume opened from boot device handle: %p\n",
+        File::GetRootDeviceHandle());
 
     // List boot partition files for visual validation
     File::ListDirectory("/");
@@ -66,6 +68,7 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
     if (!fb.Init()) {
         EFIConsole::SetColor(EFI_RED, EFI_BACKGROUND_BLACK);
         EFIConsole::Print("FAILED!\n");
+        EFIConsole::PrintFormatted("GOP init status = 0x%llx\n", fb.GetLastStatus());
         app.Stall(3000000);
         return EFI_UNSUPPORTED;
     }
@@ -75,6 +78,8 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
 
     EFIConsole::PrintFormatted("GOP Resolution: %dx%d (%d pixels per scanline)\n",
         fb.GetWidth(), fb.GetHeight(), fb.GetPixelsPerScanLine());
+    EFIConsole::PrintFormatted("GOP Pixel Format: %s (%d), Framebuffer=%p\n",
+        fb.GetPixelFormatName(), fb.GetPixelFormat(), reinterpret_cast<void*>(fb.GetBaseAddress()));
 
     // GOP test visual layout: Blue background, White rectangle, Black text
     fb.Fill(0x00113366); // Smooth dark blue
@@ -90,6 +95,16 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
         app.Stall(5000000);
         return EFI_NOT_FOUND;
     }
+    size_t kernelFileSize = kernelFile.GetSize();
+    if (kernelFileSize == 0) {
+        EFIConsole::SetColor(EFI_RED, EFI_BACKGROUND_BLACK);
+        EFIConsole::Print("FAILED (empty or unreadable file info)!\n");
+        app.Stall(5000000);
+        return EFI_LOAD_ERROR;
+    }
+    EFIConsole::SetColor(EFI_GREEN, EFI_BACKGROUND_BLACK);
+    EFIConsole::PrintFormatted("OPENED (%llu bytes from ESP)\n", kernelFileSize);
+    EFIConsole::SetColor(EFI_LIGHTGRAY, EFI_BACKGROUND_BLACK);
 
     ElfLoader loader(kernelFile);
     if (!loader.Load()) {
@@ -104,9 +119,10 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
 
     EFIConsole::PrintFormatted("Kernel ELF Loaded: Base=%p, Size=%lld bytes, Entry=%p\n",
         reinterpret_cast<void*>(loader.GetKernelBase()), loader.GetKernelSize(), reinterpret_cast<void*>(loader.GetEntryPoint()));
+    EFIConsole::Print("/kernel/kernel.elf was read through the ESP root volume opened from the boot image device.\n");
 
     // 5. Gather boot info metadata
-    BootInfo bootInfo;
+    BootInfo bootInfo {};
 
     // Framebuffer metadata
     bootInfo.framebuffer.base_address = fb.GetBaseAddress();
@@ -154,13 +170,18 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
     bootInfo.kernel_size = loader.GetKernelSize();
 
     // 6. Memory Map and Exit Boot Services
+    kernelFile.Close();
+    File::CloseRootVolume();
     EFIConsole::Print("Exiting Boot Services...\n");
     app.Stall(1000000); // 1-second delay so user can read messages
 
     MemoryMap memMap;
     bool exitSuccess = false;
+    EFI_STATUS exitStatus = EFI_SUCCESS;
 
-    // Retry loop in case memory map changes during ExitBootServices call
+    // Retry loop in case the memory map key changes during ExitBootServices.
+    // Nothing that uses Boot Services may run between MemoryMap::Get() and
+    // ExitBootServices(), or the freshly returned map key can become stale.
     for (int retries = 0; retries < 5; retries++) {
         if (!memMap.Get()) {
             EFIConsole::Print("Error: Failed to obtain memory map.\n");
@@ -168,23 +189,17 @@ extern "C" EFI_STATUS EFIAPI efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* 
             return EFI_DEVICE_ERROR;
         }
 
-        // Close root volume file protocol handle before exiting
-        File::CloseRootVolume();
-
-        EFIConsole::Print("Memory map summary:\n");
-        memMap.Print();
-
-        EFI_STATUS status = systemTable->BootServices->ExitBootServices(imageHandle, memMap.GetMapKey());
-        if (status == EFI_SUCCESS) {
+        exitStatus = systemTable->BootServices->ExitBootServices(imageHandle, memMap.GetMapKey());
+        if (exitStatus == EFI_SUCCESS) {
             exitSuccess = true;
             break;
         }
-        // If we fail due to map key mismatch, we loop, get map again, and retry
+        // If the map key was invalidated, loop, get a fresh map, and retry.
     }
 
     if (!exitSuccess) {
         // Can only print if we didn't exit boot services (so status is not success)
-        EFIConsole::Print("Error: ExitBootServices failed permanently.\n");
+        EFIConsole::PrintFormatted("Error: ExitBootServices failed permanently: 0x%llx\n", exitStatus);
         app.Stall(5000000);
         return EFI_DEVICE_ERROR;
     }

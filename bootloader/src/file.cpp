@@ -4,6 +4,7 @@
 #include "efi_console.hpp"
 
 EFI_FILE_PROTOCOL* File::s_RootVolume = nullptr;
+EFI_HANDLE File::s_RootDeviceHandle = nullptr;
 
 File::File(const char* asciiPath) : m_Handle(nullptr), m_OwnsHandle(true) {
     // Convert ASCII to UTF-16 and replace '/' with '\'
@@ -60,10 +61,11 @@ bool File::InitRootVolume(EFI_HANDLE imageHandle) {
         EFIConsole::PrintFormatted("Error: Failed to locate Loaded Image Protocol (%x)\n", status);
         return false;
     }
+    s_RootDeviceHandle = loadedImage->DeviceHandle;
 
     // Get Simple File System Protocol from Loaded Image Device Handle
     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* sfs = nullptr;
-    status = bs->HandleProtocol(loadedImage->DeviceHandle, &EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID, reinterpret_cast<void**>(&sfs));
+    status = bs->HandleProtocol(s_RootDeviceHandle, &EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID, reinterpret_cast<void**>(&sfs));
     if (status != EFI_SUCCESS || !sfs) {
         EFIConsole::PrintFormatted("Error: Failed to locate Simple File System Protocol (%x)\n", status);
         return false;
@@ -84,6 +86,7 @@ void File::CloseRootVolume() {
         s_RootVolume->Close(s_RootVolume);
         s_RootVolume = nullptr;
     }
+    s_RootDeviceHandle = nullptr;
 }
 
 bool File::Open() {

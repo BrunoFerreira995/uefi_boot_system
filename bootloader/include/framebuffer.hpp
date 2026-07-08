@@ -10,7 +10,10 @@ private:
     uint32_t m_Height;
     uint32_t m_PixelsPerScanLine;
     uint32_t m_PixelFormat;
+    EFI_STATUS m_LastStatus;
     EFI_GRAPHICS_OUTPUT_PROTOCOL* m_Gop;
+
+    uint32_t ConvertColor(uint32_t color) const;
 
 public:
     Framebuffer();
@@ -24,6 +27,8 @@ public:
     uint32_t GetHeight() const { return m_Height; }
     uint32_t GetPixelsPerScanLine() const { return m_PixelsPerScanLine; }
     uint32_t GetPixelFormat() const { return m_PixelFormat; }
+    EFI_STATUS GetLastStatus() const { return m_LastStatus; }
+    const char* GetPixelFormatName() const;
 
     void DrawPixel(uint32_t x, uint32_t y, uint32_t color);
     void DrawRectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color);

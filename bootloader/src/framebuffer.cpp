@@ -1,6 +1,42 @@
 #include "framebuffer.hpp"
 #include "uefi_application.hpp"
 
+namespace {
+
+bool NormalizePixelFormat(const EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info, uint32_t* format) {
+    if (!info || !format) {
+        return false;
+    }
+
+    if (info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor ||
+        info->PixelFormat == PixelRedGreenBlueReserved8BitPerColor) {
+        *format = info->PixelFormat;
+        return true;
+    }
+
+    if (info->PixelFormat != PixelBitMask) {
+        return false;
+    }
+
+    if (info->PixelInformation.RedMask == 0x00FF0000 &&
+        info->PixelInformation.GreenMask == 0x0000FF00 &&
+        info->PixelInformation.BlueMask == 0x000000FF) {
+        *format = PixelBlueGreenRedReserved8BitPerColor;
+        return true;
+    }
+
+    if (info->PixelInformation.RedMask == 0x000000FF &&
+        info->PixelInformation.GreenMask == 0x0000FF00 &&
+        info->PixelInformation.BlueMask == 0x00FF0000) {
+        *format = PixelRedGreenBlueReserved8BitPerColor;
+        return true;
+    }
+
+    return false;
+}
+
+} // namespace
+
 // Standard 8x8 font definitions for printable ASCII characters [0x20 to 0x7E]
 static const uint8_t font8x8_basic[128][8] = {
     // 0x00 - 0x1F: Non-printable
@@ -112,12 +148,57 @@ static const uint8_t font8x8_basic[128][8] = {
 };
 
 Framebuffer::Framebuffer()
-    : m_BaseAddress(0), m_Width(0), m_Height(0), m_PixelsPerScanLine(0), m_PixelFormat(0), m_Gop(nullptr) {}
+    : m_BaseAddress(0), m_Width(0), m_Height(0), m_PixelsPerScanLine(0), m_PixelFormat(0),
+      m_LastStatus(EFI_SUCCESS), m_Gop(nullptr) {}
 
 bool Framebuffer::Init() {
     auto& app = UEFIApplication::Get();
+    EFI_BOOT_SERVICES* bs = app.GetBootServices();
+
     EFI_STATUS status = app.LocateProtocol(EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID, reinterpret_cast<void**>(&m_Gop));
+    m_LastStatus = status;
     if (status != EFI_SUCCESS || !m_Gop || !m_Gop->Mode) {
+        return false;
+    }
+
+    uint32_t bestMode = m_Gop->Mode->Mode;
+    uint64_t bestPixels = 0;
+
+    for (uint32_t mode = 0; mode < m_Gop->Mode->MaxMode; mode++) {
+        size_t infoSize = 0;
+        EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info = nullptr;
+        status = m_Gop->QueryMode(m_Gop, mode, &infoSize, &info);
+        if (status != EFI_SUCCESS || !info) {
+            continue;
+        }
+
+        uint32_t normalizedFormat = 0;
+        const bool usableFormat = NormalizePixelFormat(info, &normalizedFormat);
+        const uint64_t pixels = static_cast<uint64_t>(info->HorizontalResolution) * info->VerticalResolution;
+
+        if (usableFormat && info->PixelsPerScanLine >= info->HorizontalResolution && pixels > bestPixels) {
+            bestMode = mode;
+            bestPixels = pixels;
+        }
+
+        bs->FreePool(info);
+    }
+
+    if (bestMode != m_Gop->Mode->Mode) {
+        status = m_Gop->SetMode(m_Gop, bestMode);
+        m_LastStatus = status;
+        if (status != EFI_SUCCESS) {
+            return false;
+        }
+    }
+
+    if (!m_Gop->Mode->Info || m_Gop->Mode->FrameBufferBase == 0 || m_Gop->Mode->FrameBufferSize == 0) {
+        return false;
+    }
+
+    uint32_t normalizedFormat = 0;
+    if (!NormalizePixelFormat(m_Gop->Mode->Info, &normalizedFormat) ||
+        m_Gop->Mode->Info->PixelsPerScanLine < m_Gop->Mode->Info->HorizontalResolution) {
         return false;
     }
 
@@ -125,31 +206,60 @@ bool Framebuffer::Init() {
     m_Width = m_Gop->Mode->Info->HorizontalResolution;
     m_Height = m_Gop->Mode->Info->VerticalResolution;
     m_PixelsPerScanLine = m_Gop->Mode->Info->PixelsPerScanLine;
-    m_PixelFormat = m_Gop->Mode->Info->PixelFormat;
+    m_PixelFormat = normalizedFormat;
 
     return true;
+}
+
+uint32_t Framebuffer::ConvertColor(uint32_t color) const {
+    uint32_t red = (color >> 16) & 0xFF;
+    uint32_t green = (color >> 8) & 0xFF;
+    uint32_t blue = color & 0xFF;
+
+    if (m_PixelFormat == PixelRedGreenBlueReserved8BitPerColor) {
+        return red | (green << 8) | (blue << 16);
+    }
+
+    return blue | (green << 8) | (red << 16);
+}
+
+const char* Framebuffer::GetPixelFormatName() const {
+    switch (m_PixelFormat) {
+        case PixelRedGreenBlueReserved8BitPerColor:
+            return "RGBx";
+        case PixelBlueGreenRedReserved8BitPerColor:
+            return "BGRx";
+        case PixelBitMask:
+            return "BitMask";
+        case PixelBltOnly:
+            return "BltOnly";
+        default:
+            return "Unknown";
+    }
 }
 
 void Framebuffer::DrawPixel(uint32_t x, uint32_t y, uint32_t color) {
     if (x >= m_Width || y >= m_Height) return;
     uint32_t* fb = reinterpret_cast<uint32_t*>(m_BaseAddress);
-    fb[y * m_PixelsPerScanLine + x] = color;
+    fb[y * m_PixelsPerScanLine + x] = ConvertColor(color);
 }
 
 void Framebuffer::DrawRectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color) {
+    uint32_t converted = ConvertColor(color);
     for (uint32_t cy = y; cy < y + h && cy < m_Height; cy++) {
         for (uint32_t cx = x; cx < x + w && cx < m_Width; cx++) {
             uint32_t* fb = reinterpret_cast<uint32_t*>(m_BaseAddress);
-            fb[cy * m_PixelsPerScanLine + cx] = color;
+            fb[cy * m_PixelsPerScanLine + cx] = converted;
         }
     }
 }
 
 void Framebuffer::Fill(uint32_t color) {
     uint32_t* fb = reinterpret_cast<uint32_t*>(m_BaseAddress);
+    uint32_t converted = ConvertColor(color);
     size_t size = static_cast<size_t>(m_Height) * m_PixelsPerScanLine;
     for (size_t i = 0; i < size; i++) {
-        fb[i] = color;
+        fb[i] = converted;
     }
 }
 
@@ -165,7 +275,7 @@ void Framebuffer::DrawChar(uint32_t x, uint32_t y, char c, uint32_t color) {
     for (int gy = 0; gy < 8; gy++) {
         uint8_t row = glyph[gy];
         for (int gx = 0; gx < 8; gx++) {
-            if (row & (1 << gx)) {
+            if (row & (1 << (7 - gx))) {
                 // Scale 2x2 for better readability on high-res displays
                 DrawPixel(x + gx * 2,     y + gy * 2,     color);
                 DrawPixel(x + gx * 2 + 1, y + gy * 2,     color);

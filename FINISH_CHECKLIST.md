@@ -23,9 +23,9 @@
 - [x] Confirmar que o bootloader foi encontrado em `EFI/BOOT/BOOTX64.EFI`
 - [x] Confirmar que o bootloader foi executado
 - [x] Corrigir abertura do diretório raiz `/`
-- [ ] Corrigir inicialização do GOP/Framebuffer
-- [ ] Confirmar leitura de `kernel/kernel.elf`
-- [ ] Confirmar que o kernel foi carregado a partir da ESP
+- [x] Corrigir inicialização do GOP/Framebuffer
+- [x] Confirmar leitura de `kernel/kernel.elf`
+- [x] Confirmar que o kernel foi carregado a partir da ESP
 
 ## Roadmap do projeto
 
@@ -36,7 +36,7 @@
 - [x] Compilar o kernel
 - [x] Gerar a imagem EFI/ESP
 - [x] Executar o bootloader no QEMU
-- [ ] Carregar o kernel pelo bootloader
+- [x] Carregar o kernel pelo bootloader
 
 ### Fase 2 — Hardware Initialization
 - [x] Implementar Memory Map
@@ -92,6 +92,24 @@
 - [x] Implementar window manager
 - [x] Implementar compositor
 - [x] Criar desktop environment
+- [x] Criar fila de eventos da GUI
+- [x] Adicionar tipos de evento `MouseMove`, `MouseDown`, `MouseUp`, `Click`, `DoubleClick`, `Hover` e `Drag`
+- [x] Renderizar cursor de mouse
+- [x] Implementar clique lógico na GUI
+- [x] Implementar arraste de janelas pela barra de título
+- [x] Implementar z-order com bring-to-front ao clicar em janela
+- [x] Adicionar barra de título com nome da janela
+- [x] Adicionar botão de fechar na barra de título
+- [x] Adicionar janela visual de Terminal
+- [x] Exibir status visual de CPU, RAM, FPS e relógio na barra superior
+- [x] Criar API gráfica interna para retângulos, linhas, texto e imagem placeholder
+- [ ] Conectar pacotes reais do mouse PS/2 à fila de eventos da GUI
+- [ ] Implementar hover com estado visual
+- [ ] Implementar double click
+- [ ] Implementar minimizar janela
+- [ ] Implementar maximizar/restaurar janela
+- [ ] Adicionar ícones no desktop
+- [ ] Implementar comandos reais do terminal: `help`, `mem`, `cpu`, `clear`, `version`, `uptime`, `reboot`
 
 ### Fase 11 — Rede
 - [ ] Implementar Ethernet
@@ -102,30 +120,35 @@
 - [ ] Implementar DNS
 
 ## Prerequisites
-- [ ] Install CMake
-- [ ] Install Clang/LLVM
-- [ ] Install x86_64-elf-binutils or compatible linker
-- [ ] Install x86_64-w64-mingw32 cross-compiler
-- [ ] Install QEMU
-- [ ] Install OVMF/EDK2 firmware image for UEFI boot
+- [x] Install CMake
+- [x] Install Clang/LLVM
+- [x] Install x86_64-elf-binutils or compatible linker
+- [x] Install x86_64-w64-mingw32 cross-compiler
+- [x] Install QEMU
+- [x] Install OVMF/EDK2 firmware image for UEFI boot
 
 ## Build
-- [ ] Make the helper scripts executable: `chmod +x scripts/build.sh scripts/run.sh`
-- [ ] Run the build script: `./scripts/build.sh`
-- [ ] Confirm build artifacts exist:
-  - [ ] `build/bootloader/BOOTX64.EFI`
-  - [ ] `build/bootloader/BOOTX64.EFI.exe`
-  - [ ] `build/kernel/kernel.elf`
+- [x] Make the helper scripts executable: `chmod +x scripts/build.sh scripts/run.sh`
+- [x] Run the build script: `./scripts/build.sh`
+- [x] Confirm build artifacts exist:
+  - [x] `build/bootloader/BOOTX64.EFI.exe`
+  - [x] `build/kernel/kernel.elf`
 
 ## Run
-- [ ] Run the boot script: `./scripts/run.sh`
-- [ ] Confirm QEMU launches with the UEFI firmware image
-- [ ] Confirm the bootloader and kernel are loaded from the ESP image
+- [x] Run the boot script: `./scripts/run.sh`
+- [x] Confirm QEMU launches with the UEFI firmware image
+- [x] Confirm the ESP is exposed as the boot volume
+- [x] Confirm the bootloader is loaded from `EFI/BOOT/BOOTX64.EFI`
+- [x] Confirm `/kernel/kernel.elf` is opened and read from the ESP
+- [x] Confirm the kernel ELF is loaded by the bootloader
 
 ## Verification
-- [ ] Check that `ESP/EFI/BOOT/BOOTX64.EFI` exists
-- [ ] Check that `ESP/kernel/kernel.elf` exists
-- [ ] Verify the project boots without build errors
+- [x] Check that `ESP/EFI/BOOT/BOOTX64.EFI` exists
+- [x] Check that `ESP/kernel/kernel.elf` exists
+- [x] Verify the project builds without errors
+- [x] Verify GOP/framebuffer initialization succeeds
+- [x] Verify framebuffer colors/text render with the detected pixel format
+- [x] Verify `ExitBootServices` uses a fresh memory map key
 
 ## Troubleshooting
 - [ ] If the build fails, verify the toolchain paths in the CMake files

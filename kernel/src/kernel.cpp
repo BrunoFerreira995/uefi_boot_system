@@ -241,7 +241,19 @@ private:
         }
 
         uint32_t* base = reinterpret_cast<uint32_t*>(m_Framebuffer->base_address);
-        base[y * m_Framebuffer->pixels_per_scanline + x] = color;
+        base[y * m_Framebuffer->pixels_per_scanline + x] = ConvertColor(color);
+    }
+
+    uint32_t ConvertColor(uint32_t color) const {
+        uint32_t red = (color >> 16) & 0xFF;
+        uint32_t green = (color >> 8) & 0xFF;
+        uint32_t blue = color & 0xFF;
+
+        if (m_Framebuffer->format == 0) {
+            return red | (green << 8) | (blue << 16);
+        }
+
+        return blue | (green << 8) | (red << 16);
     }
 
     void DrawChar(uint32_t x, uint32_t y, char c, uint32_t color) {
@@ -254,7 +266,7 @@ private:
         for (int gy = 0; gy < 8; gy++) {
             uint8_t row = glyph[gy];
             for (int gx = 0; gx < 8; gx++) {
-                if (row & (1 << gx)) {
+                if (row & (1 << (7 - gx))) {
                     DrawPixel(x + gx * 2, y + gy * 2, color);
                     DrawPixel(x + gx * 2 + 1, y + gy * 2, color);
                     DrawPixel(x + gx * 2, y + gy * 2 + 1, color);
@@ -731,6 +743,7 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     PrintGuiInfo();
 
     while (true) {
+        KernelGuiPumpEvents();
         asm volatile("hlt");
     }
 }

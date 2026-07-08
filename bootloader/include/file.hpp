@@ -9,6 +9,7 @@ private:
     EFI_FILE_PROTOCOL* m_Handle;
     bool m_OwnsHandle;
     static EFI_FILE_PROTOCOL* s_RootVolume;
+    static EFI_HANDLE s_RootDeviceHandle;
 
 public:
     File(const char* asciiPath);
@@ -18,6 +19,8 @@ public:
     // Initializes the static root volume interface from the Loaded Image Device Handle
     static bool InitRootVolume(EFI_HANDLE imageHandle);
     static void CloseRootVolume();
+    static bool IsRootVolumeOpen() { return s_RootVolume != nullptr; }
+    static EFI_HANDLE GetRootDeviceHandle() { return s_RootDeviceHandle; }
 
     bool Open();
     void Close();
