@@ -1,4 +1,6 @@
 #include "kernel.hpp"
+#include "cpu.hpp"
+#include "scheduler.hpp"
 
 // Simple 8x8 font bitmap for the kernel printout (basic printable ASCII subset)
 static const uint8_t font8x8_kernel[128][8] = {
@@ -106,13 +108,6 @@ static const uint8_t font8x8_kernel[128][8] = {
     {0x70, 0x18, 0x18, 0x0e, 0x18, 0x18, 0x70, 0x00}, // }
     {0x76, 0xdc, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // ~
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}  // DEL
-};
-
-enum class LogLevel {
-    Info,
-    Warn,
-    Error,
-    Panic,
 };
 
 static constexpr uint32_t kColorBackground = 0xFF050505;
@@ -311,13 +306,13 @@ static const char* LogPrefix(LogLevel level) {
     return "[LOG] ";
 }
 
-static void KernelLog(LogLevel level, const char* message) {
+void KernelLog(LogLevel level, const char* message) {
     g_Console.Write(LogPrefix(level), LogColor(level));
     g_Console.Write(message, kColorText);
     g_Console.PutChar('\n');
 }
 
-static void KernelPanic(const char* reason) {
+void KernelPanic(const char* reason) {
     if (g_Console.IsReady()) {
         g_Console.FillRect(0, 0, 800, 120, 0xFF330000);
         KernelLog(LogLevel::Panic, reason);
@@ -578,6 +573,10 @@ static PhysicalMemoryManager g_PhysicalMemory;
 static VirtualMemoryManager g_VirtualMemory;
 static KernelHeap g_KernelHeap;
 
+void* KernelAllocate(uint64_t size, uint64_t alignment) {
+    return g_KernelHeap.Allocate(size, alignment);
+}
+
 static bool KernelMemoryInit(const BootInfo& boot_info) {
     if (!g_PhysicalMemory.Init(boot_info)) {
         return false;
@@ -679,6 +678,13 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Logging system online");
     KernelLog(LogLevel::Info, "Panic handler armed");
 
+    if (!KernelCpuInit()) {
+        KernelPanic("CPU initialization failed");
+    }
+
+    KernelLog(LogLevel::Info, "Phase 5 CPU initialized");
+    PrintCpuInfo();
+
     if (!KernelMemoryInit(*boot_info)) {
         KernelPanic("Kernel memory initialization failed");
     }
@@ -687,6 +693,14 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Virtual memory identity map installed");
     KernelLog(LogLevel::Info, "Kernel heap online");
     PrintMemoryManagerInfo();
+
+    if (!KernelSchedulerInit()) {
+        KernelPanic("Scheduler initialization failed");
+    }
+
+    KernelLog(LogLevel::Info, "Phase 6 scheduler initialized");
+    KernelSchedulerRunSelfTest();
+    PrintSchedulerInfo();
 
     while (true) {
         asm volatile("hlt");

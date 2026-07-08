@@ -51,16 +51,16 @@
 - [x] Criar Kernel Heap
 
 ### Fase 5 — CPU
-- [ ] Configurar GDT
-- [ ] Configurar IDT
-- [ ] Implementar TSS
-- [ ] Tratar exceptions
+- [x] Configurar GDT
+- [x] Configurar IDT
+- [x] Implementar TSS
+- [x] Tratar exceptions
 
 ### Fase 6 — Scheduler
-- [ ] Implementar threads
-- [ ] Implementar processos
-- [ ] Criar context switch
-- [ ] Adicionar Round Robin
+- [x] Implementar threads
+- [x] Implementar processos
+- [x] Criar context switch
+- [x] Adicionar Round Robin
 
 ### Fase 7 — Drivers
 - [ ] Implementar driver de framebuffer

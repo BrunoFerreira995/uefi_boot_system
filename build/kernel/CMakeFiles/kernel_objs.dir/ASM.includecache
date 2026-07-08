@@ -6,5 +6,9 @@
 
 #IncludeRegexTransform: 
 
+/Users/bucha/dev/uefi_boot_system/kernel/src/context_switch.S
+
 /Users/bucha/dev/uefi_boot_system/kernel/src/entry.S
+
+/Users/bucha/dev/uefi_boot_system/kernel/src/interrupt_stubs.S
 

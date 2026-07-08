@@ -142,6 +142,38 @@ kernel.elf/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel.elf.dir/build.make CMakeFiles/kernel.elf.dir/build
 .PHONY : kernel.elf/fast
 
+src/context_switch.obj: src/context_switch.S.obj
+.PHONY : src/context_switch.obj
+
+# target to build an object file
+src/context_switch.S.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/context_switch.S.obj
+.PHONY : src/context_switch.S.obj
+
+src/cpu.obj: src/cpu.cpp.obj
+.PHONY : src/cpu.obj
+
+# target to build an object file
+src/cpu.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj
+.PHONY : src/cpu.cpp.obj
+
+src/cpu.i: src/cpu.cpp.i
+.PHONY : src/cpu.i
+
+# target to preprocess a source file
+src/cpu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/cpu.cpp.i
+.PHONY : src/cpu.cpp.i
+
+src/cpu.s: src/cpu.cpp.s
+.PHONY : src/cpu.s
+
+# target to generate assembly for a file
+src/cpu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/cpu.cpp.s
+.PHONY : src/cpu.cpp.s
+
 src/entry.obj: src/entry.S.obj
 .PHONY : src/entry.obj
 
@@ -149,6 +181,14 @@ src/entry.obj: src/entry.S.obj
 src/entry.S.obj:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/entry.S.obj
 .PHONY : src/entry.S.obj
+
+src/interrupt_stubs.obj: src/interrupt_stubs.S.obj
+.PHONY : src/interrupt_stubs.obj
+
+# target to build an object file
+src/interrupt_stubs.S.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/interrupt_stubs.S.obj
+.PHONY : src/interrupt_stubs.S.obj
 
 src/kernel.obj: src/kernel.cpp.obj
 .PHONY : src/kernel.obj
@@ -174,6 +214,30 @@ src/kernel.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/kernel.cpp.s
 .PHONY : src/kernel.cpp.s
 
+src/scheduler.obj: src/scheduler.cpp.obj
+.PHONY : src/scheduler.obj
+
+# target to build an object file
+src/scheduler.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj
+.PHONY : src/scheduler.cpp.obj
+
+src/scheduler.i: src/scheduler.cpp.i
+.PHONY : src/scheduler.i
+
+# target to preprocess a source file
+src/scheduler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/scheduler.cpp.i
+.PHONY : src/scheduler.cpp.i
+
+src/scheduler.s: src/scheduler.cpp.s
+.PHONY : src/scheduler.s
+
+# target to generate assembly for a file
+src/scheduler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/scheduler.cpp.s
+.PHONY : src/scheduler.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -184,10 +248,18 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... kernel.elf"
 	@echo "... kernel_objs"
+	@echo "... src/context_switch.obj"
+	@echo "... src/cpu.obj"
+	@echo "... src/cpu.i"
+	@echo "... src/cpu.s"
 	@echo "... src/entry.obj"
+	@echo "... src/interrupt_stubs.obj"
 	@echo "... src/kernel.obj"
 	@echo "... src/kernel.i"
 	@echo "... src/kernel.s"
+	@echo "... src/scheduler.obj"
+	@echo "... src/scheduler.i"
+	@echo "... src/scheduler.s"
 .PHONY : help
 
 

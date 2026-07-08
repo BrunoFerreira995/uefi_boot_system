@@ -88,12 +88,12 @@ clean: CMakeFiles/kernel.elf.dir/clean
 CMakeFiles/kernel_objs.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Built target kernel_objs"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3,4,5,6,7 "Built target kernel_objs"
 .PHONY : CMakeFiles/kernel_objs.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/kernel_objs.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kernel_objs.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 0
 .PHONY : CMakeFiles/kernel_objs.dir/rule
@@ -105,7 +105,7 @@ kernel_objs: CMakeFiles/kernel_objs.dir/rule
 # codegen rule for target.
 CMakeFiles/kernel_objs.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3 "Finished codegen for target kernel_objs"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=2,3,4,5,6,7 "Finished codegen for target kernel_objs"
 .PHONY : CMakeFiles/kernel_objs.dir/codegen
 
 # clean rule for target.
@@ -125,7 +125,7 @@ CMakeFiles/kernel.elf.dir/all: CMakeFiles/kernel_objs.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/kernel.elf.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/kernel.elf.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles 0
 .PHONY : CMakeFiles/kernel.elf.dir/rule
