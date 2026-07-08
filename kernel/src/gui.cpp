@@ -14,30 +14,91 @@ struct Rect {
 struct Window {
     const char* title;
     Rect bounds;
+    Rect restore_bounds;
     uint32_t color;
     bool visible;
+    bool minimized;
+    bool maximized;
     bool terminal;
 };
 
 static constexpr uint32_t kMaxWindows = 8;
 static constexpr uint32_t kEventQueueCapacity = 64;
-static constexpr uint32_t kTitleBarHeight = 26;
-static constexpr uint32_t kCloseButtonSize = 16;
+static constexpr uint32_t kTopBarHeight = 38;
+static constexpr uint32_t kTaskBarHeight = 42;
+static constexpr uint32_t kTitleBarHeight = 30;
+static constexpr uint32_t kWindowBorder = 2;
+static constexpr uint32_t kButtonSize = 16;
+static constexpr uint32_t kButtonGap = 7;
 static constexpr uint32_t kCursorHeight = 16;
-static constexpr uint32_t kDesktopColor = 0xFF18202A;
-static constexpr uint32_t kPanelColor = 0xFF202C38;
-static constexpr uint32_t kTitleColor = 0xFF32485C;
-static constexpr uint32_t kActiveTitleColor = 0xFF3C5D78;
-static constexpr uint32_t kAccentColor = 0xFF00D084;
-static constexpr uint32_t kTextColor = 0xFFE8EEF4;
-static constexpr uint32_t kMutedTextColor = 0xFF9FB0C0;
-static constexpr uint32_t kCloseColor = 0xFFE85D75;
-static constexpr uint32_t kTerminalColor = 0xFF06120F;
-static constexpr uint32_t kCursorColor = 0xFFFFFFFF;
-static constexpr uint32_t kCursorShadowColor = 0xFF101820;
-static constexpr uint32_t kWindowAColor = 0xFF25364A;
-static constexpr uint32_t kWindowBColor = 0xFF3A3148;
-static constexpr uint32_t kShadowColor = 0x66000000;
+
+struct Theme {
+    uint32_t desktop_top;
+    uint32_t desktop_bottom;
+    uint32_t panel;
+    uint32_t panel_edge;
+    uint32_t window;
+    uint32_t terminal;
+    uint32_t monitor;
+    uint32_t title_active;
+    uint32_t title_inactive;
+    uint32_t border_active;
+    uint32_t border_inactive;
+    uint32_t button_idle;
+    uint32_t button_hover;
+    uint32_t close;
+    uint32_t minimize;
+    uint32_t maximize;
+    uint32_t text;
+    uint32_t text_muted;
+    uint32_t accent;
+    uint32_t shadow_near;
+    uint32_t shadow_mid;
+    uint32_t shadow_far;
+    uint32_t cursor;
+    uint32_t cursor_shadow;
+};
+
+static constexpr Theme kTheme = {
+    0xFF202733,
+    0xFF151B24,
+    0xFF222B36,
+    0xFF303C49,
+    0xFF253241,
+    0xFF07120F,
+    0xFF342D46,
+    0xFF344D63,
+    0xFF2B3947,
+    0xFF6DB7D8,
+    0xFF52687A,
+    0xFF3A4652,
+    0xFF4A5C6B,
+    0xFFE25E6F,
+    0xFFE1B955,
+    0xFF61C083,
+    0xFFE8EEF4,
+    0xFF9FB0C0,
+    0xFF66D9A2,
+    0xFF111821,
+    0xFF0C1118,
+    0xFF080B10,
+    0xFFFFFFFF,
+    0xFF101820,
+};
+
+enum class WindowControl : uint8_t {
+    None,
+    Close,
+    Minimize,
+    Maximize,
+};
+
+enum class CursorKind : uint8_t {
+    Arrow,
+    Hand,
+    Move,
+    Resize,
+};
 
 GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
@@ -56,6 +117,9 @@ int32_t g_MouseDownWindowIndex = -1;
 int32_t g_MouseDownX = 0;
 int32_t g_MouseDownY = 0;
 bool g_Dragging = false;
+WindowControl g_HoveredControl = WindowControl::None;
+int32_t g_HoveredWindowIndex = -1;
+CursorKind g_CursorKind = CursorKind::Arrow;
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -101,10 +165,17 @@ void ResetGuiStatus() {
     for (uint32_t i = 0; i < kMaxWindows; i++) {
         g_Windows[i].title = nullptr;
         g_Windows[i].bounds = {0, 0, 0, 0};
+        g_Windows[i].restore_bounds = {0, 0, 0, 0};
         g_Windows[i].color = 0;
         g_Windows[i].visible = false;
+        g_Windows[i].minimized = false;
+        g_Windows[i].maximized = false;
         g_Windows[i].terminal = false;
     }
+
+    g_HoveredControl = WindowControl::None;
+    g_HoveredWindowIndex = -1;
+    g_CursorKind = CursorKind::Arrow;
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -261,7 +332,7 @@ void DrawText(uint32_t x, uint32_t y, const char* text, uint32_t color) {
 }
 
 void DrawImage(const Rect& rect, uint32_t color) {
-    FillRect(rect, color);
+    Graphics::FillRect(rect, color);
 }
 
 } // namespace Graphics
@@ -270,23 +341,27 @@ void DrawCursor() {
     const uint32_t x = g_MouseX < 0 ? 0 : static_cast<uint32_t>(g_MouseX);
     const uint32_t y = g_MouseY < 0 ? 0 : static_cast<uint32_t>(g_MouseY);
 
-    FillRect({x + 2, y + 2, 2, kCursorHeight}, kCursorShadowColor);
-    FillRect({x + 4, y + 10, 2, 6}, kCursorShadowColor);
-    FillRect({x, y, 2, kCursorHeight}, kCursorColor);
-    FillRect({x + 2, y + 2, 2, 12}, kCursorColor);
-    FillRect({x + 4, y + 4, 2, 8}, kCursorColor);
-    FillRect({x + 6, y + 6, 2, 4}, kCursorColor);
-}
-
-void DrawBorder(const Rect& rect, uint32_t color) {
-    if (rect.width == 0 || rect.height == 0) {
+    if (g_CursorKind == CursorKind::Hand) {
+        FillRect({x + 3, y + 2, 4, 14}, kTheme.cursor_shadow);
+        FillRect({x + 1, y + 6, 12, 8}, kTheme.cursor_shadow);
+        FillRect({x + 2, y + 1, 4, 14}, kTheme.cursor);
+        FillRect({x, y + 5, 12, 8}, kTheme.cursor);
         return;
     }
 
-    FillRect({rect.x, rect.y, rect.width, 2}, color);
-    FillRect({rect.x, rect.y + rect.height - 2, rect.width, 2}, color);
-    FillRect({rect.x, rect.y, 2, rect.height}, color);
-    FillRect({rect.x + rect.width - 2, rect.y, 2, rect.height}, color);
+    if (g_CursorKind == CursorKind::Move) {
+        Graphics::DrawLine(static_cast<int32_t>(x), static_cast<int32_t>(y + 8), static_cast<int32_t>(x + 16), static_cast<int32_t>(y + 8), kTheme.cursor);
+        Graphics::DrawLine(static_cast<int32_t>(x + 8), static_cast<int32_t>(y), static_cast<int32_t>(x + 8), static_cast<int32_t>(y + 16), kTheme.cursor);
+        FillRect({x + 7, y + 7, 3, 3}, kTheme.cursor);
+        return;
+    }
+
+    FillRect({x + 2, y + 2, 2, kCursorHeight}, kTheme.cursor_shadow);
+    FillRect({x + 4, y + 10, 2, 6}, kTheme.cursor_shadow);
+    FillRect({x, y, 2, kCursorHeight}, kTheme.cursor);
+    FillRect({x + 2, y + 2, 2, 12}, kTheme.cursor);
+    FillRect({x + 4, y + 4, 2, 8}, kTheme.cursor);
+    FillRect({x + 6, y + 6, 2, 4}, kTheme.cursor);
 }
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect) {
@@ -296,24 +371,52 @@ bool PointInRect(int32_t x, int32_t y, const Rect& rect) {
         y < static_cast<int32_t>(rect.y + rect.height);
 }
 
+void CopyWindow(Window& destination, const Window& source) {
+    destination.title = source.title;
+    destination.bounds = source.bounds;
+    destination.restore_bounds = source.restore_bounds;
+    destination.color = source.color;
+    destination.visible = source.visible;
+    destination.minimized = source.minimized;
+    destination.maximized = source.maximized;
+    destination.terminal = source.terminal;
+}
+
 bool PointInTitleBar(int32_t x, int32_t y, const Window& window) {
     return PointInRect(x, y, {window.bounds.x, window.bounds.y, window.bounds.width, kTitleBarHeight});
 }
 
-Rect CloseButtonRect(const Window& window) {
-    const uint32_t x = window.bounds.x + window.bounds.width - kCloseButtonSize - 8;
-    const uint32_t y = window.bounds.y + (kTitleBarHeight - kCloseButtonSize) / 2;
-    return {x, y, kCloseButtonSize, kCloseButtonSize};
+Rect ControlButtonRect(const Window& window, WindowControl control) {
+    uint32_t slot = 0;
+    if (control == WindowControl::Maximize) {
+        slot = 1;
+    } else if (control == WindowControl::Minimize) {
+        slot = 2;
+    }
+
+    const uint32_t x = window.bounds.x + window.bounds.width - 9 - kButtonSize - slot * (kButtonSize + kButtonGap);
+    const uint32_t y = window.bounds.y + (kTitleBarHeight - kButtonSize) / 2;
+    return {x, y, kButtonSize, kButtonSize};
 }
 
-bool PointInCloseButton(int32_t x, int32_t y, const Window& window) {
-    return PointInRect(x, y, CloseButtonRect(window));
+WindowControl HitWindowControl(int32_t x, int32_t y, const Window& window) {
+    if (PointInRect(x, y, ControlButtonRect(window, WindowControl::Close))) {
+        return WindowControl::Close;
+    }
+    if (PointInRect(x, y, ControlButtonRect(window, WindowControl::Maximize))) {
+        return WindowControl::Maximize;
+    }
+    if (PointInRect(x, y, ControlButtonRect(window, WindowControl::Minimize))) {
+        return WindowControl::Minimize;
+    }
+
+    return WindowControl::None;
 }
 
 int32_t FindTopWindowAt(int32_t x, int32_t y, bool title_bar_only) {
     for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
         const Window& window = g_Windows[i];
-        if (!window.visible) {
+        if (!window.visible || window.minimized) {
             continue;
         }
 
@@ -330,15 +433,20 @@ void BringWindowToFront(uint32_t index) {
         return;
     }
 
-    Window selected = g_Windows[index];
+    Window selected;
+    CopyWindow(selected, g_Windows[index]);
     for (uint32_t i = index; i + 1 < g_Status.window_count; i++) {
-        g_Windows[i] = g_Windows[i + 1];
+        CopyWindow(g_Windows[i], g_Windows[i + 1]);
     }
-    g_Windows[g_Status.window_count - 1] = selected;
+    CopyWindow(g_Windows[g_Status.window_count - 1], selected);
     g_DragWindowIndex = static_cast<int32_t>(g_Status.window_count - 1);
 }
 
 void MoveWindow(Window& window, int32_t x, int32_t y) {
+    if (window.maximized) {
+        return;
+    }
+
     const int32_t max_x = g_Framebuffer.width > window.bounds.width
         ? static_cast<int32_t>(g_Framebuffer.width - window.bounds.width)
         : 0;
@@ -352,8 +460,8 @@ void MoveWindow(Window& window, int32_t x, int32_t y) {
         x = max_x;
     }
 
-    if (y < static_cast<int32_t>(44)) {
-        y = 44;
+    if (y < static_cast<int32_t>(kTopBarHeight + 6)) {
+        y = static_cast<int32_t>(kTopBarHeight + 6);
     } else if (y > max_y) {
         y = max_y;
     }
@@ -370,21 +478,68 @@ bool AddWindow(const char* title, Rect bounds, uint32_t color, bool terminal) {
     Window& window = g_Windows[g_Status.window_count];
     window.title = title;
     window.bounds = bounds;
+    window.restore_bounds = bounds;
     window.color = color;
     window.visible = true;
+    window.minimized = false;
+    window.maximized = false;
     window.terminal = terminal;
     g_Status.window_count++;
     return true;
 }
 
+void MinimizeWindow(uint32_t index) {
+    if (index >= g_Status.window_count) {
+        return;
+    }
+
+    g_Windows[index].minimized = true;
+    g_DragWindowIndex = -1;
+}
+
+void ToggleMaximizeWindow(uint32_t index) {
+    if (index >= g_Status.window_count) {
+        return;
+    }
+
+    Window& window = g_Windows[index];
+    if (window.maximized) {
+        window.bounds = window.restore_bounds;
+        window.maximized = false;
+        return;
+    }
+
+    window.restore_bounds = window.bounds;
+    window.bounds = {
+        8,
+        kTopBarHeight + 8,
+        g_Framebuffer.width > 16 ? g_Framebuffer.width - 16 : g_Framebuffer.width,
+        g_Framebuffer.height > kTopBarHeight + kTaskBarHeight + 20
+            ? g_Framebuffer.height - kTopBarHeight - kTaskBarHeight - 20
+            : g_Framebuffer.height,
+    };
+    window.maximized = true;
+}
+
+void RestoreWindowFromTaskbar(uint32_t index) {
+    if (index >= g_Status.window_count || !g_Windows[index].visible) {
+        return;
+    }
+
+    g_Windows[index].minimized = false;
+    BringWindowToFront(index);
+}
+
 bool InitWindowManager() {
     const uint32_t margin = 32;
     const uint32_t usable_width = g_Framebuffer.width > margin * 2 ? g_Framebuffer.width - margin * 2 : g_Framebuffer.width;
-    const uint32_t usable_height = g_Framebuffer.height > 120 ? g_Framebuffer.height - 120 : g_Framebuffer.height;
+    const uint32_t usable_height = g_Framebuffer.height > kTopBarHeight + kTaskBarHeight + 48
+        ? g_Framebuffer.height - kTopBarHeight - kTaskBarHeight - 48
+        : g_Framebuffer.height;
 
     const Rect shell = {
         margin,
-        72,
+        kTopBarHeight + 30,
         usable_width > 520 ? 520 : usable_width,
         usable_height > 260 ? 260 : usable_height,
     };
@@ -396,8 +551,8 @@ bool InitWindowManager() {
     };
 
     g_Status.window_manager_ready =
-        AddWindow("Terminal", shell, kTerminalColor, true) &&
-        AddWindow("System Monitor", monitor, kWindowBColor, false);
+        AddWindow("Terminal", shell, kTheme.terminal, true) &&
+        AddWindow("System Monitor", monitor, kTheme.monitor, false);
     return g_Status.window_manager_ready;
 }
 
@@ -405,52 +560,88 @@ void DrawTerminalContents(const Window& window) {
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
 
-    Graphics::DrawText(x, y, "AntigravityOS v0.1", kTextColor);
+    Graphics::DrawText(x, y, "Kernel Console", kTheme.text);
     y += 24;
-    Graphics::DrawText(x, y, "> help", kAccentColor);
+    Graphics::DrawText(x, y, "[INFO] Phase 10 GUI initialized", kTheme.accent);
     y += 24;
-    Graphics::DrawText(x, y, "help mem cpu clear", kMutedTextColor);
+    Graphics::DrawText(x, y, "[INFO] Window manager ready", kTheme.accent);
     y += 20;
-    Graphics::DrawText(x, y, "version uptime reboot", kMutedTextColor);
+    Graphics::DrawText(x, y, "[INFO] Compositor rendered desktop", kTheme.text_muted);
     y += 32;
-    Graphics::DrawText(x, y, "> ", kAccentColor);
+    Graphics::DrawText(x, y, "> help mem cpu clear version uptime", kTheme.text);
 }
 
 void DrawSystemMonitorContents(const Window& window) {
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
 
-    Graphics::DrawText(x, y, "CPU 3%", kTextColor);
+    Graphics::DrawText(x, y, "CPU 3%", kTheme.text);
     y += 24;
-    Graphics::DrawText(x, y, "RAM 12 MB", kTextColor);
+    Graphics::DrawText(x, y, "RAM 12 MB", kTheme.text);
     y += 24;
-    Graphics::DrawText(x, y, "FPS 60", kTextColor);
+    Graphics::DrawText(x, y, "FPS 60", kTheme.text);
     y += 28;
     Graphics::FillRect({x, y, 150, 10}, 0xFF1B2632);
-    Graphics::FillRect({x, y, 48, 10}, kAccentColor);
+    Graphics::FillRect({x, y, 48, 10}, kTheme.accent);
+}
+
+void DrawWindowControl(const Window& window, WindowControl control, bool active) {
+    const Rect rect = ControlButtonRect(window, control);
+    const bool hovered = active && g_HoveredControl == control && g_HoveredWindowIndex >= 0;
+    uint32_t color = hovered ? kTheme.button_hover : kTheme.button_idle;
+
+    if (control == WindowControl::Close) {
+        color = hovered ? kTheme.close : kTheme.button_idle;
+    }
+
+    Graphics::FillRect(rect, color);
+    const uint32_t icon = control == WindowControl::Close
+        ? kTheme.close
+        : (control == WindowControl::Minimize ? kTheme.minimize : kTheme.maximize);
+
+    if (control == WindowControl::Close) {
+        Graphics::DrawLine(static_cast<int32_t>(rect.x + 5), static_cast<int32_t>(rect.y + 5),
+            static_cast<int32_t>(rect.x + 11), static_cast<int32_t>(rect.y + 11), icon);
+        Graphics::DrawLine(static_cast<int32_t>(rect.x + 11), static_cast<int32_t>(rect.y + 5),
+            static_cast<int32_t>(rect.x + 5), static_cast<int32_t>(rect.y + 11), icon);
+    } else if (control == WindowControl::Minimize) {
+        Graphics::FillRect({rect.x + 4, rect.y + 11, 8, 2}, icon);
+    } else if (window.maximized) {
+        Graphics::DrawRect({rect.x + 4, rect.y + 5, 8, 7}, icon);
+        Graphics::DrawRect({rect.x + 2, rect.y + 7, 8, 7}, icon);
+    } else {
+        Graphics::DrawRect({rect.x + 4, rect.y + 4, 8, 8}, icon);
+    }
+}
+
+void DrawShadow(const Rect& bounds) {
+    Graphics::FillRect({bounds.x + 14, bounds.y + 16, bounds.width, bounds.height}, kTheme.shadow_far);
+    Graphics::FillRect({bounds.x + 9, bounds.y + 10, bounds.width, bounds.height}, kTheme.shadow_mid);
+    Graphics::FillRect({bounds.x + 4, bounds.y + 5, bounds.width, bounds.height}, kTheme.shadow_near);
 }
 
 void ComposeWindow(const Window& window, bool active) {
-    if (!window.visible) {
+    if (!window.visible || window.minimized) {
         return;
     }
 
-    const Rect shadow = {
-        window.bounds.x + 8,
-        window.bounds.y + 8,
-        window.bounds.width,
-        window.bounds.height,
-    };
-    Graphics::FillRect(shadow, kShadowColor);
+    DrawShadow(window.bounds);
     Graphics::FillRect(window.bounds, window.color);
     Graphics::FillRect({window.bounds.x, window.bounds.y, window.bounds.width, kTitleBarHeight},
-        active ? kActiveTitleColor : kTitleColor);
-    Graphics::DrawText(window.bounds.x + 12, window.bounds.y + 6, window.title, kTextColor);
+        active ? kTheme.title_active : kTheme.title_inactive);
+    Graphics::FillRect({window.bounds.x, window.bounds.y + kTitleBarHeight - 1, window.bounds.width, 1},
+        active ? kTheme.border_active : kTheme.border_inactive);
+    Graphics::DrawText(window.bounds.x + 12, window.bounds.y + 8, window.title,
+        active ? kTheme.text : kTheme.text_muted);
 
-    const Rect close = CloseButtonRect(window);
-    Graphics::FillRect(close, kCloseColor);
-    Graphics::DrawText(close.x + 4, close.y + 2, "X", 0xFFFFFFFF);
-    Graphics::DrawRect(window.bounds, active ? kAccentColor : 0xFF597082);
+    DrawWindowControl(window, WindowControl::Minimize, active);
+    DrawWindowControl(window, WindowControl::Maximize, active);
+    DrawWindowControl(window, WindowControl::Close, active);
+
+    for (uint32_t i = 0; i < kWindowBorder; i++) {
+        Graphics::DrawRect({window.bounds.x + i, window.bounds.y + i, window.bounds.width - i * 2, window.bounds.height - i * 2},
+            active ? kTheme.border_active : kTheme.border_inactive);
+    }
 
     if (window.terminal) {
         DrawTerminalContents(window);
@@ -459,22 +650,72 @@ void ComposeWindow(const Window& window, bool active) {
     }
 }
 
-bool ComposeDesktop() {
-    Graphics::FillRect({0, 0, g_Framebuffer.width, g_Framebuffer.height}, kDesktopColor);
-    Graphics::FillRect({0, 0, g_Framebuffer.width, 44}, kPanelColor);
-    Graphics::FillRect({0, g_Framebuffer.height - 42, g_Framebuffer.width, 42}, kPanelColor);
-    Graphics::DrawText(24, 14, "Antigravity OS", kTextColor);
-    Graphics::DrawText(200, 14, "CPU 3%", kMutedTextColor);
-    Graphics::DrawText(292, 14, "RAM 12 MB", kMutedTextColor);
-    Graphics::DrawText(420, 14, "FPS 60", kMutedTextColor);
-    if (g_Framebuffer.width > 92) {
-        Graphics::DrawText(g_Framebuffer.width - 82, 14, "22:45", kTextColor);
+void DrawWallpaper() {
+    Graphics::FillRect({0, 0, g_Framebuffer.width, g_Framebuffer.height}, kTheme.desktop_bottom);
+    const uint32_t band_height = g_Framebuffer.height / 4;
+    Graphics::FillRect({0, 0, g_Framebuffer.width, band_height}, kTheme.desktop_top);
+
+    for (uint32_t x = 0; x < g_Framebuffer.width; x += 48) {
+        Graphics::DrawLine(static_cast<int32_t>(x), static_cast<int32_t>(kTopBarHeight),
+            static_cast<int32_t>(x + 120), static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight), 0xFF1D2631);
     }
-    Graphics::DrawText(24, g_Framebuffer.height - 27, "Files", kAccentColor);
+}
+
+void DrawDesktopIcons() {
+    const uint32_t x = 24;
+    uint32_t y = kTopBarHeight + 28;
+    Graphics::DrawImage({x, y, 28, 24}, 0xFF33485A);
+    Graphics::FillRect({x + 4, y + 5, 20, 14}, kTheme.accent);
+    Graphics::DrawText(x, y + 34, "Files", kTheme.text);
+
+    y += 72;
+    Graphics::DrawImage({x + 3, y, 22, 28}, 0xFF38404A);
+    Graphics::FillRect({x + 7, y + 5, 14, 18}, kTheme.minimize);
+    Graphics::DrawText(x, y + 38, "Disk", kTheme.text);
+}
+
+void DrawBars() {
+    Graphics::FillRect({0, 0, g_Framebuffer.width, kTopBarHeight}, kTheme.panel);
+    Graphics::FillRect({0, kTopBarHeight - 1, g_Framebuffer.width, 1}, kTheme.panel_edge);
+    Graphics::FillRect({0, g_Framebuffer.height - kTaskBarHeight, g_Framebuffer.width, kTaskBarHeight}, kTheme.panel);
+    Graphics::FillRect({0, g_Framebuffer.height - kTaskBarHeight, g_Framebuffer.width, 1}, kTheme.panel_edge);
+
+    Graphics::FillRect({14, 12, 14, 14}, kTheme.accent);
+    Graphics::DrawText(38, 12, "Antigravity OS", kTheme.text);
+    Graphics::DrawText(190, 12, "CPU 3%", kTheme.text_muted);
+    Graphics::DrawText(282, 12, "RAM 12 MB", kTheme.text_muted);
+    Graphics::DrawText(410, 12, "FPS 60", kTheme.text_muted);
+    if (g_Framebuffer.width > 92) {
+        Graphics::DrawText(g_Framebuffer.width - 82, 12, "22:45", kTheme.text);
+    }
+}
+
+void DrawTaskbar() {
+    uint32_t x = 18;
+    const uint32_t y = g_Framebuffer.height - kTaskBarHeight + 8;
+
+    for (uint32_t i = 0; i < g_Status.window_count; i++) {
+        const Window& window = g_Windows[i];
+        if (!window.visible) {
+            continue;
+        }
+
+        const uint32_t button_width = window.terminal ? 112 : 156;
+        Graphics::FillRect({x, y, button_width, 26}, window.minimized ? 0xFF1C242E : 0xFF2D3945);
+        Graphics::DrawRect({x, y, button_width, 26}, window.minimized ? kTheme.border_inactive : kTheme.border_active);
+        Graphics::DrawText(x + 10, y + 7, window.title, window.minimized ? kTheme.text_muted : kTheme.text);
+        x += button_width + 10;
+    }
+}
+
+bool ComposeDesktop() {
+    DrawWallpaper();
+    DrawDesktopIcons();
+    DrawBars();
 
     int32_t active_window = -1;
     for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
-        if (g_Windows[i].visible) {
+        if (g_Windows[i].visible && !g_Windows[i].minimized) {
             active_window = i;
             break;
         }
@@ -484,6 +725,7 @@ bool ComposeDesktop() {
         ComposeWindow(g_Windows[i], static_cast<int32_t>(i) == active_window);
     }
 
+    DrawTaskbar();
     DrawCursor();
     return true;
 }
@@ -516,8 +758,65 @@ void CloseWindow(uint32_t index) {
     }
 }
 
+int32_t FindTaskbarWindowAt(int32_t x, int32_t y) {
+    if (y < static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight)) {
+        return -1;
+    }
+
+    int32_t button_x = 18;
+    const int32_t button_y = static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 8);
+    for (uint32_t i = 0; i < g_Status.window_count; i++) {
+        const Window& window = g_Windows[i];
+        if (!window.visible) {
+            continue;
+        }
+
+        const int32_t button_width = window.terminal ? 112 : 156;
+        if (PointInRect(x, y, {
+            static_cast<uint32_t>(button_x),
+            static_cast<uint32_t>(button_y),
+            static_cast<uint32_t>(button_width),
+            26,
+        })) {
+            return static_cast<int32_t>(i);
+        }
+        button_x += button_width + 10;
+    }
+
+    return -1;
+}
+
+void UpdateHoverState() {
+    g_HoveredWindowIndex = FindTopWindowAt(g_MouseX, g_MouseY, false);
+    g_HoveredControl = WindowControl::None;
+    g_CursorKind = CursorKind::Arrow;
+
+    if (FindTaskbarWindowAt(g_MouseX, g_MouseY) >= 0) {
+        g_CursorKind = CursorKind::Hand;
+        return;
+    }
+
+    if (g_HoveredWindowIndex < 0) {
+        return;
+    }
+
+    const Window& window = g_Windows[g_HoveredWindowIndex];
+    g_HoveredControl = HitWindowControl(g_MouseX, g_MouseY, window);
+    if (g_HoveredControl != WindowControl::None) {
+        g_CursorKind = CursorKind::Hand;
+    } else if (PointInTitleBar(g_MouseX, g_MouseY, window)) {
+        g_CursorKind = CursorKind::Move;
+    }
+}
+
 void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
     if (button != 0) {
+        return;
+    }
+
+    const int32_t taskbar_index = FindTaskbarWindowAt(x, y);
+    if (taskbar_index >= 0) {
+        RestoreWindowFromTaskbar(static_cast<uint32_t>(taskbar_index));
         return;
     }
 
@@ -527,8 +826,13 @@ void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
     }
 
     Window& window = g_Windows[window_index];
-    if (PointInCloseButton(x, y, window)) {
+    const WindowControl control = HitWindowControl(x, y, window);
+    if (control == WindowControl::Close) {
         CloseWindow(static_cast<uint32_t>(window_index));
+    } else if (control == WindowControl::Minimize) {
+        MinimizeWindow(static_cast<uint32_t>(window_index));
+    } else if (control == WindowControl::Maximize) {
+        ToggleMaximizeWindow(static_cast<uint32_t>(window_index));
     }
 }
 
@@ -542,6 +846,7 @@ void DispatchEvent(const GuiEvent& event) {
                 g_Dragging = true;
                 MoveWindow(g_Windows[g_DragWindowIndex], g_MouseX - g_DragOffsetX, g_MouseY - g_DragOffsetY);
             }
+            UpdateHoverState();
             ComposeDesktop();
             break;
 
@@ -567,10 +872,15 @@ void DispatchEvent(const GuiEvent& event) {
 
                 if (g_DragWindowIndex >= 0) {
                     Window& window = g_Windows[g_DragWindowIndex];
-                    g_DragOffsetX = g_MouseX - static_cast<int32_t>(window.bounds.x);
-                    g_DragOffsetY = g_MouseY - static_cast<int32_t>(window.bounds.y);
+                    if (HitWindowControl(g_MouseX, g_MouseY, window) != WindowControl::None || window.maximized) {
+                        g_DragWindowIndex = -1;
+                    } else {
+                        g_DragOffsetX = g_MouseX - static_cast<int32_t>(window.bounds.x);
+                        g_DragOffsetY = g_MouseY - static_cast<int32_t>(window.bounds.y);
+                    }
                 }
             }
+            UpdateHoverState();
             ComposeDesktop();
             break;
 
@@ -589,6 +899,7 @@ void DispatchEvent(const GuiEvent& event) {
             g_DragWindowIndex = -1;
             g_MouseDownWindowIndex = -1;
             g_Dragging = false;
+            UpdateHoverState();
             ComposeDesktop();
             break;
 
@@ -597,6 +908,7 @@ void DispatchEvent(const GuiEvent& event) {
             g_MouseY = event.y;
             ClampMouseToScreen();
             HandleMouseClick(g_MouseX, g_MouseY, event.button);
+            UpdateHoverState();
             ComposeDesktop();
             break;
 
@@ -607,6 +919,7 @@ void DispatchEvent(const GuiEvent& event) {
                 ClampMouseToScreen();
                 g_Dragging = true;
                 MoveWindow(g_Windows[g_DragWindowIndex], g_MouseX - g_DragOffsetX, g_MouseY - g_DragOffsetY);
+                UpdateHoverState();
                 ComposeDesktop();
             }
             break;
@@ -646,6 +959,7 @@ bool KernelGuiInit(const BootInfo& boot_info) {
         return false;
     }
 
+    UpdateHoverState();
     g_Status.compositor_ready = ComposeDesktop();
     g_Status.desktop_ready = g_Status.compositor_ready && g_Status.window_manager_ready;
 

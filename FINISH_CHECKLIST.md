@@ -103,12 +103,14 @@
 - [x] Adicionar janela visual de Terminal
 - [x] Exibir status visual de CPU, RAM, FPS e relógio na barra superior
 - [x] Criar API gráfica interna para retângulos, linhas, texto e imagem placeholder
+- [x] Adicionar wallpaper, barra inferior e botões de taskbar para janelas abertas
+- [x] Adicionar estados visuais ativos/inativos para janelas e controles
 - [ ] Conectar pacotes reais do mouse PS/2 à fila de eventos da GUI
-- [ ] Implementar hover com estado visual
+- [x] Implementar hover com estado visual
 - [ ] Implementar double click
-- [ ] Implementar minimizar janela
-- [ ] Implementar maximizar/restaurar janela
-- [ ] Adicionar ícones no desktop
+- [x] Implementar minimizar janela
+- [x] Implementar maximizar/restaurar janela
+- [x] Adicionar ícones no desktop
 - [ ] Implementar comandos reais do terminal: `help`, `mem`, `cpu`, `clear`, `version`, `uptime`, `reboot`
 
 ### Fase 11 — Rede
