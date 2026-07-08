@@ -1,158 +1,286 @@
 # Project Finish Checklist
 
-## 1. Instalar pré-requisitos
-- [x] Instalar CMake
-- [x] Instalar Clang/LLVM
-- [x] Instalar x86_64-elf-binutils ou linker compatível
-- [x] Instalar o compilador cruzado x86_64-w64-mingw32
-- [x] Instalar QEMU
-- [x] Instalar a firmware OVMF/EDK2 para boot UEFI
-- [x] Garantir que os scripts tenham permissão de execução: `chmod +x scripts/*.sh`
+> Current Status: Graphical UEFI operating system prototype with a custom bootloader, ELF64 kernel, memory management, scheduler, GUI, and early userspace.
 
-## 2. Build do projeto
-- [x] Rodar o setup de ambiente: `./scripts/setup_step1.sh`
-- [x] Rodar o build: `./scripts/setup_step2.sh`
-- [x] Confirmar que os artefatos foram gerados:
-  - [x] `build/bootloader/BOOTX64.EFI.exe`
-  - [x] `build/kernel/kernel.elf`
+---
 
-## 3. Rodar o projeto
-- [x] Rodar o launcher: `./scripts/setup_step3.sh`
-- [x] Confirmar que o QEMU iniciou com a firmware UEFI
-- [x] Confirmar que a ESP foi montada como `FS0:`
-- [x] Confirmar que o bootloader foi encontrado em `EFI/BOOT/BOOTX64.EFI`
-- [x] Confirmar que o bootloader foi executado
-- [x] Corrigir abertura do diretório raiz `/`
-- [x] Corrigir inicialização do GOP/Framebuffer
-- [x] Confirmar leitura de `kernel/kernel.elf`
-- [x] Confirmar que o kernel foi carregado a partir da ESP
-
-## Roadmap do projeto
-
-### Fase 1 — UEFI Boot
-- [x] Instalar as ferramentas de build e emulação
-- [x] Configurar o ambiente de compilação
-- [x] Compilar o bootloader UEFI
-- [x] Compilar o kernel
-- [x] Gerar a imagem EFI/ESP
-- [x] Executar o bootloader no QEMU
-- [x] Carregar o kernel pelo bootloader
-
-### Fase 2 — Hardware Initialization
-- [x] Implementar Memory Map
-- [x] Integrar Framebuffer
-- [x] Estudar e adicionar ACPI
-- [x] Coletar informações via CPUID
-- [x] Criar estrutura de BootInfo
-
-### Fase 3 — Kernel
-- [x] Inicializar o kernel corretamente
-- [x] Implementar console de saída
-- [x] Adicionar sistema de logging
-- [x] Criar mecanismo de kernel panic
-
-### Fase 4 — Gerenciamento de Memória
-- [x] Implementar Physical Memory Manager
-- [x] Implementar Virtual Memory
-- [x] Adicionar Paging
-- [x] Criar Kernel Heap
-
-### Fase 5 — CPU
-- [x] Configurar GDT
-- [x] Configurar IDT
-- [x] Implementar TSS
-- [x] Tratar exceptions
-
-### Fase 6 — Scheduler
-- [x] Implementar threads
-- [x] Implementar processos
-- [x] Criar context switch
-- [x] Adicionar Round Robin
-
-### Fase 7 — Drivers
-- [x] Implementar driver de framebuffer
-- [x] Implementar teclado
-- [x] Implementar mouse
-- [x] Adicionar suporte a PCI
-- [x] Adicionar suporte a USB
-- [x] Adicionar suporte a NVMe
-- [x] Adicionar suporte a rede
-
-### Fase 8 — Sistema de Arquivos
-- [x] Implementar VFS
-- [x] Adicionar suporte a FAT32
-- [x] Adicionar suporte a EXT2
-
-### Fase 9 — Userspace
-- [x] Implementar system calls
-- [x] Criar shell
-- [x] Rodar processos em modo usuário
-
-### Fase 10 — Interface Gráfica
-- [x] Implementar window manager
-- [x] Implementar compositor
-- [x] Criar desktop environment
-- [x] Criar fila de eventos da GUI
-- [x] Adicionar tipos de evento `MouseMove`, `MouseDown`, `MouseUp`, `Click`, `DoubleClick`, `Hover` e `Drag`
-- [x] Renderizar cursor de mouse
-- [x] Implementar clique lógico na GUI
-- [x] Implementar arraste de janelas pela barra de título
-- [x] Implementar z-order com bring-to-front ao clicar em janela
-- [x] Adicionar barra de título com nome da janela
-- [x] Adicionar botão de fechar na barra de título
-- [x] Adicionar janela visual de Terminal
-- [x] Exibir status visual de CPU, RAM, FPS e relógio na barra superior
-- [x] Criar API gráfica interna para retângulos, linhas, texto e imagem placeholder
-- [x] Adicionar wallpaper, barra inferior e botões de taskbar para janelas abertas
-- [x] Adicionar estados visuais ativos/inativos para janelas e controles
-- [ ] Conectar pacotes reais do mouse PS/2 à fila de eventos da GUI
-- [x] Implementar hover com estado visual
-- [ ] Implementar double click
-- [x] Implementar minimizar janela
-- [x] Implementar maximizar/restaurar janela
-- [x] Adicionar ícones no desktop
-- [ ] Implementar comandos reais do terminal: `help`, `mem`, `cpu`, `clear`, `version`, `uptime`, `reboot`
-
-### Fase 11 — Rede
-- [ ] Implementar Ethernet
-- [ ] Implementar IPv4
-- [ ] Implementar TCP
-- [ ] Implementar UDP
-- [ ] Implementar DHCP
-- [ ] Implementar DNS
-
-## Prerequisites
+# Phase 1 — Development Environment
 - [x] Install CMake
 - [x] Install Clang/LLVM
-- [x] Install x86_64-elf-binutils or compatible linker
-- [x] Install x86_64-w64-mingw32 cross-compiler
+- [x] Install x86_64-elf-binutils
+- [x] Install x86_64-w64-mingw32 cross compiler
 - [x] Install QEMU
-- [x] Install OVMF/EDK2 firmware image for UEFI boot
+- [x] Install OVMF / EDK2 firmware
+- [x] Configure build scripts
+- [x] Configure CMake project
 
-## Build
-- [x] Make the helper scripts executable: `chmod +x scripts/build.sh scripts/run.sh`
-- [x] Run the build script: `./scripts/build.sh`
-- [x] Confirm build artifacts exist:
-  - [x] `build/bootloader/BOOTX64.EFI.exe`
-  - [x] `build/kernel/kernel.elf`
+---
 
-## Run
-- [x] Run the boot script: `./scripts/run.sh`
-- [x] Confirm QEMU launches with the UEFI firmware image
-- [x] Confirm the ESP is exposed as the boot volume
-- [x] Confirm the bootloader is loaded from `EFI/BOOT/BOOTX64.EFI`
-- [x] Confirm `/kernel/kernel.elf` is opened and read from the ESP
-- [x] Confirm the kernel ELF is loaded by the bootloader
+# Phase 2 — Build System
+- [x] Build bootloader
+- [x] Build kernel
+- [x] Generate EFI System Partition (ESP)
+- [x] Package boot files
+- [x] Launch QEMU automatically
 
-## Verification
-- [x] Check that `ESP/EFI/BOOT/BOOTX64.EFI` exists
-- [x] Check that `ESP/kernel/kernel.elf` exists
-- [x] Verify the project builds without errors
-- [x] Verify GOP/framebuffer initialization succeeds
-- [x] Verify framebuffer colors/text render with the detected pixel format
-- [x] Verify `ExitBootServices` uses a fresh memory map key
+---
 
-## Troubleshooting
-- [ ] If the build fails, verify the toolchain paths in the CMake files
-- [ ] If QEMU fails, verify OVMF firmware is installed and discoverable
-- [ ] If the bootloader does not start, inspect the generated EFI binary and kernel ELF
+# Phase 3 — UEFI Bootloader
+- [x] Locate EFI System Partition
+- [x] Open root filesystem
+- [x] Locate BOOTX64.EFI
+- [x] Load kernel ELF
+- [x] Parse ELF64 executable
+- [x] Allocate kernel memory
+- [x] Relocate ELF segments
+- [x] Build BootInfo structure
+- [x] ExitBootServices()
+- [x] Jump to kernel
+
+---
+
+# Phase 4 — Boot Information
+- [x] Memory Map
+- [x] Graphics Output Protocol
+- [x] Framebuffer information
+- [x] ACPI RSDP
+- [x] CPUID
+- [x] BootInfo structure
+
+---
+
+# Phase 5 — Kernel Initialization
+- [x] Kernel entry point
+- [x] Kernel logger
+- [x] Panic handler
+- [x] Framebuffer console
+- [x] Early initialization
+- [x] Kernel memory initialization
+
+---
+
+# Phase 6 — Memory Management
+- [x] Physical Memory Manager
+- [x] Virtual Memory Manager
+- [x] Paging
+- [x] Kernel Heap
+- [x] Page allocator
+- [ ] Copy-on-write
+- [ ] Shared memory
+- [ ] Slab allocator
+
+---
+
+# Phase 7 — CPU
+- [x] GDT
+- [x] IDT
+- [x] TSS
+- [x] Exception handlers
+- [ ] IRQ handlers
+- [ ] APIC
+- [ ] IOAPIC
+- [ ] SMP support
+- [ ] Multi-core scheduler
+
+---
+
+# Phase 8 — Process Management
+- [x] Threads
+- [x] Processes
+- [x] Context switching
+- [x] Round Robin scheduler
+- [ ] Priorities
+- [ ] Sleeping threads
+- [ ] Signals
+- [ ] IPC
+- [ ] Synchronization primitives
+
+---
+
+# Phase 9 — Drivers
+
+## Graphics
+- [x] Framebuffer driver
+- [x] Graphics primitives
+
+## Input
+- [x] Keyboard
+- [x] Mouse abstraction
+- [ ] PS/2 packet decoding
+- [ ] USB HID
+
+## Storage
+- [x] FAT32
+- [x] VFS
+- [x] EXT2
+- [ ] AHCI
+- [ ] NVMe
+
+## Bus
+- [x] PCI enumeration
+- [ ] PCI configuration
+- [ ] PCI interrupts
+
+## Network
+- [ ] Ethernet
+- [ ] Intel E1000
+- [ ] VirtIO Net
+- [ ] Wi-Fi
+
+---
+
+# Phase 10 — Filesystems
+- [x] VFS
+- [x] FAT32
+- [x] EXT2
+- [ ] File permissions
+- [ ] Symbolic links
+- [ ] Mount manager
+- [ ] RamFS
+
+---
+
+# Phase 11 — Userspace
+- [x] System calls
+- [x] Terminal window
+- [x] Basic shell
+- [x] User mode
+- [ ] ELF userspace loader
+- [ ] Dynamic linker
+- [ ] libc
+- [ ] POSIX layer
+
+---
+
+# Phase 12 — Desktop Environment
+
+## Window Manager
+- [x] Window manager
+- [x] Compositor
+- [x] Z-order
+- [x] Drag windows
+- [x] Window states
+- [x] Close button
+- [x] Minimize
+- [x] Maximize
+- [x] Restore
+
+## Desktop
+- [x] Wallpaper
+- [x] Desktop icons
+- [x] Taskbar
+- [x] Window buttons
+
+## Events
+- [x] MouseMove
+- [x] MouseDown
+- [x] MouseUp
+- [x] Click
+- [x] Hover
+- [x] Drag
+- [ ] DoubleClick
+- [ ] Mouse wheel
+
+## Graphics
+- [x] Rectangle API
+- [x] Line API
+- [x] Text API
+- [x] Image placeholder
+- [ ] PNG support
+- [ ] BMP support
+- [ ] TrueType fonts
+
+---
+
+# Phase 13 — Terminal
+- [x] Terminal window
+- [ ] Command parser
+- [ ] help
+- [ ] clear
+- [ ] mem
+- [ ] cpu
+- [ ] version
+- [ ] uptime
+- [ ] ls
+- [ ] pwd
+- [ ] cd
+- [ ] cat
+- [ ] reboot
+- [ ] shutdown
+
+---
+
+# Phase 14 — Networking
+- [ ] Ethernet
+- [ ] ARP
+- [ ] IPv4
+- [ ] ICMP
+- [ ] UDP
+- [ ] TCP
+- [ ] DHCP
+- [ ] DNS
+- [ ] HTTP
+- [ ] HTTPS
+- [ ] Socket API
+
+---
+
+# Phase 15 — Security
+- [ ] Users
+- [ ] Permissions
+- [ ] Access Control
+- [ ] Process isolation
+- [ ] Virtual memory protection
+
+---
+
+# Phase 16 — Applications
+- [ ] File Manager
+- [ ] Text Editor
+- [ ] Image Viewer
+- [ ] Calculator
+- [ ] Settings
+- [ ] Task Manager
+- [ ] Package Manager
+
+---
+
+# Phase 17 — Development SDK
+- [ ] C Standard Library
+- [ ] C++ Runtime
+- [ ] Build SDK
+- [ ] Documentation
+- [ ] Example applications
+- [ ] Developer tools
+
+---
+
+# Phase 18 — Compatibility
+- [ ] POSIX compatibility
+- [ ] ELF executable compatibility
+- [ ] SDL2 support
+- [ ] SDL3 support
+- [ ] OpenGL abstraction
+- [ ] Vulkan abstraction
+
+---
+
+# Phase 19 — Performance
+- [ ] Hardware acceleration
+- [ ] Optimized compositor
+- [ ] Multi-core scheduling
+- [ ] Profiling tools
+- [ ] Benchmark suite
+
+---
+
+# Phase 20 — Version 1.0 Release
+- [ ] Stable boot process
+- [ ] Stable desktop
+- [ ] Stable userspace
+- [ ] Networking
+- [ ] Package manager
+- [ ] Documentation
+- [ ] Developer SDK
+- [ ] Installation image
+- [ ] Release v1.0
