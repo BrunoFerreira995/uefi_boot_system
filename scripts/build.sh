@@ -22,6 +22,6 @@ cmake --build "$BUILD_DIR"
 
 echo "=============================================="
 echo " Build successful!"
-echo " Bootloader: $BUILD_DIR/bootloader/BOOTX64.EFI"
+echo " Bootloader: $BUILD_DIR/bootloader/BOOTX64.EFI.exe"
 echo " Kernel:     $BUILD_DIR/kernel/kernel.elf"
 echo "=============================================="

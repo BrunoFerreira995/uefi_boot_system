@@ -2,7 +2,9 @@
 #include "cpu.hpp"
 #include "drivers.hpp"
 #include "filesystem.hpp"
+#include "gui.hpp"
 #include "scheduler.hpp"
+#include "userspace.hpp"
 
 // Simple 8x8 font bitmap for the kernel printout (basic printable ASCII subset)
 static const uint8_t font8x8_kernel[128][8] = {
@@ -715,6 +717,18 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     }
 
     PrintFileSystemInfo();
+
+    if (!KernelUserspaceInit()) {
+        KernelPanic("Userspace initialization failed");
+    }
+
+    PrintUserspaceInfo();
+
+    if (!KernelGuiInit(*boot_info)) {
+        KernelPanic("GUI initialization failed");
+    }
+
+    PrintGuiInfo();
 
     while (true) {
         asm volatile("hlt");

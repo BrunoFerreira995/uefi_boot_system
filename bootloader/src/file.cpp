@@ -5,7 +5,7 @@
 
 EFI_FILE_PROTOCOL* File::s_RootVolume = nullptr;
 
-File::File(const char* asciiPath) : m_Handle(nullptr) {
+File::File(const char* asciiPath) : m_Handle(nullptr), m_OwnsHandle(true) {
     // Convert ASCII to UTF-16 and replace '/' with '\'
     size_t i = 0;
     // Skip leading slash if any, but UEFI usually takes paths relative to the volume root.
@@ -26,7 +26,7 @@ File::File(const char* asciiPath) : m_Handle(nullptr) {
     m_Path[i] = L'\0';
 }
 
-File::File(const char16_t* utf16Path) : m_Handle(nullptr) {
+File::File(const char16_t* utf16Path) : m_Handle(nullptr), m_OwnsHandle(true) {
     size_t i = 0;
     if (utf16Path[0] == L'/') {
         utf16Path++;
@@ -90,6 +90,13 @@ bool File::Open() {
     if (!s_RootVolume) return false;
     if (m_Handle) return true;
 
+    if (m_Path[0] == L'\0') {
+        m_Handle = s_RootVolume;
+        m_OwnsHandle = false;
+        m_Handle->SetPosition(m_Handle, 0);
+        return true;
+    }
+
     EFI_STATUS status = s_RootVolume->Open(
         s_RootVolume,
         &m_Handle,
@@ -108,8 +115,11 @@ bool File::Open() {
 
 void File::Close() {
     if (m_Handle) {
-        m_Handle->Close(m_Handle);
+        if (m_OwnsHandle) {
+            m_Handle->Close(m_Handle);
+        }
         m_Handle = nullptr;
+        m_OwnsHandle = true;
     }
 }
 

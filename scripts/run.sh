@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/build"
 ESP_DIR="$ROOT_DIR/ESP"
+IMG_FILE="$ROOT_DIR/esp.img"
 
 BOOTLOADER_EFI="$BUILD_DIR/bootloader/BOOTX64.EFI"
 if [ ! -f "$BOOTLOADER_EFI" ]; then
@@ -28,6 +29,17 @@ mkdir -p "$ESP_DIR/kernel"
 
 cp "$BOOTLOADER_EFI" "$ESP_DIR/EFI/BOOT/BOOTX64.EFI"
 cp "$KERNEL_ELF" "$ESP_DIR/kernel/kernel.elf"
+
+if [ ! -f "$ESP_DIR/EFI/BOOT/BOOTX64.EFI" ] || [ ! -f "$ESP_DIR/kernel/kernel.elf" ]; then
+    echo "Error: ESP contents are incomplete."
+    echo "Expected:"
+    echo "  $ESP_DIR/EFI/BOOT/BOOTX64.EFI"
+    echo "  $ESP_DIR/kernel/kernel.elf"
+    exit 1
+fi
+
+echo "ESP contents:"
+find "$ESP_DIR" -maxdepth 4 -print
 
 # 3. Locate UEFI (OVMF) Firmware Code
 echo "Locating OVMF firmware..."
@@ -58,8 +70,7 @@ fi
 
 echo "Found OVMF firmware: $OVMF"
 
-# 4. Package Disk Image (optional, fallback to virtual FAT for maximum compatibility)
-IMG_FILE="$ROOT_DIR/esp.img"
+# 4. Package Disk Image (optional artifact; QEMU boots from the ESP folder by default)
 PACKAGED=false
 
 echo "Packaging partition image..."
@@ -83,8 +94,8 @@ fi
 
 # 5. Execute QEMU
 echo "Launching QEMU..."
-if [ "$PACKAGED" = true ]; then
-    # Boot from raw hard drive image file
+if [ "${UEFI_BOOT_MODE:-fat}" = "image" ] && [ "$PACKAGED" = true ]; then
+    # Optional: boot from the packaged disk image.
     qemu-system-x86_64 \
         -drive if=pflash,format=raw,readonly=on,file="$OVMF" \
         -drive file="$IMG_FILE",format=raw \
@@ -92,8 +103,12 @@ if [ "$PACKAGED" = true ]; then
         -m 256M \
         -vga std
 else
-    # Boot using QEMU virtual FAT directory mapper
-    echo "Warning: Direct image packaging failed/skipped. Booting from QEMU virtual FAT folder..."
+    # Boot using QEMU's virtual FAT directory mapper. This exposes \EFI\BOOT\BOOTX64.EFI
+    # directly to OVMF and avoids stale or malformed packaged image issues.
+    if [ "$PACKAGED" = true ]; then
+        echo "Packaged image available at $IMG_FILE"
+    fi
+    echo "Booting from QEMU virtual FAT folder: $ESP_DIR"
     qemu-system-x86_64 \
         -drive if=pflash,format=raw,readonly=on,file="$OVMF" \
         -drive file=fat:rw:"$ESP_DIR",format=raw \

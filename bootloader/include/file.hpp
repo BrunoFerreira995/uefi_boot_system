@@ -7,6 +7,7 @@ class File {
 private:
     char16_t m_Path[256];
     EFI_FILE_PROTOCOL* m_Handle;
+    bool m_OwnsHandle;
     static EFI_FILE_PROTOCOL* s_RootVolume;
 
 public:

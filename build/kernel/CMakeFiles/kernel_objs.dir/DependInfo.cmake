@@ -24,8 +24,10 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/bucha/dev/uefi_boot_system/kernel/src/cpu.cpp" "CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/cpu.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/drivers.cpp" "CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/filesystem.cpp" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/gui.cpp" "CMakeFiles/kernel_objs.dir/src/gui.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/gui.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/scheduler.cpp" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/userspace.cpp" "CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

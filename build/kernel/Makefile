@@ -230,6 +230,30 @@ src/filesystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/filesystem.cpp.s
 .PHONY : src/filesystem.cpp.s
 
+src/gui.obj: src/gui.cpp.obj
+.PHONY : src/gui.obj
+
+# target to build an object file
+src/gui.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/gui.cpp.obj
+.PHONY : src/gui.cpp.obj
+
+src/gui.i: src/gui.cpp.i
+.PHONY : src/gui.i
+
+# target to preprocess a source file
+src/gui.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/gui.cpp.i
+.PHONY : src/gui.cpp.i
+
+src/gui.s: src/gui.cpp.s
+.PHONY : src/gui.s
+
+# target to generate assembly for a file
+src/gui.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/gui.cpp.s
+.PHONY : src/gui.cpp.s
+
 src/interrupt_stubs.obj: src/interrupt_stubs.S.obj
 .PHONY : src/interrupt_stubs.obj
 
@@ -286,6 +310,30 @@ src/scheduler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/scheduler.cpp.s
 .PHONY : src/scheduler.cpp.s
 
+src/userspace.obj: src/userspace.cpp.obj
+.PHONY : src/userspace.obj
+
+# target to build an object file
+src/userspace.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj
+.PHONY : src/userspace.cpp.obj
+
+src/userspace.i: src/userspace.cpp.i
+.PHONY : src/userspace.i
+
+# target to preprocess a source file
+src/userspace.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/userspace.cpp.i
+.PHONY : src/userspace.cpp.i
+
+src/userspace.s: src/userspace.cpp.s
+.PHONY : src/userspace.s
+
+# target to generate assembly for a file
+src/userspace.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/userspace.cpp.s
+.PHONY : src/userspace.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -307,6 +355,9 @@ help:
 	@echo "... src/filesystem.obj"
 	@echo "... src/filesystem.i"
 	@echo "... src/filesystem.s"
+	@echo "... src/gui.obj"
+	@echo "... src/gui.i"
+	@echo "... src/gui.s"
 	@echo "... src/interrupt_stubs.obj"
 	@echo "... src/kernel.obj"
 	@echo "... src/kernel.i"
@@ -314,6 +365,9 @@ help:
 	@echo "... src/scheduler.obj"
 	@echo "... src/scheduler.i"
 	@echo "... src/scheduler.s"
+	@echo "... src/userspace.obj"
+	@echo "... src/userspace.i"
+	@echo "... src/userspace.s"
 .PHONY : help
 
 
