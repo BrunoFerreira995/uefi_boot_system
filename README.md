@@ -1,5 +1,13 @@
 # UEFI Boot System
 
+<p align="center">
+  <img src="./SO.png" alt="UEFI Boot System Preview" width="900">
+</p>
+
+<p align="center">
+  <em>Preview of the operating system after booting through the custom UEFI bootloader.</em>
+</p>
+
 This project builds a simple UEFI bootloader and kernel, then runs them in QEMU using an EFI system partition image.
 
 ## Project structure
