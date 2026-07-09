@@ -193,10 +193,10 @@
 - [x] Terminal window
 - [x] Basic shell
 - [x] User mode
-- [ ] ELF userspace loader
-- [ ] Dynamic linker
-- [ ] libc
-- [ ] POSIX layer
+- [x] ELF userspace loader
+- [x] Dynamic linker
+- [x] libc
+- [x] POSIX layer
 
 ---
 

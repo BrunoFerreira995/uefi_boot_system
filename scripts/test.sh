@@ -64,6 +64,10 @@ require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunSymlinkSelfTest" "filesys
 require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunMountManagerSelfTest" "filesystem mount manager self-test present"
 require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunRamFsSelfTest" "filesystem RamFS self-test present"
 require_text "$ROOT_DIR/kernel/src/userspace.cpp" "KernelSyscall" "userspace syscall self-test target present"
+require_text "$ROOT_DIR/kernel/src/userspace.cpp" "RunElfLoaderSelfTest" "userspace ELF loader self-test present"
+require_text "$ROOT_DIR/kernel/src/userspace.cpp" "RunDynamicLinkerSelfTest" "userspace dynamic linker self-test present"
+require_text "$ROOT_DIR/kernel/src/userspace.cpp" "RunLibcSelfTest" "userspace libc self-test present"
+require_text "$ROOT_DIR/kernel/src/userspace.cpp" "RunPosixSelfTest" "userspace POSIX self-test present"
 
 echo
 echo "== Driver tests =="
