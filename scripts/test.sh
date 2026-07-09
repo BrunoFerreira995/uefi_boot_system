@@ -59,6 +59,10 @@ require_text "$ROOT_DIR/kernel/src/drivers.cpp" "RunPs2PacketDecoderSelfTest" "P
 require_text "$ROOT_DIR/kernel/src/drivers.cpp" "RunUsbHidSelfTest" "USB HID descriptor parser self-test present"
 require_text "$ROOT_DIR/kernel/src/cpu.cpp" "CpuIrqHandler" "CPU interrupt delivery handler present"
 require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunFat32ProbeSelfTest" "filesystem FAT32 self-test present"
+require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunPermissionSelfTest" "filesystem permission self-test present"
+require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunSymlinkSelfTest" "filesystem symlink self-test present"
+require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunMountManagerSelfTest" "filesystem mount manager self-test present"
+require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "RunRamFsSelfTest" "filesystem RamFS self-test present"
 require_text "$ROOT_DIR/kernel/src/userspace.cpp" "KernelSyscall" "userspace syscall self-test target present"
 
 echo

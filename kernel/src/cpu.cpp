@@ -199,6 +199,8 @@ alignas(16) Tss64 g_Tss;
 alignas(16) IdtEntry g_Idt[256];
 alignas(16) uint8_t g_ExceptionStack[16384];
 CpuStatus g_Status {};
+KernelIrqHandler g_IrqHandlers[kIrqCount];
+void* g_IrqContexts[kIrqCount];
 
 const char* g_ExceptionNames[32] = {
     "Divide error",
@@ -298,6 +300,12 @@ void ClearBytes(void* ptr, uint64_t size) {
 
 void Out8(uint16_t port, uint8_t value) {
     asm volatile("outb %0, %1" :: "a"(value), "Nd"(port));
+}
+
+uint8_t In8(uint16_t port) {
+    uint8_t value = 0;
+    asm volatile("inb %1, %0" : "=a"(value) : "Nd"(port));
+    return value;
 }
 
 uint64_t ReadMsr(uint32_t msr) {
@@ -416,6 +424,13 @@ void InitPic() {
     Out8(kPic1Data, 0xFF);
     Out8(kPic2Data, 0xFF);
     g_Status.pic_ready = true;
+}
+
+void SendPicEoi(uint8_t irq) {
+    if (irq >= 8) {
+        Out8(kPic2Command, kPicEoi);
+    }
+    Out8(kPic1Command, kPicEoi);
 }
 
 void LocalApicWrite(uint32_t offset, uint32_t value) {
@@ -582,18 +597,21 @@ extern "C" void CpuIrqHandler(ExceptionFrame* frame) {
     const uint64_t irq = frame->vector - kIrqBaseVector;
     g_Status.irq_count[irq]++;
 
+    if (g_IrqHandlers[irq]) {
+        g_IrqHandlers[irq](static_cast<uint8_t>(irq), g_IrqContexts[irq]);
+    }
+
     if (g_Status.apic_ready) {
         LocalApicWrite(kApicEoiRegister, 0);
-    } else {
-        if (irq >= 8) {
-            Out8(kPic2Command, kPicEoi);
-        }
-        Out8(kPic1Command, kPicEoi);
     }
+
+    SendPicEoi(static_cast<uint8_t>(irq));
 }
 
 bool KernelCpuInit(const BootInfo& boot_info) {
     ClearBytes(&g_Status, sizeof(g_Status));
+    ClearBytes(g_IrqHandlers, sizeof(g_IrqHandlers));
+    ClearBytes(g_IrqContexts, sizeof(g_IrqContexts));
     InitGdt();
     InitIdt();
     InitPic();
@@ -616,6 +634,36 @@ bool KernelCpuInit(const BootInfo& boot_info) {
         g_Status.irq_handlers_ready &&
         g_Status.pic_ready &&
         g_Status.smp_ready;
+}
+
+bool KernelRegisterIrqHandler(uint8_t irq, KernelIrqHandler handler, void* context) {
+    if (irq >= kIrqCount || !handler) {
+        return false;
+    }
+
+    g_IrqHandlers[irq] = handler;
+    g_IrqContexts[irq] = context;
+    return true;
+}
+
+void KernelSetIrqMask(uint8_t irq, bool masked) {
+    if (irq >= kIrqCount) {
+        return;
+    }
+
+    const uint16_t port = irq < 8 ? kPic1Data : kPic2Data;
+    const uint8_t bit = static_cast<uint8_t>(1u << (irq % 8));
+    uint8_t mask = In8(port);
+    if (masked) {
+        mask = static_cast<uint8_t>(mask | bit);
+    } else {
+        mask = static_cast<uint8_t>(mask & ~bit);
+    }
+    Out8(port, mask);
+}
+
+void KernelEnableInterrupts() {
+    asm volatile("sti");
 }
 
 void PrintCpuInfo() {

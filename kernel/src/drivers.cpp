@@ -1,5 +1,7 @@
 #include "drivers.hpp"
 
+#include "cpu.hpp"
+#include "gui.hpp"
 #include "kernel.hpp"
 
 namespace {
@@ -7,6 +9,7 @@ namespace {
 static constexpr uint16_t kPs2DataPort = 0x60;
 static constexpr uint16_t kPs2StatusPort = 0x64;
 static constexpr uint16_t kPs2CommandPort = 0x64;
+static constexpr uint16_t kSerialCom1 = 0x3F8;
 static constexpr uint16_t kPciConfigAddress = 0xCF8;
 static constexpr uint16_t kPciConfigData = 0xCFC;
 static constexpr uint32_t kPciInvalidVendor = 0xFFFF;
@@ -16,8 +19,15 @@ static constexpr uint16_t kVirtioVendorId = 0x1AF4;
 static constexpr uint16_t kE1000DeviceId = 0x100E;
 static constexpr uint16_t kVirtioNetMinDeviceId = 0x1000;
 static constexpr uint16_t kVirtioNetMaxDeviceId = 0x1041;
+static constexpr uint8_t kPs2Ack = 0xFA;
+static constexpr uint8_t kMouseIrq = 12;
 
 DriverStatus g_Status {};
+uint8_t g_MousePacketBytes[3];
+uint8_t g_MousePacketIndex = 0;
+bool g_MouseLeftDown = false;
+int32_t g_MouseX = 320;
+int32_t g_MouseY = 240;
 
 struct PciDevice {
     uint8_t bus;
@@ -66,6 +76,36 @@ void Out8(uint16_t port, uint8_t value) {
     asm volatile("outb %0, %1" :: "a"(value), "Nd"(port));
 }
 
+void SerialInit() {
+    Out8(kSerialCom1 + 1, 0x00);
+    Out8(kSerialCom1 + 3, 0x80);
+    Out8(kSerialCom1 + 0, 0x03);
+    Out8(kSerialCom1 + 1, 0x00);
+    Out8(kSerialCom1 + 3, 0x03);
+    Out8(kSerialCom1 + 2, 0xC7);
+    Out8(kSerialCom1 + 4, 0x0B);
+}
+
+bool SerialCanWrite() {
+    return (In8(kSerialCom1 + 5) & 0x20) != 0;
+}
+
+void SerialWriteChar(char c) {
+    for (uint32_t retry = 0; retry < 100000 && !SerialCanWrite(); retry++) {
+    }
+    Out8(kSerialCom1, static_cast<uint8_t>(c));
+}
+
+void SerialWrite(const char* text) {
+    if (!text) {
+        return;
+    }
+
+    while (*text) {
+        SerialWriteChar(*text++);
+    }
+}
+
 uint32_t In32(uint16_t port) {
     uint32_t value;
     asm volatile("inl %1, %0" : "=a"(value) : "Nd"(port));
@@ -110,12 +150,24 @@ bool Ps2WriteData(uint8_t data) {
     return true;
 }
 
+bool Ps2WriteMouse(uint8_t data) {
+    if (!Ps2WriteCommand(0xD4)) {
+        return false;
+    }
+    return Ps2WriteData(data);
+}
+
 bool Ps2Read(uint8_t& value) {
     if (!WaitPs2OutputReady()) {
         return false;
     }
     value = In8(kPs2DataPort);
     return true;
+}
+
+bool Ps2ReadAck() {
+    uint8_t response = 0;
+    return Ps2Read(response) && response == kPs2Ack;
 }
 
 void FlushPs2Output() {
@@ -140,21 +192,39 @@ bool InitKeyboard() {
 }
 
 bool InitMouse() {
-    uint8_t response = 0;
+    SerialWrite("[PS2] mouse init start\n");
 
     if (!Ps2WriteCommand(0xA8)) {
         return false;
     }
+    SerialWrite("[PS2] aux enabled\n");
 
-    if (!Ps2WriteCommand(0xD4) || !Ps2WriteData(0xF4)) {
+    if (!Ps2WriteCommand(0x20)) {
         return false;
     }
 
-    if (!Ps2Read(response)) {
+    uint8_t controller_config = 0;
+    if (!Ps2Read(controller_config)) {
         return false;
     }
 
-    return response == 0xFA;
+    controller_config = static_cast<uint8_t>(controller_config | 0x02);
+    controller_config = static_cast<uint8_t>(controller_config & ~0x20);
+    if (!Ps2WriteCommand(0x60) || !Ps2WriteData(controller_config)) {
+        return false;
+    }
+
+    if (!Ps2WriteMouse(0xF6) || !Ps2ReadAck()) {
+        return false;
+    }
+    SerialWrite("[PS2] mouse default ACK\n");
+
+    if (!Ps2WriteMouse(0xF4) || !Ps2ReadAck()) {
+        return false;
+    }
+    SerialWrite("[PS2] mouse reporting enabled ACK\n");
+
+    return true;
 }
 
 uint32_t PciReadConfig(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
@@ -197,8 +267,12 @@ uint8_t PciInterruptPin(uint8_t bus, uint8_t device, uint8_t function) {
     return static_cast<uint8_t>((PciReadConfig(bus, device, function, 0x3C) >> 8) & 0xFF);
 }
 
+bool IsPs2MousePacketHeader(uint8_t data) {
+    return (data & 0x08) != 0 && (data & 0xC0) == 0;
+}
+
 bool DecodePs2MousePacket(const uint8_t packet[3], Ps2MousePacket& decoded) {
-    if (!packet || (packet[0] & 0x08) == 0) {
+    if (!packet || !IsPs2MousePacketHeader(packet[0])) {
         decoded.valid = false;
         return false;
     }
@@ -217,7 +291,7 @@ bool DecodePs2MousePacket(const uint8_t packet[3], Ps2MousePacket& decoded) {
     decoded.left_button = (packet[0] & 0x01) != 0;
     decoded.right_button = (packet[0] & 0x02) != 0;
     decoded.middle_button = (packet[0] & 0x04) != 0;
-    decoded.valid = (packet[0] & 0xC0) == 0;
+    decoded.valid = true;
     return decoded.valid;
 }
 
@@ -257,6 +331,89 @@ bool RunUsbHidSelfTest() {
     keyboard.interface_string = 0;
 
     return IsUsbHidInterface(keyboard);
+}
+
+void ClampMouse() {
+    if (g_MouseX < 0) {
+        g_MouseX = 0;
+    }
+    if (g_MouseY < 0) {
+        g_MouseY = 0;
+    }
+    if (g_MouseX > 4095) {
+        g_MouseX = 4095;
+    }
+    if (g_MouseY > 4095) {
+        g_MouseY = 4095;
+    }
+}
+
+void PostMouseEvent(GuiEventType type, uint32_t button = 0) {
+    GuiEvent event;
+    event.type = type;
+    event.x = g_MouseX;
+    event.y = g_MouseY;
+    event.button = button;
+    event.key = 0;
+    if (KernelGuiPostEvent(event)) {
+        g_Status.mouse_event_count++;
+        g_Status.mouse_event_queue_ready = true;
+        if (type == GuiEventType::MouseMove) {
+            SerialWrite("[EVENT] MouseMove\n");
+            SerialWrite("[GUI] cursor redraw\n");
+        }
+    }
+}
+
+void FeedMouseByte(uint8_t data) {
+    if (g_MousePacketIndex == 0 && !IsPs2MousePacketHeader(data)) {
+        return;
+    }
+
+    g_MousePacketBytes[g_MousePacketIndex++] = data;
+    if (g_MousePacketIndex < 3) {
+        return;
+    }
+
+    g_MousePacketIndex = 0;
+    Ps2MousePacket packet;
+    packet.dx = 0;
+    packet.dy = 0;
+    packet.left_button = false;
+    packet.right_button = false;
+    packet.middle_button = false;
+    packet.valid = false;
+
+    if (!DecodePs2MousePacket(g_MousePacketBytes, packet)) {
+        SerialWrite("[MOUSE] packet resync\n");
+        if (IsPs2MousePacketHeader(data)) {
+            g_MousePacketBytes[0] = data;
+            g_MousePacketIndex = 1;
+        }
+        return;
+    }
+
+    g_Status.mouse_packet_count++;
+    SerialWrite("[MOUSE] packet dx/dy received\n");
+    g_MouseX += packet.dx;
+    g_MouseY += packet.dy;
+    ClampMouse();
+    PostMouseEvent(GuiEventType::MouseMove);
+
+    if (packet.left_button != g_MouseLeftDown) {
+        g_MouseLeftDown = packet.left_button;
+        PostMouseEvent(packet.left_button ? GuiEventType::MouseDown : GuiEventType::MouseUp, 0);
+    }
+}
+
+void MouseIrqHandler(uint8_t irq, void*) {
+    if (irq != kMouseIrq) {
+        return;
+    }
+
+    g_Status.mouse_irq12_count++;
+    SerialWrite("[IRQ12] mouse byte received\n");
+    FeedMouseByte(In8(kPs2DataPort));
 }
 
 void TrackPciDevice(const PciDevice& device) {
@@ -386,6 +543,11 @@ void ResetDriverStatus() {
     g_Status.keyboard_ready = false;
     g_Status.mouse_ready = false;
     g_Status.ps2_packet_decoder_ready = false;
+    g_Status.ps2_mouse_hardware_ready = false;
+    g_Status.mouse_irq12_ready = false;
+    g_Status.mouse_event_queue_ready = false;
+    g_Status.cursor_framebuffer_ready = false;
+    g_Status.qemu_mouse_ready = false;
     g_Status.pci_ready = false;
     g_Status.pci_config_ready = false;
     g_Status.pci_interrupts_ready = false;
@@ -399,6 +561,9 @@ void ResetDriverStatus() {
     g_Status.virtio_net_supported = false;
     g_Status.wifi_supported = false;
     g_Status.pci_device_count = 0;
+    g_Status.mouse_irq12_count = 0;
+    g_Status.mouse_packet_count = 0;
+    g_Status.mouse_event_count = 0;
     g_Status.usb_controller_count = 0;
     g_Status.ahci_controller_count = 0;
     g_Status.nvme_controller_count = 0;
@@ -411,6 +576,7 @@ void ResetDriverStatus() {
 
 bool KernelDriversInit(const BootInfo& boot_info) {
     ResetDriverStatus();
+    SerialInit();
     g_Status.framebuffer_ready =
         boot_info.framebuffer.base_address != 0 &&
         boot_info.framebuffer.width > 0 &&
@@ -419,7 +585,16 @@ bool KernelDriversInit(const BootInfo& boot_info) {
 
     g_Status.keyboard_ready = InitKeyboard();
     g_Status.mouse_ready = InitMouse();
+    g_Status.ps2_mouse_hardware_ready = g_Status.mouse_ready;
     g_Status.ps2_packet_decoder_ready = RunPs2PacketDecoderSelfTest();
+    g_Status.mouse_irq12_ready =
+        KernelRegisterIrqHandler(kMouseIrq, MouseIrqHandler, nullptr);
+    if (g_Status.mouse_irq12_ready) {
+        KernelSetIrqMask(2, false);
+        KernelSetIrqMask(kMouseIrq, false);
+    }
+    g_Status.cursor_framebuffer_ready = g_Status.framebuffer_ready;
+    g_Status.qemu_mouse_ready = g_Status.ps2_mouse_hardware_ready && g_Status.mouse_irq12_ready;
     InitPci();
 
     KernelLog(LogLevel::Info, "Phase 7 drivers initialized");
@@ -441,6 +616,14 @@ void PrintDriverInfo() {
         g_Status.mouse_ready ? "PS/2 mouse ready" : "PS/2 mouse not found");
     KernelLog(g_Status.ps2_packet_decoder_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.ps2_packet_decoder_ready ? "PS/2 packet decoder ready" : "PS/2 packet decoder unavailable");
+    KernelLog(g_Status.ps2_mouse_hardware_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.ps2_mouse_hardware_ready ? "PS/2 mouse hardware initialized" : "PS/2 mouse hardware init failed");
+    KernelLog(g_Status.mouse_irq12_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.mouse_irq12_ready ? "IRQ12 mouse handler registered" : "IRQ12 mouse handler unavailable");
+    KernelLog(g_Status.cursor_framebuffer_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.cursor_framebuffer_ready ? "Framebuffer cursor path ready" : "Framebuffer cursor path unavailable");
+    KernelLog(g_Status.qemu_mouse_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.qemu_mouse_ready ? "QEMU PS/2 mouse integration ready" : "QEMU PS/2 mouse integration incomplete");
 
     KernelLog(g_Status.pci_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.pci_ready ? "PCI bus enumerated" : "PCI bus has no visible devices");

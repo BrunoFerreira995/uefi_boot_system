@@ -31,6 +31,17 @@ static constexpr uint32_t kWindowBorder = 2;
 static constexpr uint32_t kButtonSize = 16;
 static constexpr uint32_t kButtonGap = 7;
 static constexpr uint32_t kCursorHeight = 16;
+static constexpr uint32_t kCursorBackupSize = 20;
+static constexpr uint32_t kBackBufferMaxWidth = 1024;
+static constexpr uint32_t kBackBufferMaxHeight = 768;
+static constexpr uint32_t kBackBufferPixels = kBackBufferMaxWidth * kBackBufferMaxHeight;
+
+struct CursorBackup {
+    int32_t x;
+    int32_t y;
+    uint32_t pixels[kCursorBackupSize * kCursorBackupSize];
+    bool valid;
+};
 
 struct Theme {
     uint32_t desktop_top;
@@ -104,6 +115,12 @@ GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
 Window g_Windows[kMaxWindows];
 GuiEvent g_EventQueue[kEventQueueCapacity];
+uint32_t g_BackBuffer[kBackBufferPixels];
+uint32_t* g_DrawTarget = nullptr;
+uint32_t g_DrawStride = 0;
+Rect g_ClipRect {};
+bool g_ClipEnabled = false;
+bool g_BackBufferReady = false;
 uint32_t g_EventReadIndex = 0;
 uint32_t g_EventWriteIndex = 0;
 uint32_t g_EventCount = 0;
@@ -120,6 +137,9 @@ bool g_Dragging = false;
 WindowControl g_HoveredControl = WindowControl::None;
 int32_t g_HoveredWindowIndex = -1;
 CursorKind g_CursorKind = CursorKind::Arrow;
+CursorBackup g_CursorBackup {};
+
+bool PointInRect(int32_t x, int32_t y, const Rect& rect);
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -151,6 +171,11 @@ void ResetGuiStatus() {
     g_EventReadIndex = 0;
     g_EventWriteIndex = 0;
     g_EventCount = 0;
+    g_DrawTarget = nullptr;
+    g_DrawStride = 0;
+    g_ClipRect = {0, 0, 0, 0};
+    g_ClipEnabled = false;
+    g_BackBufferReady = false;
     g_MouseX = 0;
     g_MouseY = 0;
     g_LeftButtonDown = false;
@@ -176,6 +201,9 @@ void ResetGuiStatus() {
     g_HoveredControl = WindowControl::None;
     g_HoveredWindowIndex = -1;
     g_CursorKind = CursorKind::Arrow;
+    g_CursorBackup.x = 0;
+    g_CursorBackup.y = 0;
+    g_CursorBackup.valid = false;
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -185,13 +213,135 @@ bool FramebufferValid(const FramebufferInfo& framebuffer) {
         framebuffer.pixels_per_scanline >= framebuffer.width;
 }
 
+uint32_t* ActivePixels() {
+    return g_DrawTarget ? g_DrawTarget : reinterpret_cast<uint32_t*>(g_Framebuffer.base_address);
+}
+
+uint32_t ActiveStride() {
+    return g_DrawTarget ? g_DrawStride : g_Framebuffer.pixels_per_scanline;
+}
+
+bool RectEmpty(const Rect& rect) {
+    return rect.width == 0 || rect.height == 0;
+}
+
+Rect ScreenRect() {
+    return {0, 0, g_Framebuffer.width, g_Framebuffer.height};
+}
+
+Rect IntersectRect(const Rect& a, const Rect& b) {
+    const uint32_t ax2 = a.x + a.width;
+    const uint32_t ay2 = a.y + a.height;
+    const uint32_t bx2 = b.x + b.width;
+    const uint32_t by2 = b.y + b.height;
+    const uint32_t x1 = a.x > b.x ? a.x : b.x;
+    const uint32_t y1 = a.y > b.y ? a.y : b.y;
+    const uint32_t x2 = ax2 < bx2 ? ax2 : bx2;
+    const uint32_t y2 = ay2 < by2 ? ay2 : by2;
+
+    if (x2 <= x1 || y2 <= y1) {
+        return {0, 0, 0, 0};
+    }
+    return {x1, y1, x2 - x1, y2 - y1};
+}
+
+Rect UnionRect(const Rect& a, const Rect& b) {
+    if (RectEmpty(a)) {
+        return b;
+    }
+    if (RectEmpty(b)) {
+        return a;
+    }
+
+    const uint32_t ax2 = a.x + a.width;
+    const uint32_t ay2 = a.y + a.height;
+    const uint32_t bx2 = b.x + b.width;
+    const uint32_t by2 = b.y + b.height;
+    const uint32_t x1 = a.x < b.x ? a.x : b.x;
+    const uint32_t y1 = a.y < b.y ? a.y : b.y;
+    const uint32_t x2 = ax2 > bx2 ? ax2 : bx2;
+    const uint32_t y2 = ay2 > by2 ? ay2 : by2;
+    return {x1, y1, x2 - x1, y2 - y1};
+}
+
+Rect ExpandRect(const Rect& rect, uint32_t amount) {
+    const uint32_t x = rect.x > amount ? rect.x - amount : 0;
+    const uint32_t y = rect.y > amount ? rect.y - amount : 0;
+    const uint32_t x2 = rect.x + rect.width + amount;
+    const uint32_t y2 = rect.y + rect.height + amount;
+    const uint32_t max_x = x2 < g_Framebuffer.width ? x2 : g_Framebuffer.width;
+    const uint32_t max_y = y2 < g_Framebuffer.height ? y2 : g_Framebuffer.height;
+    return max_x > x && max_y > y ? Rect{x, y, max_x - x, max_y - y} : Rect{0, 0, 0, 0};
+}
+
+Rect CursorRectAt(int32_t x, int32_t y) {
+    const uint32_t cx = x < 0 ? 0 : static_cast<uint32_t>(x);
+    const uint32_t cy = y < 0 ? 0 : static_cast<uint32_t>(y);
+    return IntersectRect({cx, cy, kCursorBackupSize, kCursorBackupSize}, ScreenRect());
+}
+
+Rect WindowVisualRect(const Window& window) {
+    if (!window.visible || window.minimized) {
+        return {0, 0, 0, 0};
+    }
+    return ExpandRect(window.bounds, 18);
+}
+
+void BeginDrawToFramebuffer() {
+    g_DrawTarget = nullptr;
+    g_DrawStride = 0;
+    g_ClipEnabled = false;
+}
+
+void BeginDrawToBackBuffer(const Rect& clip) {
+    g_DrawTarget = g_BackBuffer;
+    g_DrawStride = kBackBufferMaxWidth;
+    g_ClipRect = IntersectRect(clip, ScreenRect());
+    g_ClipEnabled = true;
+}
+
 void DrawPixel(uint32_t x, uint32_t y, uint32_t color) {
+    if (x >= g_Framebuffer.width || y >= g_Framebuffer.height) {
+        return;
+    }
+    if (g_ClipEnabled && !PointInRect(static_cast<int32_t>(x), static_cast<int32_t>(y), g_ClipRect)) {
+        return;
+    }
+
+    uint32_t* pixels = ActivePixels();
+    pixels[y * ActiveStride() + x] = ConvertColor(color);
+}
+
+uint32_t ReadRawPixel(uint32_t x, uint32_t y) {
+    if (x >= g_Framebuffer.width || y >= g_Framebuffer.height) {
+        return 0;
+    }
+
+    const uint32_t* pixels = reinterpret_cast<const uint32_t*>(g_Framebuffer.base_address);
+    return pixels[y * g_Framebuffer.pixels_per_scanline + x];
+}
+
+void WriteRawPixel(uint32_t x, uint32_t y, uint32_t value) {
     if (x >= g_Framebuffer.width || y >= g_Framebuffer.height) {
         return;
     }
 
     uint32_t* pixels = reinterpret_cast<uint32_t*>(g_Framebuffer.base_address);
-    pixels[y * g_Framebuffer.pixels_per_scanline + x] = ConvertColor(color);
+    pixels[y * g_Framebuffer.pixels_per_scanline + x] = value;
+}
+
+void CopyBackBufferToFramebuffer(const Rect& dirty) {
+    const Rect clipped = IntersectRect(dirty, ScreenRect());
+    if (!g_BackBufferReady || RectEmpty(clipped)) {
+        return;
+    }
+
+    uint32_t* framebuffer = reinterpret_cast<uint32_t*>(g_Framebuffer.base_address);
+    for (uint32_t y = clipped.y; y < clipped.y + clipped.height; y++) {
+        for (uint32_t x = clipped.x; x < clipped.x + clipped.width; x++) {
+            framebuffer[y * g_Framebuffer.pixels_per_scanline + x] = g_BackBuffer[y * kBackBufferMaxWidth + x];
+        }
+    }
 }
 
 void FillRect(const Rect& rect, uint32_t color) {
@@ -362,6 +512,57 @@ void DrawCursor() {
     FillRect({x + 2, y + 2, 2, 12}, kTheme.cursor);
     FillRect({x + 4, y + 4, 2, 8}, kTheme.cursor);
     FillRect({x + 6, y + 6, 2, 4}, kTheme.cursor);
+}
+
+void ClampMouseToScreen();
+void UpdateHoverState();
+
+void SaveCursorBackground() {
+    g_CursorBackup.x = g_MouseX;
+    g_CursorBackup.y = g_MouseY;
+    g_CursorBackup.valid = true;
+
+    for (uint32_t py = 0; py < kCursorBackupSize; py++) {
+        for (uint32_t px = 0; px < kCursorBackupSize; px++) {
+            const int32_t sx = g_CursorBackup.x + static_cast<int32_t>(px);
+            const int32_t sy = g_CursorBackup.y + static_cast<int32_t>(py);
+            g_CursorBackup.pixels[py * kCursorBackupSize + px] =
+                (sx >= 0 && sy >= 0) ? ReadRawPixel(static_cast<uint32_t>(sx), static_cast<uint32_t>(sy)) : 0;
+        }
+    }
+}
+
+void RestoreCursorBackground() {
+    if (!g_CursorBackup.valid) {
+        return;
+    }
+
+    for (uint32_t py = 0; py < kCursorBackupSize; py++) {
+        for (uint32_t px = 0; px < kCursorBackupSize; px++) {
+            const int32_t sx = g_CursorBackup.x + static_cast<int32_t>(px);
+            const int32_t sy = g_CursorBackup.y + static_cast<int32_t>(py);
+            if (sx >= 0 && sy >= 0) {
+                WriteRawPixel(static_cast<uint32_t>(sx), static_cast<uint32_t>(sy),
+                    g_CursorBackup.pixels[py * kCursorBackupSize + px]);
+            }
+        }
+    }
+
+    g_CursorBackup.valid = false;
+}
+
+void PaintCursor() {
+    SaveCursorBackground();
+    DrawCursor();
+}
+
+void MoveCursorOnly(int32_t x, int32_t y) {
+    RestoreCursorBackground();
+    g_MouseX = x;
+    g_MouseY = y;
+    ClampMouseToScreen();
+    UpdateHoverState();
+    PaintCursor();
 }
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect) {
@@ -709,6 +910,13 @@ void DrawTaskbar() {
 }
 
 bool ComposeDesktop() {
+    g_CursorBackup.valid = false;
+    if (g_BackBufferReady) {
+        BeginDrawToBackBuffer(ScreenRect());
+    } else {
+        BeginDrawToFramebuffer();
+    }
+
     DrawWallpaper();
     DrawDesktopIcons();
     DrawBars();
@@ -726,8 +934,47 @@ bool ComposeDesktop() {
     }
 
     DrawTaskbar();
-    DrawCursor();
+    BeginDrawToFramebuffer();
+    if (g_BackBufferReady) {
+        CopyBackBufferToFramebuffer(ScreenRect());
+    }
+    PaintCursor();
     return true;
+}
+
+void RedrawDirtyRegion(const Rect& dirty) {
+    if (!g_BackBufferReady) {
+        ComposeDesktop();
+        return;
+    }
+
+    const Rect clipped = IntersectRect(dirty, ScreenRect());
+    if (RectEmpty(clipped)) {
+        PaintCursor();
+        return;
+    }
+
+    BeginDrawToBackBuffer(clipped);
+    DrawWallpaper();
+    DrawDesktopIcons();
+    DrawBars();
+
+    int32_t active_window = -1;
+    for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
+        if (g_Windows[i].visible && !g_Windows[i].minimized) {
+            active_window = i;
+            break;
+        }
+    }
+
+    for (uint32_t i = 0; i < g_Status.window_count; i++) {
+        ComposeWindow(g_Windows[i], static_cast<int32_t>(i) == active_window);
+    }
+
+    DrawTaskbar();
+    BeginDrawToFramebuffer();
+    CopyBackBufferToFramebuffer(clipped);
+    PaintCursor();
 }
 
 void ClampMouseToScreen() {
@@ -839,18 +1086,26 @@ void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
 void DispatchEvent(const GuiEvent& event) {
     switch (event.type) {
         case GuiEventType::MouseMove:
-            g_MouseX = event.x;
-            g_MouseY = event.y;
-            ClampMouseToScreen();
             if (g_LeftButtonDown && g_DragWindowIndex >= 0) {
+                const Rect old_window_rect = WindowVisualRect(g_Windows[g_DragWindowIndex]);
+                const Rect old_cursor_rect = CursorRectAt(g_MouseX, g_MouseY);
+                RestoreCursorBackground();
+                g_MouseX = event.x;
+                g_MouseY = event.y;
+                ClampMouseToScreen();
                 g_Dragging = true;
                 MoveWindow(g_Windows[g_DragWindowIndex], g_MouseX - g_DragOffsetX, g_MouseY - g_DragOffsetY);
+                const Rect new_window_rect = WindowVisualRect(g_Windows[g_DragWindowIndex]);
+                const Rect new_cursor_rect = CursorRectAt(g_MouseX, g_MouseY);
+                UpdateHoverState();
+                RedrawDirtyRegion(UnionRect(UnionRect(old_window_rect, new_window_rect), UnionRect(old_cursor_rect, new_cursor_rect)));
+            } else {
+                MoveCursorOnly(event.x, event.y);
             }
-            UpdateHoverState();
-            ComposeDesktop();
             break;
 
         case GuiEventType::MouseDown:
+            RestoreCursorBackground();
             g_LeftButtonDown = event.button == 0;
             g_MouseX = event.x;
             g_MouseY = event.y;
@@ -885,6 +1140,7 @@ void DispatchEvent(const GuiEvent& event) {
             break;
 
         case GuiEventType::MouseUp:
+            RestoreCursorBackground();
             g_MouseX = event.x;
             g_MouseY = event.y;
             ClampMouseToScreen();
@@ -904,6 +1160,7 @@ void DispatchEvent(const GuiEvent& event) {
             break;
 
         case GuiEventType::Click:
+            RestoreCursorBackground();
             g_MouseX = event.x;
             g_MouseY = event.y;
             ClampMouseToScreen();
@@ -914,13 +1171,18 @@ void DispatchEvent(const GuiEvent& event) {
 
         case GuiEventType::Drag:
             if (g_LeftButtonDown && g_DragWindowIndex >= 0) {
+                const Rect old_window_rect = WindowVisualRect(g_Windows[g_DragWindowIndex]);
+                const Rect old_cursor_rect = CursorRectAt(g_MouseX, g_MouseY);
+                RestoreCursorBackground();
                 g_MouseX = event.x;
                 g_MouseY = event.y;
                 ClampMouseToScreen();
                 g_Dragging = true;
                 MoveWindow(g_Windows[g_DragWindowIndex], g_MouseX - g_DragOffsetX, g_MouseY - g_DragOffsetY);
+                const Rect new_window_rect = WindowVisualRect(g_Windows[g_DragWindowIndex]);
+                const Rect new_cursor_rect = CursorRectAt(g_MouseX, g_MouseY);
                 UpdateHoverState();
-                ComposeDesktop();
+                RedrawDirtyRegion(UnionRect(UnionRect(old_window_rect, new_window_rect), UnionRect(old_cursor_rect, new_cursor_rect)));
             }
             break;
 
@@ -950,6 +1212,9 @@ bool KernelGuiInit(const BootInfo& boot_info) {
     }
 
     g_Framebuffer = boot_info.framebuffer;
+    g_BackBufferReady =
+        g_Framebuffer.width <= kBackBufferMaxWidth &&
+        g_Framebuffer.height <= kBackBufferMaxHeight;
     g_MouseX = static_cast<int32_t>(g_Framebuffer.width / 2);
     g_MouseY = static_cast<int32_t>(g_Framebuffer.height / 2);
     g_Status.event_queue_ready = true;

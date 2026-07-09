@@ -8,11 +8,37 @@ enum class FileSystemType {
     Unknown,
     Fat32,
     Ext2,
+    RamFs,
+};
+
+enum FileMode : uint16_t {
+    OwnerRead = 0400,
+    OwnerWrite = 0200,
+    OwnerExecute = 0100,
+    GroupRead = 0040,
+    GroupWrite = 0020,
+    GroupExecute = 0010,
+    OtherRead = 0004,
+    OtherWrite = 0002,
+    OtherExecute = 0001,
+    Directory = 040000,
+    Symlink = 0120000,
+    Regular = 0100000,
 };
 
 struct VfsMount {
     const char* path;
     FileSystemType type;
+    bool active;
+};
+
+struct VfsNode {
+    const char* path;
+    const char* symlink_target;
+    FileSystemType type;
+    uint16_t mode;
+    bool directory;
+    bool symlink;
     bool active;
 };
 
@@ -24,11 +50,13 @@ struct FsDriver {
 
 static constexpr uint32_t kMaxFsDrivers = 4;
 static constexpr uint32_t kMaxMounts = 8;
+static constexpr uint32_t kMaxRamFsNodes = 16;
 static constexpr uint16_t kFatBootSignature = 0xAA55;
 static constexpr uint16_t kExt2Magic = 0xEF53;
 
 FsDriver g_Drivers[kMaxFsDrivers];
 VfsMount g_Mounts[kMaxMounts];
+VfsNode g_RamFsNodes[kMaxRamFsNodes];
 FileSystemStatus g_Status {};
 
 uint16_t ReadLe16(const uint8_t* data, uint64_t offset) {
@@ -82,12 +110,75 @@ bool Ext2Probe(const uint8_t* data, uint64_t size) {
     return magic == kExt2Magic && inode_count != 0 && block_count != 0;
 }
 
+bool RamFsProbe(const uint8_t*, uint64_t) {
+    return true;
+}
+
+bool StringEquals(const char* a, const char* b) {
+    if (!a || !b) {
+        return false;
+    }
+
+    while (*a && *b) {
+        if (*a != *b) {
+            return false;
+        }
+        a++;
+        b++;
+    }
+
+    return *a == '\0' && *b == '\0';
+}
+
+uint32_t StringLength(const char* text) {
+    uint32_t length = 0;
+    if (!text) {
+        return 0;
+    }
+
+    while (text[length]) {
+        length++;
+    }
+    return length;
+}
+
+bool PathHasPrefix(const char* path, const char* prefix) {
+    if (!path || !prefix) {
+        return false;
+    }
+
+    const uint32_t prefix_length = StringLength(prefix);
+    if (prefix_length == 0) {
+        return false;
+    }
+    if (StringEquals(prefix, "/")) {
+        return path[0] == '/';
+    }
+
+    for (uint32_t i = 0; i < prefix_length; i++) {
+        if (path[i] != prefix[i]) {
+            return false;
+        }
+    }
+
+    return path[prefix_length] == '\0' || path[prefix_length] == '/';
+}
+
+bool HasPermission(const VfsNode& node, uint16_t permission) {
+    return (node.mode & permission) == permission;
+}
+
 void ResetFileSystemStatus() {
     g_Status.vfs_ready = false;
     g_Status.fat32_supported = false;
     g_Status.ext2_supported = false;
+    g_Status.file_permissions_ready = false;
+    g_Status.symbolic_links_ready = false;
+    g_Status.mount_manager_ready = false;
+    g_Status.ramfs_ready = false;
     g_Status.registered_driver_count = 0;
     g_Status.mounted_filesystem_count = 0;
+    g_Status.ramfs_node_count = 0;
 
     for (uint32_t i = 0; i < kMaxFsDrivers; i++) {
         g_Drivers[i].name = nullptr;
@@ -99,6 +190,16 @@ void ResetFileSystemStatus() {
         g_Mounts[i].path = nullptr;
         g_Mounts[i].type = FileSystemType::Unknown;
         g_Mounts[i].active = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxRamFsNodes; i++) {
+        g_RamFsNodes[i].path = nullptr;
+        g_RamFsNodes[i].symlink_target = nullptr;
+        g_RamFsNodes[i].type = FileSystemType::Unknown;
+        g_RamFsNodes[i].mode = 0;
+        g_RamFsNodes[i].directory = false;
+        g_RamFsNodes[i].symlink = false;
+        g_RamFsNodes[i].active = false;
     }
 }
 
@@ -126,6 +227,54 @@ bool VfsMountPath(const char* path, FileSystemType type) {
     mount.active = true;
     g_Status.mounted_filesystem_count++;
     return true;
+}
+
+const VfsMount* VfsFindMount(const char* path) {
+    const VfsMount* best = nullptr;
+    uint32_t best_length = 0;
+
+    for (uint32_t i = 0; i < g_Status.mounted_filesystem_count; i++) {
+        const VfsMount& mount = g_Mounts[i];
+        if (!mount.active || !PathHasPrefix(path, mount.path)) {
+            continue;
+        }
+
+        const uint32_t length = StringLength(mount.path);
+        if (!best || length > best_length) {
+            best = &mount;
+            best_length = length;
+        }
+    }
+
+    return best;
+}
+
+bool RamFsAddNode(const char* path, uint16_t mode, bool directory, const char* symlink_target = nullptr) {
+    if (!path || g_Status.ramfs_node_count >= kMaxRamFsNodes) {
+        return false;
+    }
+
+    VfsNode& node = g_RamFsNodes[g_Status.ramfs_node_count];
+    node.path = path;
+    node.symlink_target = symlink_target;
+    node.type = FileSystemType::RamFs;
+    node.mode = mode;
+    node.directory = directory;
+    node.symlink = symlink_target != nullptr;
+    node.active = true;
+    g_Status.ramfs_node_count++;
+    return true;
+}
+
+const VfsNode* RamFsFindNode(const char* path) {
+    for (uint32_t i = 0; i < g_Status.ramfs_node_count; i++) {
+        const VfsNode& node = g_RamFsNodes[i];
+        if (node.active && StringEquals(node.path, path)) {
+            return &node;
+        }
+    }
+
+    return nullptr;
 }
 
 void WriteLe16(uint8_t* data, uint64_t offset, uint16_t value) {
@@ -173,12 +322,70 @@ bool RunExt2ProbeSelfTest() {
     return Ext2Probe(image, sizeof(image));
 }
 
+bool RunPermissionSelfTest() {
+    VfsNode node;
+    node.path = "/tmp/config";
+    node.symlink_target = nullptr;
+    node.type = FileSystemType::RamFs;
+    node.mode = static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupRead | OtherRead);
+    node.directory = false;
+    node.symlink = false;
+    node.active = true;
+
+    return HasPermission(node, OwnerRead) &&
+        HasPermission(node, OwnerWrite) &&
+        HasPermission(node, GroupRead) &&
+        !HasPermission(node, GroupWrite) &&
+        !HasPermission(node, OtherWrite);
+}
+
+bool RunRamFsSelfTest() {
+    const uint32_t start_count = g_Status.ramfs_node_count;
+    if (!RamFsAddNode("/tmp", static_cast<uint16_t>(Directory | OwnerRead | OwnerWrite | OwnerExecute), true)) {
+        return false;
+    }
+    if (!RamFsAddNode("/tmp/readme", static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupRead | OtherRead), false)) {
+        return false;
+    }
+
+    const VfsNode* root = RamFsFindNode("/tmp");
+    const VfsNode* readme = RamFsFindNode("/tmp/readme");
+    return g_Status.ramfs_node_count == start_count + 2 &&
+        root && root->directory &&
+        readme && !readme->directory &&
+        HasPermission(*readme, OwnerRead);
+}
+
+bool RunSymlinkSelfTest() {
+    if (!RamFsAddNode("/tmp/latest", static_cast<uint16_t>(Symlink | OwnerRead | GroupRead | OtherRead), false, "/tmp/readme")) {
+        return false;
+    }
+
+    const VfsNode* link = RamFsFindNode("/tmp/latest");
+    return link &&
+        link->symlink &&
+        StringEquals(link->symlink_target, "/tmp/readme") &&
+        RamFsFindNode(link->symlink_target) != nullptr;
+}
+
+bool RunMountManagerSelfTest() {
+    const VfsMount* root = VfsFindMount("/");
+    const VfsMount* boot = VfsFindMount("/boot/kernel.elf");
+    const VfsMount* tmp = VfsFindMount("/tmp/readme");
+
+    return root && root->type == FileSystemType::Ext2 &&
+        boot && boot->type == FileSystemType::Fat32 &&
+        tmp && tmp->type == FileSystemType::RamFs;
+}
+
 const char* TypeName(FileSystemType type) {
     switch (type) {
         case FileSystemType::Fat32:
             return "FAT32";
         case FileSystemType::Ext2:
             return "EXT2";
+        case FileSystemType::RamFs:
+            return "RamFS";
         case FileSystemType::Unknown:
             return "unknown";
     }
@@ -193,10 +400,12 @@ bool KernelFileSystemInit() {
 
     g_Status.vfs_ready =
         VfsRegisterDriver("fat32", FileSystemType::Fat32, Fat32Probe) &&
-        VfsRegisterDriver("ext2", FileSystemType::Ext2, Ext2Probe);
+        VfsRegisterDriver("ext2", FileSystemType::Ext2, Ext2Probe) &&
+        VfsRegisterDriver("ramfs", FileSystemType::RamFs, RamFsProbe);
 
     g_Status.fat32_supported = RunFat32ProbeSelfTest();
     g_Status.ext2_supported = RunExt2ProbeSelfTest();
+    g_Status.file_permissions_ready = RunPermissionSelfTest();
 
     if (g_Status.fat32_supported) {
         VfsMountPath("/boot", FileSystemType::Fat32);
@@ -206,8 +415,19 @@ bool KernelFileSystemInit() {
         VfsMountPath("/", FileSystemType::Ext2);
     }
 
-    KernelLog(LogLevel::Info, "Phase 8 filesystem initialized");
-    return g_Status.vfs_ready && g_Status.fat32_supported && g_Status.ext2_supported;
+    VfsMountPath("/tmp", FileSystemType::RamFs);
+    g_Status.ramfs_ready = RunRamFsSelfTest();
+    g_Status.symbolic_links_ready = g_Status.ramfs_ready && RunSymlinkSelfTest();
+    g_Status.mount_manager_ready = RunMountManagerSelfTest();
+
+    KernelLog(LogLevel::Info, "Phase 10 filesystem initialized");
+    return g_Status.vfs_ready &&
+        g_Status.fat32_supported &&
+        g_Status.ext2_supported &&
+        g_Status.file_permissions_ready &&
+        g_Status.symbolic_links_ready &&
+        g_Status.mount_manager_ready &&
+        g_Status.ramfs_ready;
 }
 
 const FileSystemStatus& KernelFileSystemStatus() {
@@ -221,6 +441,14 @@ void PrintFileSystemInfo() {
         g_Status.fat32_supported ? "FAT32 recognizer ready" : "FAT32 recognizer failed");
     KernelLog(g_Status.ext2_supported ? LogLevel::Info : LogLevel::Warn,
         g_Status.ext2_supported ? "EXT2 recognizer ready" : "EXT2 recognizer failed");
+    KernelLog(g_Status.file_permissions_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.file_permissions_ready ? "VFS file permissions ready" : "VFS file permissions unavailable");
+    KernelLog(g_Status.symbolic_links_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.symbolic_links_ready ? "VFS symbolic links ready" : "VFS symbolic links unavailable");
+    KernelLog(g_Status.mount_manager_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.mount_manager_ready ? "VFS mount manager ready" : "VFS mount manager unavailable");
+    KernelLog(g_Status.ramfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.ramfs_ready ? "RamFS ready" : "RamFS unavailable");
 
     for (uint32_t i = 0; i < g_Status.mounted_filesystem_count; i++) {
         if (!g_Mounts[i].active) {

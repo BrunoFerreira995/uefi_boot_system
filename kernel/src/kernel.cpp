@@ -1258,6 +1258,8 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     }
 
     PrintGuiInfo();
+    KernelEnableInterrupts();
+    KernelLog(LogLevel::Info, "Hardware interrupts enabled");
 
     while (true) {
         KernelGuiPumpEvents();

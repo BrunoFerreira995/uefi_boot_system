@@ -99,6 +99,7 @@ if [ "${UEFI_BOOT_MODE:-fat}" = "image" ] && [ "$PACKAGED" = true ]; then
     qemu-system-x86_64 \
         -drive if=pflash,format=raw,readonly=on,file="$OVMF" \
         -drive file="$IMG_FILE",format=raw \
+        -serial stdio \
         -net none \
         -m 256M \
         -vga std
@@ -112,6 +113,7 @@ else
     qemu-system-x86_64 \
         -drive if=pflash,format=raw,readonly=on,file="$OVMF" \
         -drive file=fat:rw:"$ESP_DIR",format=raw \
+        -serial stdio \
         -net none \
         -m 256M \
         -vga std

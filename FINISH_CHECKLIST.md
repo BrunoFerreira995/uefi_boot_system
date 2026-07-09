@@ -126,6 +126,26 @@
 - [x] Mouse abstraction
 - [x] PS/2 packet decoding
   - [x] 3-byte mouse packet decoder with self-test
+- [x] PS/2 mouse hardware init
+  - [x] Auxiliary device enable
+  - [x] Controller IRQ12 enable
+  - [x] Mouse defaults and data reporting ACK path
+- [x] IRQ12 mouse interrupt path
+  - [x] IDT vector 44 available
+  - [x] IRQ12 handler registered
+  - [x] PIC cascade and IRQ12 unmasked
+  - [ ] Live `[IRQ12] mouse byte received` serial confirmation
+- [x] Mouse event queue integration
+  - [x] Mouse packets post GUI MouseMove/MouseDown/MouseUp events
+- [x] Cursor visible on framebuffer
+  - [x] GUI cursor redraw path available
+  - [x] Cursor background save/restore
+  - [x] Dirty rectangle redraw
+  - [x] Avoid full desktop redraw on simple MouseMove
+  - [x] Optional double buffering
+- [x] QEMU mouse integration
+  - [x] Run script enables PS/2 mouse, PS/2 keyboard, and serial stdio
+  - [ ] Live QEMU mouse movement test
 - [x] USB HID
   - [x] HID interface descriptor parser scaffold
 
@@ -161,10 +181,10 @@
 - [x] VFS
 - [x] FAT32
 - [x] EXT2
-- [ ] File permissions
-- [ ] Symbolic links
-- [ ] Mount manager
-- [ ] RamFS
+- [x] File permissions
+- [x] Symbolic links
+- [x] Mount manager
+- [x] RamFS
 
 ---
 
