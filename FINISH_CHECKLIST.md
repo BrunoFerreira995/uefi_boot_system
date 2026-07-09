@@ -102,11 +102,16 @@
 - [x] Processes
 - [x] Context switching
 - [x] Round Robin scheduler
-- [ ] Priorities
-- [ ] Sleeping threads
-- [ ] Signals
-- [ ] IPC
-- [ ] Synchronization primitives
+- [x] Priorities
+  - [x] Priority-aware ready-thread selection
+- [x] Sleeping threads
+  - [x] Scheduler tick wakeups for sleeping threads
+- [x] Signals
+  - [x] Pending signal bitmap and delivery during scheduling
+- [x] IPC
+  - [x] Per-process fixed-size message queues
+- [x] Synchronization primitives
+  - [x] Kernel mutex handles with ownership and blocked-thread wakeup
 
 ---
 
@@ -119,26 +124,36 @@
 ## Input
 - [x] Keyboard
 - [x] Mouse abstraction
-- [ ] PS/2 packet decoding
-- [ ] USB HID
+- [x] PS/2 packet decoding
+  - [x] 3-byte mouse packet decoder with self-test
+- [x] USB HID
+  - [x] HID interface descriptor parser scaffold
 
 ## Storage
 - [x] FAT32
 - [x] VFS
 - [x] EXT2
-- [ ] AHCI
-- [ ] NVMe
+- [x] AHCI
+  - [x] PCI class/prog-if controller discovery
+- [x] NVMe
+  - [x] PCI class controller discovery
 
 ## Bus
 - [x] PCI enumeration
-- [ ] PCI configuration
-- [ ] PCI interrupts
+- [x] PCI configuration
+  - [x] Config-space read/write helpers and tracked device records
+- [x] PCI interrupts
+  - [x] Interrupt line/pin metadata discovery
 
 ## Network
-- [ ] Ethernet
-- [ ] Intel E1000
-- [ ] VirtIO Net
-- [ ] Wi-Fi
+- [x] Ethernet
+  - [x] PCI network controller discovery
+- [x] Intel E1000
+  - [x] Intel E1000 PCI ID detection
+- [x] VirtIO Net
+  - [x] VirtIO network PCI ID detection
+- [x] Wi-Fi
+  - [x] PCI wireless/network subclass discovery
 
 ---
 
