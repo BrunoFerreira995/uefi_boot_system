@@ -52,6 +52,7 @@ Make sure the following tools are available:
 # Step 1: verify environment
 ./scripts/setup_step1.sh
 
+
 # Step 2: build the project
 ./scripts/setup_step2.sh
 
@@ -63,6 +64,9 @@ Make sure the following tools are available:
 
 # Direct run
 ./scripts/run.sh
+
+# Direct teste
+./scripts/test.sh
 
 # Make scripts executable if needed
 chmod +x scripts/*.sh
