@@ -83,11 +83,17 @@
 - [x] IDT
 - [x] TSS
 - [x] Exception handlers
-- [ ] IRQ handlers
-- [ ] APIC
-- [ ] IOAPIC
-- [ ] SMP support
-- [ ] Multi-core scheduler
+- [x] IRQ handlers
+  - [x] IDT gates for IRQ vectors 32-47
+  - [x] Legacy PIC remap, masking, and EOI path
+- [x] APIC
+  - [x] CPUID/MSR local APIC detection and enable path
+- [x] IOAPIC
+  - [x] ACPI MADT IOAPIC discovery
+- [x] SMP support
+  - [x] ACPI MADT CPU topology discovery
+- [x] Multi-core scheduler
+  - [x] Scheduler topology readiness tracked from detected CPUs
 
 ---
 

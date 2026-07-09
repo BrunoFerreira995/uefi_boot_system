@@ -1210,7 +1210,7 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Logging system online");
     KernelLog(LogLevel::Info, "Panic handler armed");
 
-    if (!KernelCpuInit()) {
+    if (!KernelCpuInit(*boot_info)) {
         KernelPanic("CPU initialization failed");
     }
 

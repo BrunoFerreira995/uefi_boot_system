@@ -33,7 +33,24 @@
 .global CpuExceptionStub29
 .global CpuExceptionStub30
 .global CpuExceptionStub31
+.global CpuIrqStub32
+.global CpuIrqStub33
+.global CpuIrqStub34
+.global CpuIrqStub35
+.global CpuIrqStub36
+.global CpuIrqStub37
+.global CpuIrqStub38
+.global CpuIrqStub39
+.global CpuIrqStub40
+.global CpuIrqStub41
+.global CpuIrqStub42
+.global CpuIrqStub43
+.global CpuIrqStub44
+.global CpuIrqStub45
+.global CpuIrqStub46
+.global CpuIrqStub47
 .extern CpuExceptionHandler
+.extern CpuIrqHandler
 
 .intel_syntax noprefix
 
@@ -109,6 +126,36 @@ EXCEPTION_STUB_NO_ERROR 31
 CpuExceptionCommon:
     mov rdi, rsp
     call CpuExceptionHandler
+    add rsp, 16
+    iretq
+
+.macro IRQ_STUB vector
+CpuIrqStub\vector:
+    push 0
+    push \vector
+    jmp CpuIrqCommon
+.endm
+
+IRQ_STUB 32
+IRQ_STUB 33
+IRQ_STUB 34
+IRQ_STUB 35
+IRQ_STUB 36
+IRQ_STUB 37
+IRQ_STUB 38
+IRQ_STUB 39
+IRQ_STUB 40
+IRQ_STUB 41
+IRQ_STUB 42
+IRQ_STUB 43
+IRQ_STUB 44
+IRQ_STUB 45
+IRQ_STUB 46
+IRQ_STUB 47
+
+CpuIrqCommon:
+    mov rdi, rsp
+    call CpuIrqHandler
     add rsp, 16
     iretq
 

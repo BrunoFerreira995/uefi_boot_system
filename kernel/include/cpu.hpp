@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
-bool KernelCpuInit();
-void PrintCpuInfo();
+struct BootInfo;
 
+bool KernelCpuInit(const BootInfo& boot_info);
+void PrintCpuInfo();
