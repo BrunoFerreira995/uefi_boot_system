@@ -352,6 +352,10 @@ static constexpr uint64_t kPageSize = 4096;
 static constexpr uint64_t kManagedMemoryLimit = 0x100000000ULL;
 static constexpr uint64_t kManagedPageCount = kManagedMemoryLimit / kPageSize;
 static constexpr uint64_t kHeapInitialPages = 16;
+static constexpr uint64_t kCowTrackedPages = 128;
+static constexpr uint64_t kSharedSegmentCount = 8;
+static constexpr uint64_t kSharedSegmentMaxPages = 4;
+static constexpr uint64_t kSlabCacheCount = 4;
 
 static uint8_t g_PhysicalPageBitmap[kManagedPageCount / 8];
 
@@ -585,12 +589,498 @@ private:
     uint64_t m_End = 0;
 };
 
+class CopyOnWriteManager {
+public:
+    void Init(PhysicalMemoryManager& pmm) {
+        m_PhysicalMemory = &pmm;
+        for (uint64_t i = 0; i < kCowTrackedPages; i++) {
+            m_Pages[i].physical = 0;
+            m_Pages[i].references = 0;
+            m_Pages[i].active = false;
+        }
+    }
+
+    uint64_t AllocatePage() {
+        CowPage* slot = FindFreeSlot();
+        if (!slot || !m_PhysicalMemory) {
+            return 0;
+        }
+
+        const uint64_t physical = m_PhysicalMemory->AllocatePage();
+        if (physical == 0) {
+            return 0;
+        }
+
+        ClearPage(physical);
+        slot->physical = physical;
+        slot->references = 1;
+        slot->active = true;
+        return physical;
+    }
+
+    bool ClonePage(uint64_t physical) {
+        CowPage* page = FindPage(physical);
+        if (!page || page->references == UINT16_MAX) {
+            return false;
+        }
+
+        page->references++;
+        return true;
+    }
+
+    uint64_t ResolveWrite(uint64_t physical) {
+        CowPage* page = FindPage(physical);
+        if (!page) {
+            return 0;
+        }
+
+        if (page->references <= 1) {
+            return physical;
+        }
+
+        CowPage* replacement = FindFreeSlot();
+        if (!replacement || !m_PhysicalMemory) {
+            return 0;
+        }
+
+        const uint64_t new_physical = m_PhysicalMemory->AllocatePage();
+        if (new_physical == 0) {
+            return 0;
+        }
+
+        CopyPage(new_physical, physical);
+        page->references--;
+        replacement->physical = new_physical;
+        replacement->references = 1;
+        replacement->active = true;
+        return new_physical;
+    }
+
+    void ReleasePage(uint64_t physical) {
+        CowPage* page = FindPage(physical);
+        if (!page || page->references == 0) {
+            return;
+        }
+
+        page->references--;
+        if (page->references == 0) {
+            m_PhysicalMemory->FreePage(page->physical);
+            page->physical = 0;
+            page->active = false;
+        }
+    }
+
+    uint16_t ReferenceCount(uint64_t physical) const {
+        const CowPage* page = FindPage(physical);
+        return page ? page->references : 0;
+    }
+
+    uint64_t ActivePages() const {
+        uint64_t active = 0;
+        for (uint64_t i = 0; i < kCowTrackedPages; i++) {
+            if (m_Pages[i].active) {
+                active++;
+            }
+        }
+        return active;
+    }
+
+private:
+    struct CowPage {
+        uint64_t physical;
+        uint16_t references;
+        bool active;
+    };
+
+    CowPage* FindFreeSlot() {
+        for (uint64_t i = 0; i < kCowTrackedPages; i++) {
+            if (!m_Pages[i].active) {
+                return &m_Pages[i];
+            }
+        }
+        return nullptr;
+    }
+
+    CowPage* FindPage(uint64_t physical) {
+        for (uint64_t i = 0; i < kCowTrackedPages; i++) {
+            if (m_Pages[i].active && m_Pages[i].physical == physical) {
+                return &m_Pages[i];
+            }
+        }
+        return nullptr;
+    }
+
+    const CowPage* FindPage(uint64_t physical) const {
+        for (uint64_t i = 0; i < kCowTrackedPages; i++) {
+            if (m_Pages[i].active && m_Pages[i].physical == physical) {
+                return &m_Pages[i];
+            }
+        }
+        return nullptr;
+    }
+
+    static void ClearPage(uint64_t physical) {
+        uint8_t* page = reinterpret_cast<uint8_t*>(physical);
+        for (uint64_t i = 0; i < kPageSize; i++) {
+            page[i] = 0;
+        }
+    }
+
+    static void CopyPage(uint64_t destination, uint64_t source) {
+        uint8_t* dst = reinterpret_cast<uint8_t*>(destination);
+        const uint8_t* src = reinterpret_cast<const uint8_t*>(source);
+        for (uint64_t i = 0; i < kPageSize; i++) {
+            dst[i] = src[i];
+        }
+    }
+
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    CowPage m_Pages[kCowTrackedPages];
+};
+
+class SharedMemoryManager {
+public:
+    void Init(PhysicalMemoryManager& pmm) {
+        m_PhysicalMemory = &pmm;
+        m_NextId = 1;
+        for (uint64_t i = 0; i < kSharedSegmentCount; i++) {
+            m_Segments[i].id = 0;
+            m_Segments[i].page_count = 0;
+            m_Segments[i].references = 0;
+            m_Segments[i].active = false;
+            for (uint64_t page = 0; page < kSharedSegmentMaxPages; page++) {
+                m_Segments[i].pages[page] = 0;
+            }
+        }
+    }
+
+    uint64_t Create(uint64_t page_count) {
+        if (!m_PhysicalMemory || page_count == 0 || page_count > kSharedSegmentMaxPages) {
+            return 0;
+        }
+
+        SharedSegment* segment = FindFreeSegment();
+        if (!segment) {
+            return 0;
+        }
+
+        segment->id = m_NextId++;
+        segment->page_count = page_count;
+        segment->references = 1;
+        segment->active = true;
+
+        for (uint64_t i = 0; i < page_count; i++) {
+            segment->pages[i] = m_PhysicalMemory->AllocatePage();
+            if (segment->pages[i] == 0) {
+                DestroyPartial(*segment);
+                return 0;
+            }
+            ClearPage(segment->pages[i]);
+        }
+
+        return segment->id;
+    }
+
+    bool Attach(uint64_t id) {
+        SharedSegment* segment = FindSegment(id);
+        if (!segment || segment->references == UINT16_MAX) {
+            return false;
+        }
+
+        segment->references++;
+        return true;
+    }
+
+    void Release(uint64_t id) {
+        SharedSegment* segment = FindSegment(id);
+        if (!segment || segment->references == 0) {
+            return;
+        }
+
+        segment->references--;
+        if (segment->references == 0) {
+            DestroyPartial(*segment);
+        }
+    }
+
+    uint64_t Page(uint64_t id, uint64_t index) const {
+        const SharedSegment* segment = FindSegment(id);
+        if (!segment || index >= segment->page_count) {
+            return 0;
+        }
+
+        return segment->pages[index];
+    }
+
+    uint16_t ReferenceCount(uint64_t id) const {
+        const SharedSegment* segment = FindSegment(id);
+        return segment ? segment->references : 0;
+    }
+
+    uint64_t ActiveSegments() const {
+        uint64_t active = 0;
+        for (uint64_t i = 0; i < kSharedSegmentCount; i++) {
+            if (m_Segments[i].active) {
+                active++;
+            }
+        }
+        return active;
+    }
+
+private:
+    struct SharedSegment {
+        uint64_t id;
+        uint64_t page_count;
+        uint64_t pages[kSharedSegmentMaxPages];
+        uint16_t references;
+        bool active;
+    };
+
+    SharedSegment* FindFreeSegment() {
+        for (uint64_t i = 0; i < kSharedSegmentCount; i++) {
+            if (!m_Segments[i].active) {
+                return &m_Segments[i];
+            }
+        }
+        return nullptr;
+    }
+
+    SharedSegment* FindSegment(uint64_t id) {
+        for (uint64_t i = 0; i < kSharedSegmentCount; i++) {
+            if (m_Segments[i].active && m_Segments[i].id == id) {
+                return &m_Segments[i];
+            }
+        }
+        return nullptr;
+    }
+
+    const SharedSegment* FindSegment(uint64_t id) const {
+        for (uint64_t i = 0; i < kSharedSegmentCount; i++) {
+            if (m_Segments[i].active && m_Segments[i].id == id) {
+                return &m_Segments[i];
+            }
+        }
+        return nullptr;
+    }
+
+    void DestroyPartial(SharedSegment& segment) {
+        for (uint64_t i = 0; i < segment.page_count; i++) {
+            if (segment.pages[i] != 0) {
+                m_PhysicalMemory->FreePage(segment.pages[i]);
+                segment.pages[i] = 0;
+            }
+        }
+
+        segment.id = 0;
+        segment.page_count = 0;
+        segment.references = 0;
+        segment.active = false;
+    }
+
+    static void ClearPage(uint64_t physical) {
+        uint8_t* page = reinterpret_cast<uint8_t*>(physical);
+        for (uint64_t i = 0; i < kPageSize; i++) {
+            page[i] = 0;
+        }
+    }
+
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    uint64_t m_NextId = 1;
+    SharedSegment m_Segments[kSharedSegmentCount];
+};
+
+class SlabAllocator {
+public:
+    void Init(PhysicalMemoryManager& pmm) {
+        m_PhysicalMemory = &pmm;
+
+        const uint64_t sizes[kSlabCacheCount] = {32, 64, 128, 256};
+        for (uint64_t i = 0; i < kSlabCacheCount; i++) {
+            m_Caches[i].object_size = sizes[i];
+            m_Caches[i].page = 0;
+            m_Caches[i].free_list = nullptr;
+            m_Caches[i].total_objects = 0;
+            m_Caches[i].free_objects = 0;
+        }
+    }
+
+    bool Prime() {
+        for (uint64_t i = 0; i < kSlabCacheCount; i++) {
+            if (!GrowCache(m_Caches[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void* Allocate(uint64_t size) {
+        SlabCache* cache = FindCache(size);
+        if (!cache) {
+            return nullptr;
+        }
+
+        if (!cache->free_list && !GrowCache(*cache)) {
+            return nullptr;
+        }
+
+        FreeNode* node = cache->free_list;
+        cache->free_list = node->next;
+        cache->free_objects--;
+        return node;
+    }
+
+    bool Free(void* object, uint64_t size) {
+        if (!object) {
+            return false;
+        }
+
+        SlabCache* cache = FindCache(size);
+        if (!cache || !Contains(*cache, object)) {
+            return false;
+        }
+
+        FreeNode* node = reinterpret_cast<FreeNode*>(object);
+        node->next = cache->free_list;
+        cache->free_list = node;
+        cache->free_objects++;
+        return true;
+    }
+
+    uint64_t CacheCount() const {
+        return kSlabCacheCount;
+    }
+
+    uint64_t TotalObjects() const {
+        uint64_t total = 0;
+        for (uint64_t i = 0; i < kSlabCacheCount; i++) {
+            total += m_Caches[i].total_objects;
+        }
+        return total;
+    }
+
+private:
+    struct FreeNode {
+        FreeNode* next;
+    };
+
+    struct SlabCache {
+        uint64_t object_size;
+        uint64_t page;
+        FreeNode* free_list;
+        uint64_t total_objects;
+        uint64_t free_objects;
+    };
+
+    SlabCache* FindCache(uint64_t size) {
+        for (uint64_t i = 0; i < kSlabCacheCount; i++) {
+            if (size <= m_Caches[i].object_size) {
+                return &m_Caches[i];
+            }
+        }
+        return nullptr;
+    }
+
+    bool GrowCache(SlabCache& cache) {
+        if (!m_PhysicalMemory || cache.page != 0) {
+            return false;
+        }
+
+        cache.page = m_PhysicalMemory->AllocatePage();
+        if (cache.page == 0) {
+            return false;
+        }
+
+        cache.total_objects = kPageSize / cache.object_size;
+        cache.free_objects = cache.total_objects;
+        cache.free_list = nullptr;
+
+        uint8_t* base = reinterpret_cast<uint8_t*>(cache.page);
+        for (uint64_t i = 0; i < cache.total_objects; i++) {
+            FreeNode* node = reinterpret_cast<FreeNode*>(base + i * cache.object_size);
+            node->next = cache.free_list;
+            cache.free_list = node;
+        }
+
+        return true;
+    }
+
+    bool Contains(const SlabCache& cache, const void* object) const {
+        const uint64_t address = reinterpret_cast<uint64_t>(object);
+        return cache.page != 0 && address >= cache.page && address < cache.page + kPageSize;
+    }
+
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    SlabCache m_Caches[kSlabCacheCount];
+};
+
 static PhysicalMemoryManager g_PhysicalMemory;
 static VirtualMemoryManager g_VirtualMemory;
 static KernelHeap g_KernelHeap;
+static CopyOnWriteManager g_CopyOnWrite;
+static SharedMemoryManager g_SharedMemory;
+static SlabAllocator g_SlabAllocator;
 
 void* KernelAllocate(uint64_t size, uint64_t alignment) {
     return g_KernelHeap.Allocate(size, alignment);
+}
+
+static bool KernelMemorySelfTest() {
+    const uint64_t cow_original = g_CopyOnWrite.AllocatePage();
+    if (cow_original == 0) {
+        return false;
+    }
+
+    reinterpret_cast<uint8_t*>(cow_original)[0] = 0x5A;
+    if (!g_CopyOnWrite.ClonePage(cow_original) || g_CopyOnWrite.ReferenceCount(cow_original) != 2) {
+        return false;
+    }
+
+    const uint64_t cow_private = g_CopyOnWrite.ResolveWrite(cow_original);
+    if (cow_private == 0 || cow_private == cow_original) {
+        return false;
+    }
+
+    reinterpret_cast<uint8_t*>(cow_private)[0] = 0xA5;
+    if (reinterpret_cast<uint8_t*>(cow_original)[0] != 0x5A ||
+        reinterpret_cast<uint8_t*>(cow_private)[0] != 0xA5 ||
+        g_CopyOnWrite.ReferenceCount(cow_original) != 1 ||
+        g_CopyOnWrite.ReferenceCount(cow_private) != 1) {
+        return false;
+    }
+
+    g_CopyOnWrite.ReleasePage(cow_original);
+    g_CopyOnWrite.ReleasePage(cow_private);
+
+    const uint64_t shared_segment = g_SharedMemory.Create(2);
+    if (shared_segment == 0 || !g_SharedMemory.Attach(shared_segment) ||
+        g_SharedMemory.ReferenceCount(shared_segment) != 2) {
+        return false;
+    }
+
+    const uint64_t shared_page = g_SharedMemory.Page(shared_segment, 0);
+    if (shared_page == 0) {
+        return false;
+    }
+
+    reinterpret_cast<uint8_t*>(shared_page)[0] = 0xC3;
+    if (reinterpret_cast<uint8_t*>(g_SharedMemory.Page(shared_segment, 0))[0] != 0xC3) {
+        return false;
+    }
+
+    g_SharedMemory.Release(shared_segment);
+    g_SharedMemory.Release(shared_segment);
+
+    void* slab_a = g_SlabAllocator.Allocate(24);
+    void* slab_b = g_SlabAllocator.Allocate(128);
+    if (!slab_a || !slab_b) {
+        return false;
+    }
+
+    if (!g_SlabAllocator.Free(slab_a, 24) || !g_SlabAllocator.Free(slab_b, 128)) {
+        return false;
+    }
+
+    return g_CopyOnWrite.ActivePages() == 0 && g_SharedMemory.ActiveSegments() == 0;
 }
 
 static bool KernelMemoryInit(const BootInfo& boot_info) {
@@ -604,8 +1094,16 @@ static bool KernelMemoryInit(const BootInfo& boot_info) {
         return false;
     }
 
+    g_CopyOnWrite.Init(g_PhysicalMemory);
+    g_SharedMemory.Init(g_PhysicalMemory);
+    g_SlabAllocator.Init(g_PhysicalMemory);
+
+    if (!g_SlabAllocator.Prime()) {
+        return false;
+    }
+
     void* probe = g_KernelHeap.Allocate(64);
-    return probe != nullptr;
+    return probe != nullptr && KernelMemorySelfTest();
 }
 
 static bool KernelInit(BootInfo* boot_info) {
@@ -638,6 +1136,24 @@ static void PrintMemoryManagerInfo() {
     g_Console.Write(" used=");
     g_Console.WriteUnsigned(g_KernelHeap.Used());
     g_Console.Write(" bytes\n");
+
+    g_Console.Write("COW pages tracked=");
+    g_Console.WriteUnsigned(kCowTrackedPages);
+    g_Console.Write(" active=");
+    g_Console.WriteUnsigned(g_CopyOnWrite.ActivePages());
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Shared memory segments=");
+    g_Console.WriteUnsigned(kSharedSegmentCount);
+    g_Console.Write(" active=");
+    g_Console.WriteUnsigned(g_SharedMemory.ActiveSegments());
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Slab allocator: caches=");
+    g_Console.WriteUnsigned(g_SlabAllocator.CacheCount());
+    g_Console.Write(" objects=");
+    g_Console.WriteUnsigned(g_SlabAllocator.TotalObjects());
+    g_Console.PutChar('\n');
 }
 
 static void PrintBootInfo(const BootInfo& boot_info) {
@@ -708,6 +1224,7 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Physical memory manager online");
     KernelLog(LogLevel::Info, "Virtual memory identity map installed");
     KernelLog(LogLevel::Info, "Kernel heap online");
+    KernelLog(LogLevel::Info, "Copy-on-write pages, shared memory, and slab allocator online");
     PrintMemoryManagerInfo();
 
     if (!KernelSchedulerInit()) {

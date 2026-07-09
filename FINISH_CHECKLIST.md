@@ -61,13 +61,20 @@
 
 # Phase 6 — Memory Management
 - [x] Physical Memory Manager
+  - [x] Bitmap-backed page tracking from the UEFI memory map
+  - [x] Reservation of low memory, kernel image, framebuffer, and paging structures
 - [x] Virtual Memory Manager
 - [x] Paging
+  - [x] 0-4GiB identity map with 2MiB pages
 - [x] Kernel Heap
+  - [x] Early bump allocator backed by physical pages
 - [x] Page allocator
-- [ ] Copy-on-write
-- [ ] Shared memory
-- [ ] Slab allocator
+- [x] Copy-on-write
+  - [x] Refcounted physical pages with private copy on write resolution
+- [x] Shared memory
+  - [x] Refcounted multi-page shared segments
+- [x] Slab allocator
+  - [x] Fixed-size caches for small kernel objects
 
 ---
 
