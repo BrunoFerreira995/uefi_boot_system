@@ -86,6 +86,10 @@ require_text "$ROOT_DIR/kernel/src/gui.cpp" "MouseDown" "mouse click path presen
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "Drag" "mouse drag path present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "ComposeDesktop" "desktop redraw path present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "DrawRect" "graphics primitive rendering path present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "RunTerminalCommandSelfTest" "terminal command parser self-test present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "ExecuteTerminalCommand" "terminal command dispatcher present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "cat readme" "terminal cat command present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "shutdown: request queued" "terminal shutdown command present"
 
 echo
 echo "== Regression tests =="

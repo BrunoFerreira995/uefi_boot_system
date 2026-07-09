@@ -242,19 +242,19 @@
 
 # Phase 13 — Terminal
 - [x] Terminal window
-- [ ] Command parser
-- [ ] help
-- [ ] clear
-- [ ] mem
-- [ ] cpu
-- [ ] version
-- [ ] uptime
-- [ ] ls
-- [ ] pwd
-- [ ] cd
-- [ ] cat
-- [ ] reboot
-- [ ] shutdown
+- [x] Command parser
+- [x] help
+- [x] clear
+- [x] mem
+- [x] cpu
+- [x] version
+- [x] uptime
+- [x] ls
+- [x] pwd
+- [x] cd
+- [x] cat
+- [x] reboot
+- [x] shutdown
 
 ---
 

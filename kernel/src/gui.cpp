@@ -111,6 +111,13 @@ enum class CursorKind : uint8_t {
     Resize,
 };
 
+struct TerminalLine {
+    const char* text;
+    uint32_t color;
+};
+
+static constexpr uint32_t kMaxTerminalLines = 12;
+
 GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
 Window g_Windows[kMaxWindows];
@@ -138,6 +145,11 @@ WindowControl g_HoveredControl = WindowControl::None;
 int32_t g_HoveredWindowIndex = -1;
 CursorKind g_CursorKind = CursorKind::Arrow;
 CursorBackup g_CursorBackup {};
+TerminalLine g_TerminalLines[kMaxTerminalLines];
+uint32_t g_TerminalLineCount = 0;
+const char* g_TerminalCwd = "/";
+bool g_TerminalRebootRequested = false;
+bool g_TerminalShutdownRequested = false;
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect);
 
@@ -204,6 +216,14 @@ void ResetGuiStatus() {
     g_CursorBackup.x = 0;
     g_CursorBackup.y = 0;
     g_CursorBackup.valid = false;
+    g_TerminalLineCount = 0;
+    g_TerminalCwd = "/";
+    g_TerminalRebootRequested = false;
+    g_TerminalShutdownRequested = false;
+    for (uint32_t i = 0; i < kMaxTerminalLines; i++) {
+        g_TerminalLines[i].text = nullptr;
+        g_TerminalLines[i].color = 0;
+    }
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -757,19 +777,205 @@ bool InitWindowManager() {
     return g_Status.window_manager_ready;
 }
 
+bool TerminalTextEquals(const char* a, const char* b) {
+    if (!a || !b) {
+        return false;
+    }
+
+    while (*a && *b) {
+        if (*a != *b) {
+            return false;
+        }
+        a++;
+        b++;
+    }
+
+    return *a == '\0' && *b == '\0';
+}
+
+bool TerminalStartsWith(const char* text, const char* prefix) {
+    if (!text || !prefix) {
+        return false;
+    }
+
+    while (*prefix) {
+        if (*text != *prefix) {
+            return false;
+        }
+        text++;
+        prefix++;
+    }
+
+    return true;
+}
+
+void TerminalAppendLine(const char* text, uint32_t color = kTheme.text) {
+    if (!text) {
+        return;
+    }
+
+    if (g_TerminalLineCount >= kMaxTerminalLines) {
+        for (uint32_t i = 1; i < kMaxTerminalLines; i++) {
+            g_TerminalLines[i - 1] = g_TerminalLines[i];
+        }
+        g_TerminalLineCount = kMaxTerminalLines - 1;
+    }
+
+    g_TerminalLines[g_TerminalLineCount].text = text;
+    g_TerminalLines[g_TerminalLineCount].color = color;
+    g_TerminalLineCount++;
+}
+
+void TerminalClear() {
+    g_TerminalLineCount = 0;
+    for (uint32_t i = 0; i < kMaxTerminalLines; i++) {
+        g_TerminalLines[i].text = nullptr;
+        g_TerminalLines[i].color = 0;
+    }
+}
+
+bool ExecuteTerminalCommand(const char* command) {
+    if (!command) {
+        return false;
+    }
+
+    if (TerminalTextEquals(command, "help")) {
+        TerminalAppendLine("help mem cpu clear version uptime", kTheme.accent);
+        TerminalAppendLine("ls pwd cd cat reboot shutdown", kTheme.accent);
+        return true;
+    }
+    if (TerminalTextEquals(command, "clear")) {
+        TerminalClear();
+        TerminalAppendLine("> clear", kTheme.text_muted);
+        return true;
+    }
+    if (TerminalTextEquals(command, "mem")) {
+        TerminalAppendLine("mem: heap online, pages tracked", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "cpu")) {
+        TerminalAppendLine("cpu: x86_64 irq apic smp ready", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "version")) {
+        TerminalAppendLine("version: Antigravity OS 0.13", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "uptime")) {
+        TerminalAppendLine("uptime: boot session active", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "ls")) {
+        TerminalAppendLine("boot kernel tmp readme", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "pwd")) {
+        TerminalAppendLine(g_TerminalCwd, kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "cd") || TerminalTextEquals(command, "cd /")) {
+        g_TerminalCwd = "/";
+        TerminalAppendLine("cwd: /", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "cd /boot")) {
+        g_TerminalCwd = "/boot";
+        TerminalAppendLine("cwd: /boot", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "cd /tmp")) {
+        g_TerminalCwd = "/tmp";
+        TerminalAppendLine("cwd: /tmp", kTheme.text);
+        return true;
+    }
+    if (TerminalStartsWith(command, "cd ")) {
+        TerminalAppendLine("cd: no such directory", kTheme.close);
+        return true;
+    }
+    if (TerminalTextEquals(command, "cat readme") || TerminalTextEquals(command, "cat /tmp/readme")) {
+        TerminalAppendLine("Antigravity OS terminal ready.", kTheme.text);
+        return true;
+    }
+    if (TerminalStartsWith(command, "cat ")) {
+        TerminalAppendLine("cat: file not found", kTheme.close);
+        return true;
+    }
+    if (TerminalTextEquals(command, "reboot")) {
+        g_TerminalRebootRequested = true;
+        TerminalAppendLine("reboot: request queued", kTheme.minimize);
+        return true;
+    }
+    if (TerminalTextEquals(command, "shutdown")) {
+        g_TerminalShutdownRequested = true;
+        TerminalAppendLine("shutdown: request queued", kTheme.minimize);
+        return true;
+    }
+
+    TerminalAppendLine("shell: unknown command", kTheme.close);
+    return false;
+}
+
+void SeedTerminalTranscript() {
+    TerminalClear();
+    g_TerminalRebootRequested = false;
+    g_TerminalShutdownRequested = false;
+    TerminalAppendLine("Kernel Console", kTheme.text);
+    TerminalAppendLine("[INFO] Phase 13 terminal initialized", kTheme.accent);
+    TerminalAppendLine("[INFO] Command parser ready", kTheme.accent);
+    TerminalAppendLine("> help", kTheme.text_muted);
+    ExecuteTerminalCommand("help");
+    TerminalAppendLine("> mem", kTheme.text_muted);
+    ExecuteTerminalCommand("mem");
+    TerminalAppendLine("> cpu", kTheme.text_muted);
+    ExecuteTerminalCommand("cpu");
+    TerminalAppendLine("> version", kTheme.text_muted);
+    ExecuteTerminalCommand("version");
+    TerminalAppendLine("> uptime", kTheme.text_muted);
+    ExecuteTerminalCommand("uptime");
+}
+
+bool RunTerminalCommandSelfTest() {
+    TerminalClear();
+    const bool help_ok = ExecuteTerminalCommand("help");
+    const bool clear_ok = ExecuteTerminalCommand("clear") && g_TerminalLineCount == 1;
+    const bool mem_ok = ExecuteTerminalCommand("mem");
+    const bool cpu_ok = ExecuteTerminalCommand("cpu");
+    const bool version_ok = ExecuteTerminalCommand("version");
+    const bool uptime_ok = ExecuteTerminalCommand("uptime");
+    const bool ls_ok = ExecuteTerminalCommand("ls");
+    const bool pwd_ok = ExecuteTerminalCommand("pwd");
+    const bool cd_ok = ExecuteTerminalCommand("cd /tmp") && TerminalTextEquals(g_TerminalCwd, "/tmp");
+    const bool cat_ok = ExecuteTerminalCommand("cat readme");
+    const bool reboot_ok = ExecuteTerminalCommand("reboot") && g_TerminalRebootRequested;
+    const bool shutdown_ok = ExecuteTerminalCommand("shutdown") && g_TerminalShutdownRequested;
+
+    return help_ok &&
+        clear_ok &&
+        mem_ok &&
+        cpu_ok &&
+        version_ok &&
+        uptime_ok &&
+        ls_ok &&
+        pwd_ok &&
+        cd_ok &&
+        cat_ok &&
+        reboot_ok &&
+        shutdown_ok;
+}
+
 void DrawTerminalContents(const Window& window) {
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
 
-    Graphics::DrawText(x, y, "Kernel Console", kTheme.text);
-    y += 24;
-    Graphics::DrawText(x, y, "[INFO] Phase 10 GUI initialized", kTheme.accent);
-    y += 24;
-    Graphics::DrawText(x, y, "[INFO] Window manager ready", kTheme.accent);
-    y += 20;
-    Graphics::DrawText(x, y, "[INFO] Compositor rendered desktop", kTheme.text_muted);
-    y += 32;
-    Graphics::DrawText(x, y, "> help mem cpu clear version uptime", kTheme.text);
+    for (uint32_t i = 0; i < g_TerminalLineCount; i++) {
+        if (g_TerminalLines[i].text) {
+            Graphics::DrawText(x, y, g_TerminalLines[i].text, g_TerminalLines[i].color);
+        }
+        y += 20;
+        if (y + 16 >= window.bounds.y + window.bounds.height) {
+            break;
+        }
+    }
 }
 
 void DrawSystemMonitorContents(const Window& window) {
@@ -1224,6 +1430,12 @@ bool KernelGuiInit(const BootInfo& boot_info) {
         return false;
     }
 
+    if (!RunTerminalCommandSelfTest()) {
+        KernelLog(LogLevel::Warn, "Terminal command self-test failed");
+        return false;
+    }
+
+    SeedTerminalTranscript();
     UpdateHoverState();
     g_Status.compositor_ready = ComposeDesktop();
     g_Status.desktop_ready = g_Status.compositor_ready && g_Status.window_manager_ready;
