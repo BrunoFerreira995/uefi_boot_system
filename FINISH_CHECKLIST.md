@@ -302,7 +302,57 @@
 
 ---
 
-# Phase 20 — Version 1.0 Release
+# Phase 20 — Tests
+
+## Build Tests
+- [x] Full bootloader build
+- [x] Full kernel build
+- [x] Freestanding link check
+- [x] Clean build from reset build directory
+- [x] Local test pipeline script
+
+## Boot Tests
+- [x] QEMU boot command/package smoke test
+- [x] Bootloader handoff path validation
+- [x] Kernel panic path validation
+- [x] Desktop startup path validation
+- [x] Userspace exit path validation
+
+## Kernel Self-Tests
+- [x] Memory manager self-test
+- [x] Scheduler/process self-test
+- [x] PS/2 packet decoder self-test
+- [x] USB HID descriptor parser self-test
+- [x] CPU interrupt delivery handler check
+- [x] Filesystem probe self-test
+- [x] Userspace syscall path check
+
+## Driver Tests
+- [x] PCI enumeration test target
+- [x] PCI config-space read/write helper check
+- [x] Keyboard input driver path check
+- [x] Mouse input driver path check
+- [x] Storage controller discovery check
+- [x] Network controller discovery check
+
+## UI Tests
+- [x] Window manager interaction target
+- [x] Terminal command surface check
+- [x] Mouse drag/click path check
+- [x] Desktop redraw path check
+- [x] Graphics primitive rendering path check
+
+## Regression Tests
+- [x] Automated local test runner
+  - [x] `scripts/test.sh` with 33 checks
+- [x] Boot log source check
+- [x] Memory regression target check
+- [x] Scheduler fairness target check
+- [x] Filesystem regression target check
+
+---
+
+# Phase 21 — Version 1.0 Release
 - [ ] Stable boot process
 - [ ] Stable desktop
 - [ ] Stable userspace
