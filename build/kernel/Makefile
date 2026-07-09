@@ -286,6 +286,30 @@ src/kernel.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/kernel.cpp.s
 .PHONY : src/kernel.cpp.s
 
+src/network.obj: src/network.cpp.obj
+.PHONY : src/network.obj
+
+# target to build an object file
+src/network.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/network.cpp.obj
+.PHONY : src/network.cpp.obj
+
+src/network.i: src/network.cpp.i
+.PHONY : src/network.i
+
+# target to preprocess a source file
+src/network.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/network.cpp.i
+.PHONY : src/network.cpp.i
+
+src/network.s: src/network.cpp.s
+.PHONY : src/network.s
+
+# target to generate assembly for a file
+src/network.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/network.cpp.s
+.PHONY : src/network.cpp.s
+
 src/scheduler.obj: src/scheduler.cpp.obj
 .PHONY : src/scheduler.obj
 
@@ -309,6 +333,30 @@ src/scheduler.s: src/scheduler.cpp.s
 src/scheduler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/scheduler.cpp.s
 .PHONY : src/scheduler.cpp.s
+
+src/security.obj: src/security.cpp.obj
+.PHONY : src/security.obj
+
+# target to build an object file
+src/security.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/security.cpp.obj
+.PHONY : src/security.cpp.obj
+
+src/security.i: src/security.cpp.i
+.PHONY : src/security.i
+
+# target to preprocess a source file
+src/security.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/security.cpp.i
+.PHONY : src/security.cpp.i
+
+src/security.s: src/security.cpp.s
+.PHONY : src/security.s
+
+# target to generate assembly for a file
+src/security.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/security.cpp.s
+.PHONY : src/security.cpp.s
 
 src/userspace.obj: src/userspace.cpp.obj
 .PHONY : src/userspace.obj
@@ -362,9 +410,15 @@ help:
 	@echo "... src/kernel.obj"
 	@echo "... src/kernel.i"
 	@echo "... src/kernel.s"
+	@echo "... src/network.obj"
+	@echo "... src/network.i"
+	@echo "... src/network.s"
 	@echo "... src/scheduler.obj"
 	@echo "... src/scheduler.i"
 	@echo "... src/scheduler.s"
+	@echo "... src/security.obj"
+	@echo "... src/security.i"
+	@echo "... src/security.s"
 	@echo "... src/userspace.obj"
 	@echo "... src/userspace.i"
 	@echo "... src/userspace.s"

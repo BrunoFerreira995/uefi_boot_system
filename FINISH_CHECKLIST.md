@@ -259,26 +259,26 @@
 ---
 
 # Phase 14 — Networking
-- [ ] Ethernet
-- [ ] ARP
-- [ ] IPv4
-- [ ] ICMP
-- [ ] UDP
-- [ ] TCP
-- [ ] DHCP
-- [ ] DNS
-- [ ] HTTP
-- [ ] HTTPS
-- [ ] Socket API
+- [x] Ethernet
+- [x] ARP
+- [x] IPv4
+- [x] ICMP
+- [x] UDP
+- [x] TCP
+- [x] DHCP
+- [x] DNS
+- [x] HTTP
+- [x] HTTPS
+- [x] Socket API
 
 ---
 
 # Phase 15 — Security
-- [ ] Users
-- [ ] Permissions
-- [ ] Access Control
-- [ ] Process isolation
-- [ ] Virtual memory protection
+- [x] Users
+- [x] Permissions
+- [x] Access Control
+- [x] Process isolation
+- [x] Virtual memory protection
 
 ---
 

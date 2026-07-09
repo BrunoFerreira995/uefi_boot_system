@@ -26,7 +26,9 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/bucha/dev/uefi_boot_system/kernel/src/filesystem.cpp" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/gui.cpp" "CMakeFiles/kernel_objs.dir/src/gui.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/gui.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/network.cpp" "CMakeFiles/kernel_objs.dir/src/network.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/network.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/scheduler.cpp" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj.d"
+  "/Users/bucha/dev/uefi_boot_system/kernel/src/security.cpp" "CMakeFiles/kernel_objs.dir/src/security.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/security.cpp.obj.d"
   "/Users/bucha/dev/uefi_boot_system/kernel/src/userspace.cpp" "CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj" "gcc" "CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj.d"
   )
 

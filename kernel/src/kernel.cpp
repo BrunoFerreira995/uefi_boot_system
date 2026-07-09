@@ -3,7 +3,9 @@
 #include "drivers.hpp"
 #include "filesystem.hpp"
 #include "gui.hpp"
+#include "network.hpp"
 #include "scheduler.hpp"
+#include "security.hpp"
 #include "userspace.hpp"
 
 // Simple 8x8 font bitmap for the kernel printout (basic printable ASCII subset)
@@ -1247,11 +1249,23 @@ extern "C" void kernel_main(BootInfo* boot_info) {
 
     PrintFileSystemInfo();
 
+    if (!KernelNetworkInit()) {
+        KernelPanic("Network initialization failed");
+    }
+
+    PrintNetworkInfo();
+
     if (!KernelUserspaceInit()) {
         KernelPanic("Userspace initialization failed");
     }
 
     PrintUserspaceInfo();
+
+    if (!KernelSecurityInit()) {
+        KernelPanic("Security initialization failed");
+    }
+
+    PrintSecurityInfo();
 
     if (!KernelGuiInit(*boot_info)) {
         KernelPanic("GUI initialization failed");
