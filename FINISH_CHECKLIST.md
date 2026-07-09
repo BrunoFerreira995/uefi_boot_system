@@ -75,6 +75,12 @@
   - [x] Refcounted multi-page shared segments
 - [x] Slab allocator
   - [x] Fixed-size caches for small kernel objects
+- [ ] Huge page support
+- [ ] NUMA awareness
+- [ ] Memory mapped files (mmap)
+- [ ] Demand paging
+- [ ] Swap manager
+- [ ] Page cache
 
 ---
 
@@ -94,6 +100,11 @@
   - [x] ACPI MADT CPU topology discovery
 - [x] Multi-core scheduler
   - [x] Scheduler topology readiness tracked from detected CPUs
+- [ ] x2APIC
+- [ ] HPET timer
+- [ ] Local APIC timer scheduler
+- [ ] CPU frequency detection
+- [ ] SIMD state (SSE/AVX context switching)
 
 ---
 
@@ -112,6 +123,14 @@
   - [x] Per-process fixed-size message queues
 - [x] Synchronization primitives
   - [x] Kernel mutex handles with ownership and blocked-thread wakeup
+- [ ] fork()
+- [ ] execve()
+- [ ] clone()
+- [ ] pthread support
+- [ ] futex
+- [ ] epoll
+- [ ] eventfd
+- [ ] timerfd
 
 ---
 
@@ -120,6 +139,28 @@
 ## Graphics
 - [x] Framebuffer driver
 - [x] Graphics primitives
+- [ ] DRM/KMS
+- [ ] GPU memory manager
+- [ ] Intel graphics driver
+- [ ] AMD graphics driver
+- [ ] VirtIO GPU
+- [ ] Hardware cursor
+- [ ] Double buffering
+- [ ] Triple buffering
+
+## Audio
+- [ ] HDA controller
+- [ ] PCM playback
+- [ ] Audio mixer
+- [ ] Audio API
+- [ ] Audio32 integration
+
+## USB
+- [ ] USB UHCI
+- [ ] USB OHCI
+- [ ] USB EHCI
+- [ ] USB xHCI
+- [ ] USB Mass Storage
 
 ## Input
 - [x] Keyboard
@@ -148,6 +189,10 @@
   - [ ] Live QEMU mouse movement test
 - [x] USB HID
   - [x] HID interface descriptor parser scaffold
+- [ ] Mouse wheel
+- [ ] Relative mouse mode
+- [ ] Gamepad
+- [ ] Joystick
 
 ## Storage
 - [x] FAT32
@@ -185,6 +230,11 @@
 - [x] Symbolic links
 - [x] Mount manager
 - [x] RamFS
+- [ ] tmpfs
+- [ ] procfs
+- [ ] devfs
+- [ ] sysfs
+- [ ] initramfs
 
 ---
 
@@ -197,6 +247,13 @@
 - [x] Dynamic linker
 - [x] libc
 - [x] POSIX layer
+- [ ] init process
+- [ ] Dynamic loader cache
+- [ ] Environment variables
+- [ ] Shared libraries
+- [ ] Signals
+- [ ] Pipes
+- [ ] Pseudo terminals (PTY)
 
 ---
 
@@ -212,6 +269,9 @@
 - [x] Minimize
 - [x] Maximize
 - [x] Restore
+- [ ] Window resize
+- [ ] Window snapping
+- [ ] Virtual desktops
 
 ## Desktop
 - [x] Wallpaper
@@ -236,7 +296,10 @@
 - [x] Image placeholder
 - [ ] PNG support
 - [ ] BMP support
+- [ ] JPEG decoder
+- [ ] SVG support
 - [ ] TrueType fonts
+- [ ] Font cache
 
 ---
 
@@ -255,6 +318,12 @@
 - [x] cat
 - [x] reboot
 - [x] shutdown
+- [ ] ANSI escape sequences
+- [ ] Colors
+- [ ] Scrollback buffer
+- [ ] Command history
+- [ ] Auto-complete
+- [ ] Shell scripting
 
 ---
 
@@ -270,6 +339,11 @@
 - [x] HTTP
 - [x] HTTPS
 - [x] Socket API
+- [ ] IPv6
+- [ ] TLS
+- [ ] WebSocket
+- [ ] mDNS
+- [ ] NTP
 
 ---
 
@@ -279,6 +353,11 @@
 - [x] Access Control
 - [x] Process isolation
 - [x] Virtual memory protection
+- [ ] ASLR
+- [ ] Stack canaries
+- [ ] NX pages
+- [ ] Secure random generator
+- [ ] Kernel Address Space Layout Randomization
 
 ---
 
@@ -290,13 +369,23 @@
 - [ ] Settings
 - [ ] Task Manager
 - [ ] Package Manager
+- [ ] System Monitor
+- [ ] Terminal Emulator
+- [ ] Software Center
 
 ---
 
 # Phase 17 — Development SDK
-- [ ] C Standard Library
-- [ ] C++ Runtime
+- [ ] Full libc
+- [ ] libm
+- [ ] libpthread
+- [ ] libdl
+- [ ] C++ STL
+- [ ] GCC support
+- [ ] Clang support
 - [ ] Build SDK
+- [ ] Cross Compiler
+- [ ] Package Toolchain
 - [ ] Documentation
 - [ ] Example applications
 - [ ] Developer tools
@@ -306,10 +395,16 @@
 # Phase 18 — Compatibility
 - [ ] POSIX compatibility
 - [ ] ELF executable compatibility
+- [ ] glibc compatibility
+- [ ] musl compatibility
 - [ ] SDL2 support
 - [ ] SDL3 support
 - [ ] OpenGL abstraction
 - [ ] Vulkan abstraction
+- [ ] OpenAL
+- [ ] Wayland compatibility
+- [ ] X11 compatibility layer
+- [ ] Steam Runtime compatibility
 
 ---
 
@@ -317,8 +412,12 @@
 - [ ] Hardware acceleration
 - [ ] Optimized compositor
 - [ ] Multi-core scheduling
+- [ ] NUMA scheduling
+- [ ] GPU acceleration
 - [ ] Profiling tools
 - [ ] Benchmark suite
+- [ ] Kernel profiler
+- [ ] Performance counters
 
 ---
 
@@ -370,6 +469,20 @@
 - [x] Scheduler fairness target check
 - [x] Filesystem regression target check
 
+## Integration Tests
+- [ ] Userspace application launch
+- [ ] Filesystem stress test
+- [ ] Network stress test
+- [ ] SMP stress test
+- [ ] Memory stress test
+
+## Compatibility Tests
+- [ ] SDL2 demo
+- [ ] SDL3 demo
+- [ ] Doom
+- [ ] Quake
+- [ ] Quake III
+
 ---
 
 # Phase 21 — Version 1.0 Release
@@ -377,8 +490,34 @@
 - [ ] Stable desktop
 - [ ] Stable userspace
 - [ ] Networking
+- [ ] Audio
+- [ ] Graphics acceleration
 - [ ] Package manager
 - [ ] Documentation
 - [ ] Developer SDK
 - [ ] Installation image
+- [ ] Live ISO
 - [ ] Release v1.0
+
+---
+
+# Phase 22 — Gaming & Linux Compatibility
+- [ ] glibc compatibility
+- [ ] pthread compatibility
+- [ ] futex support
+- [ ] epoll support
+- [ ] SDL2
+- [ ] SDL3
+- [ ] OpenGL
+- [ ] Vulkan
+- [ ] OpenAL
+- [ ] Steam Runtime
+- [ ] Wine compatibility
+- [ ] Proton compatibility
+- [ ] Run Doom
+- [ ] Run Quake
+- [ ] Run Quake III
+- [ ] Run Minecraft
+- [ ] Run Steam
+- [ ] Run CS:GO
+- [ ] Run Dota 2
