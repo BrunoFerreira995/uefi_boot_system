@@ -8,6 +8,20 @@
 #include "security.hpp"
 #include "userspace.hpp"
 
+// Compiler-generated aggregate initialization may use these freestanding runtime primitives.
+extern "C" void* memset(void* destination, int value, __SIZE_TYPE__ count) {
+    volatile uint8_t* bytes = static_cast<volatile uint8_t*>(destination);
+    for (__SIZE_TYPE__ i = 0; i < count; i++) bytes[i] = static_cast<uint8_t>(value);
+    return destination;
+}
+
+extern "C" void* memcpy(void* destination, const void* source, __SIZE_TYPE__ count) {
+    volatile uint8_t* dst = static_cast<volatile uint8_t*>(destination);
+    const volatile uint8_t* src = static_cast<const volatile uint8_t*>(source);
+    for (__SIZE_TYPE__ i = 0; i < count; i++) dst[i] = src[i];
+    return destination;
+}
+
 // Simple 8x8 font bitmap for the kernel printout (basic printable ASCII subset)
 static const uint8_t font8x8_kernel[128][8] = {
     {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
@@ -358,6 +372,13 @@ static constexpr uint64_t kCowTrackedPages = 128;
 static constexpr uint64_t kSharedSegmentCount = 8;
 static constexpr uint64_t kSharedSegmentMaxPages = 4;
 static constexpr uint64_t kSlabCacheCount = 4;
+static constexpr uint64_t kHugePageSize = 2 * 1024 * 1024;
+static constexpr uint64_t kHugePagePages = kHugePageSize / kPageSize;
+static constexpr uint64_t kNumaNodeCount = 4;
+static constexpr uint64_t kMemoryMappingCount = 16;
+static constexpr uint64_t kMappingMaxPages = 16;
+static constexpr uint64_t kSwapSlotCount = 16;
+static constexpr uint64_t kPageCacheEntryCount = 16;
 
 static uint8_t g_PhysicalPageBitmap[kManagedPageCount / 8];
 
@@ -418,7 +439,15 @@ public:
     }
 
     uint64_t AllocateContiguous(uint64_t page_count) {
+        return AllocateAligned(page_count, 1);
+    }
+
+    uint64_t AllocateAligned(uint64_t page_count, uint64_t alignment_pages) {
         if (page_count == 0 || page_count > m_FreePages) {
+            return 0;
+        }
+
+        if (alignment_pages == 0 || (alignment_pages & (alignment_pages - 1)) != 0) {
             return 0;
         }
 
@@ -428,6 +457,9 @@ public:
         for (uint64_t page = 0; page < kManagedPageCount; page++) {
             if (IsPageFree(page)) {
                 if (run_length == 0) {
+                    if ((page & (alignment_pages - 1)) != 0) {
+                        continue;
+                    }
                     run_start = page;
                 }
                 run_length++;
@@ -446,6 +478,12 @@ public:
 
     void FreePage(uint64_t address) {
         MarkRange(address, 1, true);
+    }
+
+    void FreeContiguous(uint64_t address, uint64_t page_count) {
+        if ((address & (kPageSize - 1)) == 0 && page_count != 0) {
+            MarkRange(address, page_count, true);
+        }
     }
 
     uint64_t TotalPages() const {
@@ -1015,18 +1053,286 @@ private:
     SlabCache m_Caches[kSlabCacheCount];
 };
 
+class HugePageManager {
+public:
+    void Init(PhysicalMemoryManager& pmm) { m_PhysicalMemory = &pmm; }
+
+    uint64_t Allocate() {
+        return m_PhysicalMemory ? m_PhysicalMemory->AllocateAligned(kHugePagePages, kHugePagePages) : 0;
+    }
+
+    void Free(uint64_t physical) {
+        if (m_PhysicalMemory && physical != 0 && (physical & (kHugePageSize - 1)) == 0) {
+            m_PhysicalMemory->FreeContiguous(physical, kHugePagePages);
+        }
+    }
+
+private:
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+};
+
+class NumaManager {
+public:
+    void Init(const BootInfo&, PhysicalMemoryManager& pmm) {
+        // A single proximity domain is always valid. Additional ACPI SRAT domains can
+        // be added later without changing NUMA-aware allocation callers.
+        for (uint64_t i = 0; i < kNumaNodeCount; i++) {
+            m_Nodes[i] = {0, 0, 0, false};
+        }
+        m_Nodes[0] = {0, pmm.TotalPages(), pmm.FreePages(), true};
+        m_NodeCount = 1;
+        m_PhysicalMemory = &pmm;
+    }
+
+    uint64_t AllocatePage(uint32_t preferred_node) {
+        if (!m_PhysicalMemory || preferred_node >= m_NodeCount || !m_Nodes[preferred_node].online) {
+            return 0;
+        }
+        const uint64_t page = m_PhysicalMemory->AllocatePage();
+        if (page != 0 && m_Nodes[preferred_node].free_pages != 0) {
+            m_Nodes[preferred_node].free_pages--;
+        }
+        return page;
+    }
+
+    void FreePage(uint32_t node, uint64_t physical) {
+        if (!m_PhysicalMemory || physical == 0 || node >= m_NodeCount) return;
+        m_PhysicalMemory->FreePage(physical);
+        m_Nodes[node].free_pages++;
+    }
+
+    uint32_t NodeCount() const { return m_NodeCount; }
+
+private:
+    struct Node { uint32_t id; uint64_t total_pages; uint64_t free_pages; bool online; };
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    Node m_Nodes[kNumaNodeCount];
+    uint32_t m_NodeCount = 0;
+};
+
+class SwapManager {
+public:
+    void Init(PhysicalMemoryManager& pmm) {
+        m_PhysicalMemory = &pmm;
+        for (uint64_t i = 0; i < kSwapSlotCount; i++) m_Slots[i] = {0, false};
+    }
+
+    int32_t SwapOut(uint64_t physical) {
+        if (!m_PhysicalMemory || physical == 0) return -1;
+        for (uint64_t i = 0; i < kSwapSlotCount; i++) {
+            if (m_Slots[i].used) continue;
+            const uint64_t backing = m_PhysicalMemory->AllocatePage();
+            if (backing == 0) return -1;
+            CopyPage(backing, physical);
+            m_Slots[i] = {backing, true};
+            return static_cast<int32_t>(i);
+        }
+        return -1;
+    }
+
+    bool SwapIn(uint32_t slot, uint64_t destination) {
+        if (!m_PhysicalMemory || slot >= kSwapSlotCount || !m_Slots[slot].used || destination == 0) return false;
+        CopyPage(destination, m_Slots[slot].backing);
+        m_PhysicalMemory->FreePage(m_Slots[slot].backing);
+        m_Slots[slot] = {0, false};
+        return true;
+    }
+
+private:
+    struct Slot { uint64_t backing; bool used; };
+    static void CopyPage(uint64_t destination, uint64_t source) {
+        uint8_t* dst = reinterpret_cast<uint8_t*>(destination);
+        const uint8_t* src = reinterpret_cast<const uint8_t*>(source);
+        for (uint64_t i = 0; i < kPageSize; i++) dst[i] = src[i];
+    }
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    Slot m_Slots[kSwapSlotCount];
+};
+
+class PageCache {
+public:
+    void Init(PhysicalMemoryManager& pmm) {
+        m_PhysicalMemory = &pmm;
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++) m_Entries[i] = {0, 0, 0, 0, false, false};
+    }
+
+    uint64_t Acquire(uint64_t file_id, uint64_t page_offset) {
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++) {
+            Entry& entry = m_Entries[i];
+            if (entry.active && entry.file_id == file_id && entry.page_offset == page_offset) {
+                entry.references++;
+                return entry.physical;
+            }
+        }
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++) {
+            Entry& entry = m_Entries[i];
+            if (entry.active) continue;
+            const uint64_t physical = m_PhysicalMemory ? m_PhysicalMemory->AllocatePage() : 0;
+            if (physical == 0) return 0;
+            ClearPage(physical);
+            entry = {file_id, page_offset, physical, 1, false, true};
+            return physical;
+        }
+        return 0;
+    }
+
+    void MarkDirty(uint64_t physical) {
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++)
+            if (m_Entries[i].active && m_Entries[i].physical == physical) m_Entries[i].dirty = true;
+    }
+
+    bool Release(uint64_t physical) {
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++) {
+            Entry& entry = m_Entries[i];
+            if (!entry.active || entry.physical != physical || entry.references == 0) continue;
+            entry.references--;
+            return true;
+        }
+        return false;
+    }
+
+    bool Evict(uint64_t file_id, uint64_t page_offset) {
+        for (uint64_t i = 0; i < kPageCacheEntryCount; i++) {
+            Entry& entry = m_Entries[i];
+            if (!entry.active || entry.file_id != file_id || entry.page_offset != page_offset || entry.references != 0) continue;
+            m_PhysicalMemory->FreePage(entry.physical);
+            entry = {0, 0, 0, 0, false, false};
+            return true;
+        }
+        return false;
+    }
+
+private:
+    struct Entry { uint64_t file_id; uint64_t page_offset; uint64_t physical; uint16_t references; bool dirty; bool active; };
+    static void ClearPage(uint64_t physical) {
+        uint8_t* page = reinterpret_cast<uint8_t*>(physical);
+        for (uint64_t i = 0; i < kPageSize; i++) page[i] = 0;
+    }
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    Entry m_Entries[kPageCacheEntryCount];
+};
+
+class MemoryMappingManager {
+public:
+    void Init(PhysicalMemoryManager& pmm, PageCache& cache) {
+        m_PhysicalMemory = &pmm;
+        m_PageCache = &cache;
+        m_NextAddress = 0x40000000;
+        for (uint64_t i = 0; i < kMemoryMappingCount; i++) m_Mappings[i].active = false;
+    }
+
+    uint64_t Map(uint64_t file_id, uint64_t length, bool writable, bool demand_paged) {
+        const uint64_t pages = (length + kPageSize - 1) / kPageSize;
+        if (pages == 0 || pages > kMappingMaxPages) return 0;
+        for (uint64_t i = 0; i < kMemoryMappingCount; i++) {
+            Mapping& mapping = m_Mappings[i];
+            if (mapping.active) continue;
+            mapping = {m_NextAddress, pages, file_id, writable, demand_paged, true, {}};
+            m_NextAddress += pages * kPageSize;
+            if (!demand_paged) {
+                for (uint64_t page = 0; page < pages; page++) {
+                    mapping.pages[page] = Materialize(mapping, page);
+                    if (mapping.pages[page] == 0) { Unmap(mapping.address); return 0; }
+                }
+            }
+            return mapping.address;
+        }
+        return 0;
+    }
+
+    uint64_t HandlePageFault(uint64_t address, bool write) {
+        Mapping* mapping = Find(address);
+        if (!mapping || (write && !mapping->writable)) return 0;
+        const uint64_t page = (address - mapping->address) / kPageSize;
+        if (mapping->pages[page] == 0) mapping->pages[page] = Materialize(*mapping, page);
+        if (write && mapping->file_id != 0) m_PageCache->MarkDirty(mapping->pages[page]);
+        return mapping->pages[page];
+    }
+
+    bool Unmap(uint64_t address) {
+        Mapping* mapping = Find(address);
+        if (!mapping || mapping->address != address) return false;
+        for (uint64_t page = 0; page < mapping->page_count; page++) {
+            if (mapping->pages[page] == 0) continue;
+            if (mapping->file_id != 0) m_PageCache->Release(mapping->pages[page]);
+            else m_PhysicalMemory->FreePage(mapping->pages[page]);
+        }
+        mapping->active = false;
+        return true;
+    }
+
+private:
+    struct Mapping {
+        uint64_t address; uint64_t page_count; uint64_t file_id;
+        bool writable; bool demand_paged; bool active;
+        uint64_t pages[kMappingMaxPages];
+    };
+    Mapping* Find(uint64_t address) {
+        for (uint64_t i = 0; i < kMemoryMappingCount; i++) {
+            Mapping& mapping = m_Mappings[i];
+            if (mapping.active && address >= mapping.address && address < mapping.address + mapping.page_count * kPageSize) return &mapping;
+        }
+        return nullptr;
+    }
+    uint64_t Materialize(Mapping& mapping, uint64_t page) {
+        if (mapping.file_id != 0) return m_PageCache->Acquire(mapping.file_id, page);
+        const uint64_t physical = m_PhysicalMemory->AllocatePage();
+        if (physical != 0) {
+            uint8_t* data = reinterpret_cast<uint8_t*>(physical);
+            for (uint64_t i = 0; i < kPageSize; i++) data[i] = 0;
+        }
+        return physical;
+    }
+    PhysicalMemoryManager* m_PhysicalMemory = nullptr;
+    PageCache* m_PageCache = nullptr;
+    uint64_t m_NextAddress = 0;
+    Mapping m_Mappings[kMemoryMappingCount];
+};
+
 static PhysicalMemoryManager g_PhysicalMemory;
 static VirtualMemoryManager g_VirtualMemory;
 static KernelHeap g_KernelHeap;
 static CopyOnWriteManager g_CopyOnWrite;
 static SharedMemoryManager g_SharedMemory;
 static SlabAllocator g_SlabAllocator;
+static HugePageManager g_HugePages;
+static NumaManager g_Numa;
+static SwapManager g_Swap;
+static PageCache g_PageCache;
+static MemoryMappingManager g_MemoryMappings;
 
 void* KernelAllocate(uint64_t size, uint64_t alignment) {
     return g_KernelHeap.Allocate(size, alignment);
 }
 
 static bool KernelMemorySelfTest() {
+    const uint64_t huge_page = g_HugePages.Allocate();
+    if (huge_page == 0 || (huge_page & (kHugePageSize - 1)) != 0) return false;
+    g_HugePages.Free(huge_page);
+
+    const uint64_t local_page = g_Numa.AllocatePage(0);
+    if (local_page == 0 || g_Numa.NodeCount() == 0) return false;
+    g_Numa.FreePage(0, local_page);
+
+    const uint64_t anonymous_map = g_MemoryMappings.Map(0, kPageSize * 2, true, true);
+    if (anonymous_map == 0 || g_MemoryMappings.HandlePageFault(anonymous_map, true) == 0 ||
+        !g_MemoryMappings.Unmap(anonymous_map)) return false;
+
+    const uint64_t file_map = g_MemoryMappings.Map(7, kPageSize, true, true);
+    const uint64_t cached_page = g_MemoryMappings.HandlePageFault(file_map, true);
+    if (file_map == 0 || cached_page == 0 || !g_MemoryMappings.Unmap(file_map) ||
+        !g_PageCache.Evict(7, 0)) return false;
+
+    const uint64_t swap_source = g_PhysicalMemory.AllocatePage();
+    const uint64_t swap_destination = g_PhysicalMemory.AllocatePage();
+    if (swap_source == 0 || swap_destination == 0) return false;
+    reinterpret_cast<uint8_t*>(swap_source)[0] = 0x6D;
+    const int32_t swap_slot = g_Swap.SwapOut(swap_source);
+    if (swap_slot < 0 || !g_Swap.SwapIn(static_cast<uint32_t>(swap_slot), swap_destination) ||
+        reinterpret_cast<uint8_t*>(swap_destination)[0] != 0x6D) return false;
+    g_PhysicalMemory.FreePage(swap_source);
+    g_PhysicalMemory.FreePage(swap_destination);
+
     const uint64_t cow_original = g_CopyOnWrite.AllocatePage();
     if (cow_original == 0) {
         return false;
@@ -1099,6 +1405,11 @@ static bool KernelMemoryInit(const BootInfo& boot_info) {
     g_CopyOnWrite.Init(g_PhysicalMemory);
     g_SharedMemory.Init(g_PhysicalMemory);
     g_SlabAllocator.Init(g_PhysicalMemory);
+    g_HugePages.Init(g_PhysicalMemory);
+    g_Numa.Init(boot_info, g_PhysicalMemory);
+    g_Swap.Init(g_PhysicalMemory);
+    g_PageCache.Init(g_PhysicalMemory);
+    g_MemoryMappings.Init(g_PhysicalMemory, g_PageCache);
 
     if (!g_SlabAllocator.Prime()) {
         return false;
@@ -1155,6 +1466,10 @@ static void PrintMemoryManagerInfo() {
     g_Console.WriteUnsigned(g_SlabAllocator.CacheCount());
     g_Console.Write(" objects=");
     g_Console.WriteUnsigned(g_SlabAllocator.TotalObjects());
+    g_Console.PutChar('\n');
+
+    g_Console.Write("Advanced memory: 2MiB pages, demand mmap, swap, page cache; NUMA nodes=");
+    g_Console.WriteUnsigned(g_Numa.NodeCount());
     g_Console.PutChar('\n');
 }
 
@@ -1226,7 +1541,7 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     KernelLog(LogLevel::Info, "Physical memory manager online");
     KernelLog(LogLevel::Info, "Virtual memory identity map installed");
     KernelLog(LogLevel::Info, "Kernel heap online");
-    KernelLog(LogLevel::Info, "Copy-on-write pages, shared memory, and slab allocator online");
+    KernelLog(LogLevel::Info, "COW, shared, slab, huge pages, NUMA, mmap, demand paging, swap, and page cache online");
     PrintMemoryManagerInfo();
 
     if (!KernelSchedulerInit()) {

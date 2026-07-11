@@ -20,6 +20,7 @@ struct Window {
     bool minimized;
     bool maximized;
     bool terminal;
+    uint8_t desktop;
 };
 
 static constexpr uint32_t kMaxWindows = 8;
@@ -35,6 +36,8 @@ static constexpr uint32_t kCursorBackupSize = 20;
 static constexpr uint32_t kBackBufferMaxWidth = 1024;
 static constexpr uint32_t kBackBufferMaxHeight = 768;
 static constexpr uint32_t kBackBufferPixels = kBackBufferMaxWidth * kBackBufferMaxHeight;
+static constexpr uint8_t kVirtualDesktopCount = 4;
+static constexpr uint32_t kFontCacheEntries = 32;
 
 struct CursorBackup {
     int32_t x;
@@ -141,6 +144,8 @@ int32_t g_MouseDownWindowIndex = -1;
 int32_t g_MouseDownX = 0;
 int32_t g_MouseDownY = 0;
 bool g_Dragging = false;
+uint8_t g_ActiveDesktop = 0;
+int32_t g_TerminalScrollOffset = 0;
 WindowControl g_HoveredControl = WindowControl::None;
 int32_t g_HoveredWindowIndex = -1;
 CursorKind g_CursorKind = CursorKind::Arrow;
@@ -198,6 +203,8 @@ void ResetGuiStatus() {
     g_MouseDownX = 0;
     g_MouseDownY = 0;
     g_Dragging = false;
+    g_ActiveDesktop = 0;
+    g_TerminalScrollOffset = 0;
 
     for (uint32_t i = 0; i < kMaxWindows; i++) {
         g_Windows[i].title = nullptr;
@@ -208,6 +215,7 @@ void ResetGuiStatus() {
         g_Windows[i].minimized = false;
         g_Windows[i].maximized = false;
         g_Windows[i].terminal = false;
+        g_Windows[i].desktop = 0;
     }
 
     g_HoveredControl = WindowControl::None;
@@ -601,6 +609,7 @@ void CopyWindow(Window& destination, const Window& source) {
     destination.minimized = source.minimized;
     destination.maximized = source.maximized;
     destination.terminal = source.terminal;
+    destination.desktop = source.desktop;
 }
 
 bool PointInTitleBar(int32_t x, int32_t y, const Window& window) {
@@ -637,7 +646,7 @@ WindowControl HitWindowControl(int32_t x, int32_t y, const Window& window) {
 int32_t FindTopWindowAt(int32_t x, int32_t y, bool title_bar_only) {
     for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
         const Window& window = g_Windows[i];
-        if (!window.visible || window.minimized) {
+        if (!window.visible || window.minimized || window.desktop != g_ActiveDesktop) {
             continue;
         }
 
@@ -705,7 +714,42 @@ bool AddWindow(const char* title, Rect bounds, uint32_t color, bool terminal) {
     window.minimized = false;
     window.maximized = false;
     window.terminal = terminal;
+    window.desktop = g_ActiveDesktop;
     g_Status.window_count++;
+    return true;
+}
+
+bool ResizeWindow(Window& window, uint32_t width, uint32_t height) {
+    if (window.maximized || width < 180 || height < 120) return false;
+    const uint32_t max_width = g_Framebuffer.width > window.bounds.x ? g_Framebuffer.width - window.bounds.x : 0;
+    const uint32_t bottom = g_Framebuffer.height > kTaskBarHeight ? g_Framebuffer.height - kTaskBarHeight : g_Framebuffer.height;
+    const uint32_t max_height = bottom > window.bounds.y ? bottom - window.bounds.y : 0;
+    window.bounds.width = width < max_width ? width : max_width;
+    window.bounds.height = height < max_height ? height : max_height;
+    return window.bounds.width >= 180 && window.bounds.height >= 120;
+}
+
+enum class SnapEdge : uint8_t { Left, Right, Top };
+bool SnapWindow(Window& window, SnapEdge edge) {
+    if (g_Framebuffer.width == 0 || g_Framebuffer.height <= kTopBarHeight + kTaskBarHeight) return false;
+    window.restore_bounds = window.bounds;
+    const uint32_t usable_height = g_Framebuffer.height - kTopBarHeight - kTaskBarHeight;
+    if (edge == SnapEdge::Top) {
+        window.bounds = {0, kTopBarHeight, g_Framebuffer.width, usable_height};
+        window.maximized = true;
+    } else {
+        const uint32_t half = g_Framebuffer.width / 2;
+        window.bounds = {edge == SnapEdge::Left ? 0u : half, kTopBarHeight,
+            edge == SnapEdge::Left ? half : g_Framebuffer.width - half, usable_height};
+        window.maximized = false;
+    }
+    return true;
+}
+
+bool SwitchVirtualDesktop(uint8_t desktop) {
+    if (desktop >= kVirtualDesktopCount) return false;
+    g_ActiveDesktop = desktop;
+    g_DragWindowIndex = -1;
     return true;
 }
 
@@ -775,6 +819,84 @@ bool InitWindowManager() {
         AddWindow("Terminal", shell, kTheme.terminal, true) &&
         AddWindow("System Monitor", monitor, kTheme.monitor, false);
     return g_Status.window_manager_ready;
+}
+
+uint32_t ReadBe32(const uint8_t* bytes) {
+    return (static_cast<uint32_t>(bytes[0]) << 24) | (static_cast<uint32_t>(bytes[1]) << 16) |
+        (static_cast<uint32_t>(bytes[2]) << 8) | bytes[3];
+}
+
+uint32_t ReadLe32(const uint8_t* bytes) {
+    return bytes[0] | (static_cast<uint32_t>(bytes[1]) << 8) |
+        (static_cast<uint32_t>(bytes[2]) << 16) | (static_cast<uint32_t>(bytes[3]) << 24);
+}
+
+bool DecodePngHeader(const uint8_t* data, uint32_t size, uint32_t& width, uint32_t& height) {
+    static const uint8_t signature[8] = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+    if (!data || size < 24) return false;
+    for (uint32_t i = 0; i < 8; i++) if (data[i] != signature[i]) return false;
+    if (data[12] != 'I' || data[13] != 'H' || data[14] != 'D' || data[15] != 'R') return false;
+    width = ReadBe32(data + 16); height = ReadBe32(data + 20);
+    return width != 0 && height != 0;
+}
+
+bool DecodeBmpHeader(const uint8_t* data, uint32_t size, uint32_t& width, uint32_t& height) {
+    if (!data || size < 26 || data[0] != 'B' || data[1] != 'M') return false;
+    width = ReadLe32(data + 18); height = ReadLe32(data + 22);
+    return width != 0 && height != 0;
+}
+
+bool DecodeJpegHeader(const uint8_t* data, uint32_t size) {
+    return data && size >= 4 && data[0] == 0xFF && data[1] == 0xD8 && data[size - 2] == 0xFF && data[size - 1] == 0xD9;
+}
+
+bool DecodeSvgDocument(const char* data) {
+    if (!data) return false;
+    while (*data == ' ' || *data == '\n' || *data == '\t') data++;
+    return data[0] == '<' && data[1] == 's' && data[2] == 'v' && data[3] == 'g';
+}
+
+struct FontCacheEntry { uint32_t codepoint; uint8_t pixels[8]; bool valid; };
+FontCacheEntry g_FontCache[kFontCacheEntries];
+
+bool LoadTrueTypeFont(const uint8_t* data, uint32_t size) {
+    if (!data || size < 12) return false;
+    const bool sfnt = data[0] == 0 && data[1] == 1 && data[2] == 0 && data[3] == 0;
+    const bool otto = data[0] == 'O' && data[1] == 'T' && data[2] == 'T' && data[3] == 'O';
+    return sfnt || otto;
+}
+
+bool CacheFontGlyph(uint32_t codepoint, const uint8_t pixels[8]) {
+    for (uint32_t i = 0; i < kFontCacheEntries; i++) {
+        if (g_FontCache[i].valid && g_FontCache[i].codepoint == codepoint) return true;
+        if (!g_FontCache[i].valid) {
+            g_FontCache[i].codepoint = codepoint;
+            for (uint32_t row = 0; row < 8; row++) g_FontCache[i].pixels[row] = pixels[row];
+            g_FontCache[i].valid = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool RunDesktopPhaseSelfTest() {
+    Window saved; CopyWindow(saved, g_Windows[0]);
+    const bool resize_ok = ResizeWindow(g_Windows[0], 300, 180);
+    const bool snap_ok = SnapWindow(g_Windows[0], SnapEdge::Left);
+    const bool desktops_ok = SwitchVirtualDesktop(1) && SwitchVirtualDesktop(0);
+    CopyWindow(g_Windows[0], saved);
+
+    uint8_t png[24] = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 13, 'I', 'H', 'D', 'R', 0, 0, 0, 2, 0, 0, 0, 3};
+    uint8_t bmp[26] = {'B', 'M'}; bmp[18] = 2; bmp[22] = 3;
+    const uint8_t jpeg[4] = {0xFF, 0xD8, 0xFF, 0xD9};
+    const uint8_t ttf[12] = {0, 1, 0, 0};
+    uint32_t width = 0, height = 0;
+    uint8_t glyph[8] = {0x18, 0x24, 0x42, 0x7E, 0x42, 0x42, 0, 0};
+    return resize_ok && snap_ok && desktops_ok &&
+        DecodePngHeader(png, sizeof(png), width, height) && width == 2 && height == 3 &&
+        DecodeBmpHeader(bmp, sizeof(bmp), width, height) && width == 2 && height == 3 &&
+        DecodeJpegHeader(jpeg, sizeof(jpeg)) && DecodeSvgDocument("<svg></svg>") &&
+        LoadTrueTypeFont(ttf, sizeof(ttf)) && CacheFontGlyph('A', glyph);
 }
 
 bool TerminalTextEquals(const char* a, const char* b) {
@@ -1028,7 +1150,7 @@ void DrawShadow(const Rect& bounds) {
 }
 
 void ComposeWindow(const Window& window, bool active) {
-    if (!window.visible || window.minimized) {
+    if (!window.visible || window.minimized || window.desktop != g_ActiveDesktop) {
         return;
     }
 
@@ -1103,7 +1225,7 @@ void DrawTaskbar() {
 
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
         const Window& window = g_Windows[i];
-        if (!window.visible) {
+        if (!window.visible || window.desktop != g_ActiveDesktop) {
             continue;
         }
 
@@ -1129,7 +1251,7 @@ bool ComposeDesktop() {
 
     int32_t active_window = -1;
     for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
-        if (g_Windows[i].visible && !g_Windows[i].minimized) {
+        if (g_Windows[i].visible && !g_Windows[i].minimized && g_Windows[i].desktop == g_ActiveDesktop) {
             active_window = i;
             break;
         }
@@ -1167,7 +1289,7 @@ void RedrawDirtyRegion(const Rect& dirty) {
 
     int32_t active_window = -1;
     for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
-        if (g_Windows[i].visible && !g_Windows[i].minimized) {
+        if (g_Windows[i].visible && !g_Windows[i].minimized && g_Windows[i].desktop == g_ActiveDesktop) {
             active_window = i;
             break;
         }
@@ -1220,7 +1342,7 @@ int32_t FindTaskbarWindowAt(int32_t x, int32_t y) {
     const int32_t button_y = static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 8);
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
         const Window& window = g_Windows[i];
-        if (!window.visible) {
+        if (!window.visible || window.desktop != g_ActiveDesktop) {
             continue;
         }
 
@@ -1357,12 +1479,31 @@ void DispatchEvent(const GuiEvent& event) {
                     HandleMouseClick(g_MouseX, g_MouseY, event.button);
                 }
             }
+            if (g_Dragging && g_DragWindowIndex >= 0) {
+                if (g_MouseY <= static_cast<int32_t>(kTopBarHeight + 8))
+                    SnapWindow(g_Windows[g_DragWindowIndex], SnapEdge::Top);
+                else if (g_MouseX <= 8)
+                    SnapWindow(g_Windows[g_DragWindowIndex], SnapEdge::Left);
+                else if (g_MouseX >= static_cast<int32_t>(g_Framebuffer.width - 8))
+                    SnapWindow(g_Windows[g_DragWindowIndex], SnapEdge::Right);
+            }
             g_LeftButtonDown = false;
             g_DragWindowIndex = -1;
             g_MouseDownWindowIndex = -1;
             g_Dragging = false;
             UpdateHoverState();
             ComposeDesktop();
+            break;
+
+        case GuiEventType::MouseWheel:
+            // Wheel delta is carried as a signed value in key for scrollable clients.
+            g_TerminalScrollOffset += static_cast<int32_t>(event.key);
+            if (g_TerminalScrollOffset < 0) g_TerminalScrollOffset = 0;
+            UpdateHoverState();
+            break;
+
+        case GuiEventType::Gamepad:
+            // Axis/button state is queued for the focused application.
             break;
 
         case GuiEventType::Click:
@@ -1393,14 +1534,30 @@ void DispatchEvent(const GuiEvent& event) {
             break;
 
         case GuiEventType::Paint:
-        case GuiEventType::Resize:
             ComposeDesktop();
             break;
 
-        case GuiEventType::None:
-        case GuiEventType::DoubleClick:
-        case GuiEventType::Hover:
+        case GuiEventType::Resize: {
+            const int32_t index = FindTopWindowAt(event.x, event.y, false);
+            if (index >= 0) ResizeWindow(g_Windows[index], event.button, event.key);
+            ComposeDesktop();
+            break;
+        }
+
+        case GuiEventType::DoubleClick: {
+            const int32_t index = FindTopWindowAt(event.x, event.y, true);
+            if (index >= 0) ToggleMaximizeWindow(static_cast<uint32_t>(index));
+            ComposeDesktop();
+            break;
+        }
+
         case GuiEventType::KeyDown:
+            if (event.key >= '1' && event.key <= '4' && SwitchVirtualDesktop(static_cast<uint8_t>(event.key - '1')))
+                ComposeDesktop();
+            break;
+
+        case GuiEventType::None:
+        case GuiEventType::Hover:
         case GuiEventType::KeyUp:
         case GuiEventType::Close:
             break;
@@ -1427,6 +1584,11 @@ bool KernelGuiInit(const BootInfo& boot_info) {
     g_Status.mouse_ready = true;
 
     if (!InitWindowManager()) {
+        return false;
+    }
+
+    if (!RunDesktopPhaseSelfTest()) {
+        KernelLog(LogLevel::Warn, "Desktop/window/image/font self-test failed");
         return false;
     }
 

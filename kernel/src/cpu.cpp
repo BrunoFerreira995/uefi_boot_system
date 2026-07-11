@@ -1,5 +1,6 @@
 #include "cpu.hpp"
 #include "kernel.hpp"
+#include "scheduler.hpp"
 
 #include "../../common/boot_info.hpp"
 
@@ -73,7 +74,14 @@ static constexpr uint32_t kApicEoiRegister = 0xB0;
 static constexpr uint32_t kApicVersionRegister = 0x30;
 static constexpr uint64_t kApicBaseMsr = 0x1B;
 static constexpr uint64_t kApicBaseEnable = 1ULL << 11;
+static constexpr uint64_t kApicBaseX2Enable = 1ULL << 10;
 static constexpr uint64_t kApicBaseMask = 0xFFFFFF000ULL;
+static constexpr uint32_t kX2ApicMsrBase = 0x800;
+static constexpr uint32_t kApicLvtTimerRegister = 0x320;
+static constexpr uint32_t kApicTimerInitialCountRegister = 0x380;
+static constexpr uint32_t kApicTimerDivideRegister = 0x3E0;
+static constexpr uint32_t kApicTimerPeriodic = 1u << 17;
+static constexpr uint32_t kLapicTimerInitialCount = 1000000;
 static constexpr uint32_t kMaxCpuCores = 16;
 static constexpr uint32_t kMaxIoApics = 4;
 
@@ -132,12 +140,21 @@ struct CpuStatus {
     bool ioapic_ready;
     bool smp_ready;
     bool multicore_scheduler_ready;
+    bool x2apic_supported;
+    bool x2apic_ready;
+    bool hpet_ready;
+    bool lapic_timer_ready;
+    bool simd_state_ready;
+    bool avx_state_supported;
     uint64_t irq_count[kIrqCount];
     uint64_t lapic_base;
     uint32_t lapic_id;
     uint32_t lapic_version;
     uint32_t cpu_count;
     uint32_t ioapic_count;
+    uint64_t cpu_frequency_hz;
+    uint64_t hpet_frequency_hz;
+    uint64_t hpet_base;
 };
 
 struct RsdpDescriptor {
@@ -194,6 +211,19 @@ struct MadtIoApic {
     uint32_t global_system_interrupt_base;
 } __attribute__((packed));
 
+struct HpetTable {
+    AcpiSdtHeader header;
+    uint32_t event_timer_block_id;
+    uint8_t address_space_id;
+    uint8_t register_bit_width;
+    uint8_t register_bit_offset;
+    uint8_t access_size;
+    uint64_t address;
+    uint8_t hpet_number;
+    uint16_t minimum_tick;
+    uint8_t page_protection;
+} __attribute__((packed));
+
 alignas(16) uint64_t g_Gdt[5];
 alignas(16) Tss64 g_Tss;
 alignas(16) IdtEntry g_Idt[256];
@@ -201,6 +231,7 @@ alignas(16) uint8_t g_ExceptionStack[16384];
 CpuStatus g_Status {};
 KernelIrqHandler g_IrqHandlers[kIrqCount];
 void* g_IrqContexts[kIrqCount];
+extern "C" uint64_t CpuXsaveMask = 0;
 
 const char* g_ExceptionNames[32] = {
     "Divide error",
@@ -434,6 +465,10 @@ void SendPicEoi(uint8_t irq) {
 }
 
 void LocalApicWrite(uint32_t offset, uint32_t value) {
+    if (g_Status.x2apic_ready) {
+        WriteMsr(kX2ApicMsrBase + offset / 16, value);
+        return;
+    }
     if (g_Status.lapic_base == 0) {
         return;
     }
@@ -443,6 +478,9 @@ void LocalApicWrite(uint32_t offset, uint32_t value) {
 }
 
 uint32_t LocalApicRead(uint32_t offset) {
+    if (g_Status.x2apic_ready) {
+        return static_cast<uint32_t>(ReadMsr(kX2ApicMsrBase + offset / 16));
+    }
     if (g_Status.lapic_base == 0) {
         return 0;
     }
@@ -458,6 +496,7 @@ void InitLocalApic() {
     uint32_t edx = 0;
     Cpuid(1, 0, eax, ebx, ecx, edx);
     g_Status.apic_supported = (edx & (1u << 9)) != 0;
+    g_Status.x2apic_supported = (ecx & (1u << 21)) != 0;
     g_Status.lapic_id = ebx >> 24;
 
     if (!g_Status.apic_supported) {
@@ -466,7 +505,11 @@ void InitLocalApic() {
 
     uint64_t apic_base = ReadMsr(kApicBaseMsr);
     apic_base |= kApicBaseEnable;
+    if (g_Status.x2apic_supported) {
+        apic_base |= kApicBaseX2Enable;
+    }
     WriteMsr(kApicBaseMsr, apic_base);
+    g_Status.x2apic_ready = (apic_base & kApicBaseX2Enable) != 0;
 
     g_Status.lapic_base = apic_base & kApicBaseMask;
     if (g_Status.lapic_base == 0) {
@@ -474,6 +517,9 @@ void InitLocalApic() {
     }
 
     g_Status.lapic_version = LocalApicRead(kApicVersionRegister) & 0xFF;
+    if (g_Status.x2apic_ready) {
+        g_Status.lapic_id = LocalApicRead(0x20);
+    }
     LocalApicWrite(kApicSpuriousVectorRegister, LocalApicRead(kApicSpuriousVectorRegister) | 0x100);
     g_Status.apic_ready = true;
 }
@@ -577,6 +623,76 @@ void ParseMadt(const BootInfo& boot_info) {
     g_Status.multicore_scheduler_ready = g_Status.smp_ready;
 }
 
+void DetectCpuFrequency() {
+    uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
+    Cpuid(0, 0, eax, ebx, ecx, edx);
+    const uint32_t max_leaf = eax;
+    if (max_leaf >= 0x15) {
+        Cpuid(0x15, 0, eax, ebx, ecx, edx);
+        if (eax != 0 && ebx != 0 && ecx != 0)
+            g_Status.cpu_frequency_hz = (static_cast<uint64_t>(ecx) * ebx) / eax;
+    }
+    if (g_Status.cpu_frequency_hz == 0 && max_leaf >= 0x16) {
+        Cpuid(0x16, 0, eax, ebx, ecx, edx);
+        g_Status.cpu_frequency_hz = static_cast<uint64_t>(eax) * 1000000;
+    }
+}
+
+void InitHpet(const BootInfo& boot_info) {
+    const AcpiSdtHeader* table = FindAcpiTable(boot_info, "HPET");
+    if (!table || table->length < sizeof(HpetTable)) return;
+    const HpetTable* hpet = reinterpret_cast<const HpetTable*>(table);
+    if (hpet->address_space_id != 0 || hpet->address == 0) return;
+    volatile uint64_t* registers = reinterpret_cast<volatile uint64_t*>(hpet->address);
+    const uint64_t period_fs = registers[0] >> 32;
+    if (period_fs == 0) return;
+    registers[2] &= ~1ULL;
+    registers[30] = 0;
+    registers[2] |= 1ULL;
+    g_Status.hpet_base = hpet->address;
+    g_Status.hpet_frequency_hz = 1000000000000000ULL / period_fs;
+    g_Status.hpet_ready = true;
+}
+
+void InitSimdState() {
+    uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
+    Cpuid(1, 0, eax, ebx, ecx, edx);
+    if ((edx & (1u << 24)) == 0 || (edx & (1u << 25)) == 0) return;
+    uint64_t cr0 = 0, cr4 = 0;
+    asm volatile("mov %%cr0, %0" : "=r"(cr0));
+    cr0 &= ~(1ULL << 2);
+    cr0 |= 1ULL << 1;
+    asm volatile("mov %0, %%cr0" :: "r"(cr0));
+    asm volatile("mov %%cr4, %0" : "=r"(cr4));
+    cr4 |= (1ULL << 9) | (1ULL << 10);
+    CpuXsaveMask = 0;
+    if ((ecx & (1u << 26)) && (ecx & (1u << 27))) {
+        cr4 |= 1ULL << 18;
+        asm volatile("mov %0, %%cr4" :: "r"(cr4));
+        const uint32_t xcr_low = 7, xcr_high = 0;
+        asm volatile("xsetbv" :: "c"(0), "a"(xcr_low), "d"(xcr_high));
+        CpuXsaveMask = 7;
+        g_Status.avx_state_supported = true;
+    } else {
+        asm volatile("mov %0, %%cr4" :: "r"(cr4));
+    }
+    g_Status.simd_state_ready = true;
+}
+
+void LapicTimerIrq(uint8_t, void*) {
+    KernelSchedulerTimerTick();
+}
+
+void InitLapicTimer() {
+    if (!g_Status.apic_ready) return;
+    g_IrqHandlers[0] = LapicTimerIrq;
+    g_IrqContexts[0] = nullptr;
+    LocalApicWrite(kApicTimerDivideRegister, 0x3);
+    LocalApicWrite(kApicLvtTimerRegister, kApicTimerPeriodic | kIrqBaseVector);
+    LocalApicWrite(kApicTimerInitialCountRegister, kLapicTimerInitialCount);
+    g_Status.lapic_timer_ready = true;
+}
+
 } // namespace
 
 extern "C" void CpuExceptionHandler(ExceptionFrame* frame) {
@@ -615,8 +731,12 @@ bool KernelCpuInit(const BootInfo& boot_info) {
     InitGdt();
     InitIdt();
     InitPic();
+    InitSimdState();
     InitLocalApic();
     ParseMadt(boot_info);
+    DetectCpuFrequency();
+    InitHpet(boot_info);
+    InitLapicTimer();
 
     KernelLog(LogLevel::Info, "GDT installed");
     KernelLog(LogLevel::Info, "TSS loaded");
@@ -627,6 +747,14 @@ bool KernelCpuInit(const BootInfo& boot_info) {
         g_Status.ioapic_ready ? "IOAPIC discovered from ACPI MADT" : "IOAPIC not discovered");
     KernelLog(g_Status.smp_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.smp_ready ? "SMP topology discovered" : "SMP topology unavailable");
+    KernelLog(g_Status.x2apic_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.x2apic_ready ? "x2APIC enabled" : "x2APIC unavailable; xAPIC active");
+    KernelLog(g_Status.hpet_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.hpet_ready ? "HPET counter enabled" : "HPET unavailable");
+    KernelLog(g_Status.lapic_timer_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.lapic_timer_ready ? "Local APIC periodic scheduler timer armed" : "Local APIC timer unavailable");
+    KernelLog(g_Status.simd_state_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.avx_state_supported ? "SSE/AVX extended state enabled" : "SSE state enabled; AVX unavailable");
     return g_Status.gdt_ready &&
         g_Status.idt_ready &&
         g_Status.tss_ready &&
@@ -675,4 +803,10 @@ void PrintCpuInfo() {
         g_Status.ioapic_ready ? "IOAPIC ready" : "IOAPIC unavailable");
     KernelLog(g_Status.multicore_scheduler_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.multicore_scheduler_ready ? "Multi-core scheduler topology ready" : "Multi-core scheduler topology unavailable");
+    KernelLog(g_Status.lapic_timer_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.lapic_timer_ready ? "Local APIC scheduler timer ready" : "Local APIC scheduler timer unavailable");
+    KernelLog(g_Status.cpu_frequency_hz ? LogLevel::Info : LogLevel::Warn,
+        g_Status.cpu_frequency_hz ? "CPU frequency detected with CPUID" : "CPU frequency unavailable");
+    KernelLog(g_Status.simd_state_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.simd_state_ready ? "Per-thread SIMD state switching ready" : "SIMD state switching unavailable");
 }

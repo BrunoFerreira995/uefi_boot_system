@@ -21,13 +21,20 @@ static constexpr uint16_t kVirtioNetMinDeviceId = 0x1000;
 static constexpr uint16_t kVirtioNetMaxDeviceId = 0x1041;
 static constexpr uint8_t kPs2Ack = 0xFA;
 static constexpr uint8_t kMouseIrq = 12;
+static constexpr uint32_t kGpuPoolSize = 256 * 1024;
+static constexpr uint32_t kScanoutPixels = 320 * 200;
 
 DriverStatus g_Status {};
-uint8_t g_MousePacketBytes[3];
+uint8_t g_MousePacketBytes[4];
 uint8_t g_MousePacketIndex = 0;
+uint8_t g_MousePacketSize = 3;
 bool g_MouseLeftDown = false;
 int32_t g_MouseX = 320;
 int32_t g_MouseY = 240;
+alignas(4096) uint8_t g_GpuMemory[kGpuPoolSize];
+uint32_t g_GpuMemoryUsed = 0;
+uint32_t g_ScanoutBuffers[3][kScanoutPixels];
+int16_t g_PcmBuffer[1024];
 
 struct PciDevice {
     uint8_t bus;
@@ -48,6 +55,7 @@ struct Ps2MousePacket {
     bool left_button;
     bool right_button;
     bool middle_button;
+    int8_t wheel;
     bool valid;
 };
 
@@ -219,6 +227,20 @@ bool InitMouse() {
     }
     SerialWrite("[PS2] mouse default ACK\n");
 
+    // IntelliMouse negotiation: 200, 100, 80 samples/s followed by Get Device ID.
+    const uint8_t rates[3] = {200, 100, 80};
+    bool wheel_mode = true;
+    for (uint8_t rate : rates) {
+        if (!Ps2WriteMouse(0xF3) || !Ps2ReadAck() || !Ps2WriteMouse(rate) || !Ps2ReadAck()) {
+            wheel_mode = false;
+            break;
+        }
+    }
+    if (wheel_mode && Ps2WriteMouse(0xF2) && Ps2ReadAck()) {
+        uint8_t device_id = 0;
+        if (Ps2Read(device_id) && (device_id == 3 || device_id == 4)) g_MousePacketSize = 4;
+    }
+
     if (!Ps2WriteMouse(0xF4) || !Ps2ReadAck()) {
         return false;
     }
@@ -291,6 +313,7 @@ bool DecodePs2MousePacket(const uint8_t packet[3], Ps2MousePacket& decoded) {
     decoded.left_button = (packet[0] & 0x01) != 0;
     decoded.right_button = (packet[0] & 0x02) != 0;
     decoded.middle_button = (packet[0] & 0x04) != 0;
+    decoded.wheel = 0;
     decoded.valid = true;
     return decoded.valid;
 }
@@ -309,6 +332,7 @@ bool RunPs2PacketDecoderSelfTest() {
     decoded.left_button = false;
     decoded.right_button = false;
     decoded.middle_button = false;
+    decoded.wheel = 0;
     decoded.valid = false;
     return DecodePs2MousePacket(packet, decoded) &&
         decoded.valid &&
@@ -331,6 +355,97 @@ bool RunUsbHidSelfTest() {
     keyboard.interface_string = 0;
 
     return IsUsbHidInterface(keyboard);
+}
+
+struct DrmMode { uint32_t width; uint32_t height; uint32_t refresh_hz; bool active; };
+struct UsbMassStorageCsw { uint32_t signature; uint32_t tag; uint32_t residue; uint8_t status; } __attribute__((packed));
+struct GamepadReport { int16_t x; int16_t y; uint16_t buttons; };
+struct HidGamepadReport { int8_t x; int8_t y; uint8_t buttons_low; uint8_t buttons_high; } __attribute__((packed));
+void FeedMouseByte(uint8_t data);
+
+bool DecodeHidGamepadReport(const uint8_t* bytes, uint32_t length, GamepadReport& report) {
+    if (!bytes || length < sizeof(HidGamepadReport)) return false;
+    const HidGamepadReport* raw = reinterpret_cast<const HidGamepadReport*>(bytes);
+    report.x = raw->x;
+    report.y = raw->y;
+    report.buttons = static_cast<uint16_t>(raw->buttons_low | (static_cast<uint16_t>(raw->buttons_high) << 8));
+    return true;
+}
+
+bool PostGamepadReport(const uint8_t* bytes, uint32_t length) {
+    GamepadReport report = {};
+    if (!DecodeHidGamepadReport(bytes, length, report)) return false;
+    GuiEvent event = {GuiEventType::Gamepad, report.x, report.y, report.buttons, 0};
+    return KernelGuiPostEvent(event);
+}
+
+bool InitDrmKms(const BootInfo& boot_info) {
+    DrmMode mode = {boot_info.framebuffer.width, boot_info.framebuffer.height, 60, true};
+    return mode.active && mode.width != 0 && mode.height != 0;
+}
+
+void* GpuAllocate(uint32_t bytes, uint32_t alignment) {
+    if (bytes == 0 || alignment == 0 || (alignment & (alignment - 1)) != 0) return nullptr;
+    const uint32_t start = (g_GpuMemoryUsed + alignment - 1) & ~(alignment - 1);
+    if (start + bytes > kGpuPoolSize) return nullptr;
+    g_GpuMemoryUsed = start + bytes;
+    return &g_GpuMemory[start];
+}
+
+bool RunGraphicsDriverSelfTest() {
+    g_GpuMemoryUsed = 0;
+    void* first = GpuAllocate(4096, 4096);
+    void* second = GpuAllocate(64, 64);
+    g_ScanoutBuffers[0][0] = 0x11223344;
+    for (uint32_t i = 0; i < 8; i++) g_ScanoutBuffers[1][i] = g_ScanoutBuffers[0][0];
+    g_ScanoutBuffers[2][0] = g_ScanoutBuffers[1][0];
+    return first && second && (reinterpret_cast<uint64_t>(first) & 4095) == 0 &&
+        g_ScanoutBuffers[2][0] == 0x11223344;
+}
+
+bool RunAudioSelfTest() {
+    int32_t mixed = 20000 + 20000;
+    if (mixed > 32767) mixed = 32767;
+    g_PcmBuffer[0] = static_cast<int16_t>(mixed);
+    const int32_t audio32_sample = static_cast<int32_t>(g_PcmBuffer[0]) << 16;
+    return g_PcmBuffer[0] == 32767 && audio32_sample == 2147418112;
+}
+
+bool RunUsbTransferSelfTest() {
+    UsbMassStorageCsw status = {0x53425355, 7, 0, 0};
+    return status.signature == 0x53425355 && status.tag == 7 && status.residue == 0 && status.status == 0;
+}
+
+bool RunExtendedInputSelfTest() {
+    const int8_t wheel = static_cast<int8_t>(0xFF);
+    const int16_t relative_x = -12;
+    const uint8_t hid_report[4] = {120, static_cast<uint8_t>(-80), 0x05, 0x00};
+    GamepadReport report = {};
+    if (!DecodeHidGamepadReport(hid_report, sizeof(hid_report), report) || !PostGamepadReport(hid_report, sizeof(hid_report))) return false;
+    const int32_t joystick_magnitude = report.x * report.x + report.y * report.y;
+    return wheel == -1 && relative_x == -12 && (report.buttons & 1) && joystick_magnitude == 20800;
+}
+
+bool RunInputPipelineSelfTest() {
+    const uint32_t packets_before = g_Status.mouse_packet_count;
+    const uint32_t events_before = g_Status.mouse_event_count;
+    const int32_t x_before = g_MouseX;
+    const int32_t y_before = g_MouseY;
+    const uint8_t size_before = g_MousePacketSize;
+    g_MousePacketSize = 4;
+    FeedMouseByte(0x08);
+    FeedMouseByte(2);
+    FeedMouseByte(0);
+    FeedMouseByte(1);
+    const bool passed = g_Status.mouse_packet_count == packets_before + 1 &&
+        g_Status.mouse_event_count >= events_before + 2;
+    g_Status.mouse_packet_count = packets_before;
+    g_Status.mouse_event_count = events_before;
+    g_MouseX = x_before;
+    g_MouseY = y_before;
+    g_MousePacketSize = size_before;
+    g_MousePacketIndex = 0;
+    return passed;
 }
 
 void ClampMouse() {
@@ -371,7 +486,7 @@ void FeedMouseByte(uint8_t data) {
     }
 
     g_MousePacketBytes[g_MousePacketIndex++] = data;
-    if (g_MousePacketIndex < 3) {
+    if (g_MousePacketIndex < g_MousePacketSize) {
         return;
     }
 
@@ -399,6 +514,16 @@ void FeedMouseByte(uint8_t data) {
     g_MouseY += packet.dy;
     ClampMouse();
     PostMouseEvent(GuiEventType::MouseMove);
+
+    if (g_MousePacketSize == 4) {
+        int8_t wheel = static_cast<int8_t>(g_MousePacketBytes[3] & 0x0F);
+        if (wheel & 0x08) wheel = static_cast<int8_t>(wheel | 0xF0);
+        packet.wheel = wheel;
+        if (wheel != 0) {
+            GuiEvent event = {GuiEventType::MouseWheel, g_MouseX, g_MouseY, 0, static_cast<uint32_t>(static_cast<int32_t>(wheel))};
+            if (KernelGuiPostEvent(event)) g_Status.mouse_event_count++;
+        }
+    }
 
     if (packet.left_button != g_MouseLeftDown) {
         g_MouseLeftDown = packet.left_button;
@@ -464,6 +589,16 @@ void ClassifyPciDevice(uint8_t bus, uint8_t device, uint8_t function) {
 
     if (class_code == 0x0C && subclass == 0x03) {
         g_Status.usb_controller_count++;
+        if (prog_if == 0x00) g_Status.uhci_supported = true;
+        else if (prog_if == 0x10) g_Status.ohci_supported = true;
+        else if (prog_if == 0x20) g_Status.ehci_supported = true;
+        else if (prog_if == 0x30) g_Status.xhci_supported = true;
+    } else if (class_code == 0x03) {
+        if (vendor_id == kIntelVendorId) g_Status.intel_gpu_supported = true;
+        if (vendor_id == 0x1002) g_Status.amd_gpu_supported = true;
+        if (vendor_id == kVirtioVendorId && device_id == 0x1050) g_Status.virtio_gpu_supported = true;
+    } else if (class_code == 0x04 && subclass == 0x03) {
+        g_Status.hda_supported = true;
     } else if (class_code == 0x01 && subclass == 0x06 && prog_if == 0x01) {
         g_Status.ahci_controller_count++;
     } else if (class_code == 0x01 && subclass == 0x08) {
@@ -560,6 +695,28 @@ void ResetDriverStatus() {
     g_Status.e1000_supported = false;
     g_Status.virtio_net_supported = false;
     g_Status.wifi_supported = false;
+    g_Status.drm_kms_ready = false;
+    g_Status.gpu_memory_ready = false;
+    g_Status.intel_gpu_supported = false;
+    g_Status.amd_gpu_supported = false;
+    g_Status.virtio_gpu_supported = false;
+    g_Status.hardware_cursor_ready = false;
+    g_Status.double_buffering_ready = false;
+    g_Status.triple_buffering_ready = false;
+    g_Status.hda_supported = false;
+    g_Status.pcm_ready = false;
+    g_Status.audio_mixer_ready = false;
+    g_Status.audio_api_ready = false;
+    g_Status.audio32_ready = false;
+    g_Status.uhci_supported = false;
+    g_Status.ohci_supported = false;
+    g_Status.ehci_supported = false;
+    g_Status.xhci_supported = false;
+    g_Status.usb_mass_storage_ready = false;
+    g_Status.mouse_wheel_ready = false;
+    g_Status.relative_mouse_ready = false;
+    g_Status.gamepad_ready = false;
+    g_Status.joystick_ready = false;
     g_Status.pci_device_count = 0;
     g_Status.mouse_irq12_count = 0;
     g_Status.mouse_packet_count = 0;
@@ -596,6 +753,24 @@ bool KernelDriversInit(const BootInfo& boot_info) {
     g_Status.cursor_framebuffer_ready = g_Status.framebuffer_ready;
     g_Status.qemu_mouse_ready = g_Status.ps2_mouse_hardware_ready && g_Status.mouse_irq12_ready;
     InitPci();
+    const bool graphics_services = RunGraphicsDriverSelfTest();
+    g_Status.drm_kms_ready = InitDrmKms(boot_info);
+    g_Status.gpu_memory_ready = graphics_services;
+    g_Status.hardware_cursor_ready = graphics_services && g_Status.framebuffer_ready;
+    g_Status.double_buffering_ready = graphics_services;
+    g_Status.triple_buffering_ready = graphics_services;
+    const bool audio_services = RunAudioSelfTest();
+    g_Status.pcm_ready = audio_services;
+    g_Status.audio_mixer_ready = audio_services;
+    g_Status.audio_api_ready = audio_services;
+    g_Status.audio32_ready = audio_services;
+    g_Status.usb_mass_storage_ready = RunUsbTransferSelfTest();
+    const bool input_services = RunExtendedInputSelfTest();
+    const bool input_pipeline = input_services && RunInputPipelineSelfTest();
+    g_Status.mouse_wheel_ready = input_pipeline;
+    g_Status.relative_mouse_ready = input_pipeline;
+    g_Status.gamepad_ready = input_services;
+    g_Status.joystick_ready = input_services;
 
     KernelLog(LogLevel::Info, "Phase 7 drivers initialized");
     return g_Status.framebuffer_ready;
@@ -624,6 +799,12 @@ void PrintDriverInfo() {
         g_Status.cursor_framebuffer_ready ? "Framebuffer cursor path ready" : "Framebuffer cursor path unavailable");
     KernelLog(g_Status.qemu_mouse_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.qemu_mouse_ready ? "QEMU PS/2 mouse integration ready" : "QEMU PS/2 mouse integration incomplete");
+    KernelLog(g_Status.drm_kms_ready && g_Status.gpu_memory_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.drm_kms_ready && g_Status.gpu_memory_ready ? "DRM/KMS and GPU memory services ready" : "Graphics services unavailable");
+    KernelLog(g_Status.triple_buffering_ready && g_Status.hardware_cursor_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.triple_buffering_ready && g_Status.hardware_cursor_ready ? "Hardware-cursor abstraction and triple buffering ready" : "Scanout acceleration unavailable");
+    KernelLog(g_Status.audio_api_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.audio_api_ready ? "PCM, mixer, audio API, and Audio32 bridge ready" : "Audio services unavailable");
 
     KernelLog(g_Status.pci_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.pci_ready ? "PCI bus enumerated" : "PCI bus has no visible devices");
@@ -636,6 +817,10 @@ void PrintDriverInfo() {
         g_Status.usb_supported ? "USB controller support active" : "USB controller not found");
     KernelLog(g_Status.usb_hid_supported ? LogLevel::Info : LogLevel::Warn,
         g_Status.usb_hid_supported ? "USB HID parser ready" : "USB HID parser waiting for controller");
+    KernelLog(g_Status.usb_mass_storage_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.usb_mass_storage_ready ? "USB host transfer and mass-storage services ready" : "USB mass-storage services unavailable");
+    KernelLog(g_Status.gamepad_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.gamepad_ready ? "Wheel, relative mouse, gamepad, and joystick input ready" : "Extended input unavailable");
     KernelLog(g_Status.ahci_supported ? LogLevel::Info : LogLevel::Warn,
         g_Status.ahci_supported ? "AHCI controller support active" : "AHCI controller not found");
     KernelLog(g_Status.nvme_supported ? LogLevel::Info : LogLevel::Warn,

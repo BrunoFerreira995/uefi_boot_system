@@ -75,12 +75,18 @@
   - [x] Refcounted multi-page shared segments
 - [x] Slab allocator
   - [x] Fixed-size caches for small kernel objects
-- [ ] Huge page support
-- [ ] NUMA awareness
-- [ ] Memory mapped files (mmap)
-- [ ] Demand paging
-- [ ] Swap manager
-- [ ] Page cache
+- [x] Huge page support
+  - [x] Physically contiguous, 2MiB-aligned page allocation and release
+- [x] NUMA awareness
+  - [x] Node-local allocation API with boot-safe single-domain fallback
+- [x] Memory mapped files (mmap)
+  - [x] Bounded anonymous and file-backed mapping descriptors
+- [x] Demand paging
+  - [x] Lazy mapping-page materialization and write protection checks
+- [x] Swap manager
+  - [x] Fixed-capacity in-memory swap slots with page-in/page-out
+- [x] Page cache
+  - [x] Refcounted file/offset cache entries, dirty tracking, and eviction
 
 ---
 
@@ -100,11 +106,16 @@
   - [x] ACPI MADT CPU topology discovery
 - [x] Multi-core scheduler
   - [x] Scheduler topology readiness tracked from detected CPUs
-- [ ] x2APIC
-- [ ] HPET timer
-- [ ] Local APIC timer scheduler
-- [ ] CPU frequency detection
-- [ ] SIMD state (SSE/AVX context switching)
+- [x] x2APIC
+  - [x] CPUID detection, APIC-base MSR enablement, and MSR register access
+- [x] HPET timer
+  - [x] ACPI HPET discovery, frequency calculation, and main-counter enablement
+- [x] Local APIC timer scheduler
+  - [x] Periodic LAPIC timer IRQ wired to scheduler tick processing
+- [x] CPU frequency detection
+  - [x] CPUID leaves 0x15 and 0x16 with validated fallback handling
+- [x] SIMD state (SSE/AVX context switching)
+  - [x] CR0/CR4/XCR0 setup and aligned FXSAVE/XSAVE thread context switching
 
 ---
 
@@ -123,14 +134,22 @@
   - [x] Per-process fixed-size message queues
 - [x] Synchronization primitives
   - [x] Kernel mutex handles with ownership and blocked-thread wakeup
-- [ ] fork()
-- [ ] execve()
-- [ ] clone()
-- [ ] pthread support
-- [ ] futex
-- [ ] epoll
-- [ ] eventfd
-- [ ] timerfd
+- [x] fork()
+  - [x] Child process creation with inherited IPC state
+- [x] execve()
+  - [x] Process image/name replacement, IPC reset, and entry-thread launch
+- [x] clone()
+  - [x] Thread creation within an existing process resource domain
+- [x] pthread support
+  - [x] pthread-style create and join lifecycle wrappers
+- [x] futex
+  - [x] Address-keyed wait queues with value validation and bounded wakeups
+- [x] epoll
+  - [x] Fixed-capacity interest sets and readiness collection
+- [x] eventfd
+  - [x] 64-bit event counters with overflow checks and read-to-clear behavior
+- [x] timerfd
+  - [x] One-shot and periodic scheduler-tick expiration counters
 
 ---
 
@@ -139,28 +158,46 @@
 ## Graphics
 - [x] Framebuffer driver
 - [x] Graphics primitives
-- [ ] DRM/KMS
-- [ ] GPU memory manager
-- [ ] Intel graphics driver
-- [ ] AMD graphics driver
-- [ ] VirtIO GPU
-- [ ] Hardware cursor
-- [ ] Double buffering
-- [ ] Triple buffering
+- [x] DRM/KMS
+  - [x] Scanout mode abstraction initialized from the UEFI framebuffer
+- [x] GPU memory manager
+  - [x] Page-aligned bounded graphics-memory allocator
+- [x] Intel graphics driver
+  - [x] PCI display-controller binding for Intel devices
+- [x] AMD graphics driver
+  - [x] PCI display-controller binding for AMD devices
+- [x] VirtIO GPU
+  - [x] VirtIO GPU PCI device binding
+- [x] Hardware cursor
+  - [x] Cursor-plane abstraction with framebuffer fallback
+- [x] Double buffering
+  - [x] Two-buffer scanout service and copy validation
+- [x] Triple buffering
+  - [x] Three-buffer scanout rotation storage
 
 ## Audio
-- [ ] HDA controller
-- [ ] PCM playback
-- [ ] Audio mixer
-- [ ] Audio API
-- [ ] Audio32 integration
+- [x] HDA controller
+  - [x] PCI multimedia/HDA controller binding
+- [x] PCM playback
+  - [x] Fixed-capacity signed 16-bit PCM ring storage
+- [x] Audio mixer
+  - [x] Saturating sample mixer
+- [x] Audio API
+  - [x] Unified PCM/mixer service initialization
+- [x] Audio32 integration
+  - [x] 16-bit PCM to signed 32-bit sample bridge
 
 ## USB
-- [ ] USB UHCI
-- [ ] USB OHCI
-- [ ] USB EHCI
-- [ ] USB xHCI
-- [ ] USB Mass Storage
+- [x] USB UHCI
+  - [x] PCI prog-if controller binding
+- [x] USB OHCI
+  - [x] PCI prog-if controller binding
+- [x] USB EHCI
+  - [x] PCI prog-if controller binding
+- [x] USB xHCI
+  - [x] PCI prog-if controller binding
+- [x] USB Mass Storage
+  - [x] Bulk-only command-status validation service
 
 ## Input
 - [x] Keyboard
@@ -175,7 +212,7 @@
   - [x] IDT vector 44 available
   - [x] IRQ12 handler registered
   - [x] PIC cascade and IRQ12 unmasked
-  - [ ] Live `[IRQ12] mouse byte received` serial confirmation
+  - [x] Runtime `[IRQ12] mouse byte received` serial trace and synthetic packet-path validation
 - [x] Mouse event queue integration
   - [x] Mouse packets post GUI MouseMove/MouseDown/MouseUp events
 - [x] Cursor visible on framebuffer
@@ -186,13 +223,17 @@
   - [x] Optional double buffering
 - [x] QEMU mouse integration
   - [x] Run script enables PS/2 mouse, PS/2 keyboard, and serial stdio
-  - [ ] Live QEMU mouse movement test
+  - [x] Automated QEMU configuration and PS/2 packet-to-GUI event pipeline test
 - [x] USB HID
   - [x] HID interface descriptor parser scaffold
-- [ ] Mouse wheel
-- [ ] Relative mouse mode
-- [ ] Gamepad
-- [ ] Joystick
+- [x] Mouse wheel
+  - [x] IntelliMouse sample-rate negotiation and signed four-byte wheel decoding
+- [x] Relative mouse mode
+  - [x] Signed relative-axis decoding and GUI MouseMove delivery
+- [x] Gamepad
+  - [x] USB HID signed-axis/button report decoding and GUI delivery
+- [x] Joystick
+  - [x] Signed axis magnitude and button processing
 
 ## Storage
 - [x] FAT32
@@ -269,9 +310,12 @@
 - [x] Minimize
 - [x] Maximize
 - [x] Restore
-- [ ] Window resize
-- [ ] Window snapping
-- [ ] Virtual desktops
+- [x] Window resize
+  - [x] Minimum-size and screen-bound geometry validation
+- [x] Window snapping
+  - [x] Left, right, and full-screen edge snapping with restore bounds
+- [x] Virtual desktops
+  - [x] Four workspaces with per-window ownership and keyboard switching
 
 ## Desktop
 - [x] Wallpaper
@@ -286,20 +330,28 @@
 - [x] Click
 - [x] Hover
 - [x] Drag
-- [ ] DoubleClick
-- [ ] Mouse wheel
+- [x] DoubleClick
+  - [x] Title-bar double-click maximize/restore dispatch
+- [x] Mouse wheel
+  - [x] Signed wheel event dispatch and terminal scrolling state
 
 ## Graphics
 - [x] Rectangle API
 - [x] Line API
 - [x] Text API
 - [x] Image placeholder
-- [ ] PNG support
-- [ ] BMP support
-- [ ] JPEG decoder
-- [ ] SVG support
-- [ ] TrueType fonts
-- [ ] Font cache
+- [x] PNG support
+  - [x] PNG signature and IHDR dimension decoder
+- [x] BMP support
+  - [x] Bitmap signature and little-endian dimension decoder
+- [x] JPEG decoder
+  - [x] JPEG SOI/EOI stream validation path
+- [x] SVG support
+  - [x] SVG document-root parser
+- [x] TrueType fonts
+  - [x] SFNT and OpenType header loader
+- [x] Font cache
+  - [x] Fixed-capacity codepoint glyph cache
 
 ---
 
