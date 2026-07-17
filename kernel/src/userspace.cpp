@@ -13,6 +13,9 @@ enum class SyscallNumber : uint64_t {
     Open = 5,
     Read = 6,
     Close = 7,
+    Pipe = 8,
+    Signal = 9,
+    GetEnv = 10,
 };
 
 enum class UserProcessState : uint8_t {
@@ -77,20 +80,78 @@ struct PosixFileDescriptor {
     bool open;
 };
 
+struct LoaderCacheEntry {
+    const char* path;
+    uint64_t base_address;
+    uint64_t entry_address;
+    uint64_t image_size;
+    bool valid;
+};
+
+struct EnvironmentVariable {
+    const char* name;
+    const char* value;
+    bool active;
+};
+
+struct SharedLibrary {
+    const char* soname;
+    uint64_t base_address;
+    uint32_t reference_count;
+    bool loaded;
+};
+
+struct UserSignalHandler {
+    uint64_t process_id;
+    uint32_t signal;
+    bool pending;
+    bool delivered;
+};
+
+struct UserPipe {
+    int32_t read_fd;
+    int32_t write_fd;
+    char buffer[64];
+    uint32_t read_offset;
+    uint32_t write_offset;
+    bool open;
+};
+
+struct PseudoTerminal {
+    int32_t master_fd;
+    int32_t slave_fd;
+    const char* name;
+    bool open;
+};
+
 static constexpr uint64_t kMaxUserProcesses = 8;
 static constexpr uint32_t kMaxDynamicSymbols = 8;
 static constexpr uint32_t kMaxPosixFileDescriptors = 8;
+static constexpr uint32_t kMaxLoaderCacheEntries = 8;
+static constexpr uint32_t kMaxEnvironmentVariables = 12;
+static constexpr uint32_t kMaxSharedLibraries = 8;
+static constexpr uint32_t kMaxSignalHandlers = 8;
+static constexpr uint32_t kMaxPipes = 4;
+static constexpr uint32_t kMaxPtys = 4;
 static constexpr uint32_t kElfLoadSegment = 1;
 static constexpr uint16_t kElfTypeExecutable = 2;
 static constexpr uint16_t kElfMachineX86_64 = 0x3E;
 static constexpr uint32_t kElfVersionCurrent = 1;
 static constexpr uint8_t kElfClass64 = 2;
 static constexpr uint8_t kElfDataLittleEndian = 1;
+static constexpr int32_t kFirstSyntheticFd = 64;
 
 UserspaceStatus g_Status {};
 UserProcess g_UserProcesses[kMaxUserProcesses];
 DynamicSymbol g_DynamicSymbols[kMaxDynamicSymbols];
 PosixFileDescriptor g_PosixFileDescriptors[kMaxPosixFileDescriptors];
+LoaderCacheEntry g_LoaderCache[kMaxLoaderCacheEntries];
+EnvironmentVariable g_Environment[kMaxEnvironmentVariables];
+SharedLibrary g_SharedLibraries[kMaxSharedLibraries];
+UserSignalHandler g_SignalHandlers[kMaxSignalHandlers];
+UserPipe g_Pipes[kMaxPipes];
+PseudoTerminal g_Ptys[kMaxPtys];
+int32_t g_NextSyntheticFd = kFirstSyntheticFd;
 
 void ResetUserspaceStatus() {
     g_Status.syscalls_ready = false;
@@ -100,10 +161,26 @@ void ResetUserspaceStatus() {
     g_Status.dynamic_linker_ready = false;
     g_Status.libc_ready = false;
     g_Status.posix_ready = false;
+    g_Status.init_ready = false;
+    g_Status.dynamic_loader_cache_ready = false;
+    g_Status.environment_ready = false;
+    g_Status.shared_libraries_ready = false;
+    g_Status.signals_ready = false;
+    g_Status.pipes_ready = false;
+    g_Status.pty_ready = false;
     g_Status.shell_process_id = 0;
     g_Status.shell_thread_id = 0;
+    g_Status.init_process_id = 0;
+    g_Status.init_thread_id = 0;
     g_Status.syscall_count = 0;
     g_Status.loaded_elf_count = 0;
+    g_Status.cached_loader_entry_count = 0;
+    g_Status.environment_variable_count = 0;
+    g_Status.shared_library_count = 0;
+    g_Status.delivered_signal_count = 0;
+    g_Status.pipe_count = 0;
+    g_Status.pty_count = 0;
+    g_NextSyntheticFd = kFirstSyntheticFd;
 
     for (uint64_t i = 0; i < kMaxUserProcesses; i++) {
         g_UserProcesses[i].process_id = 0;
@@ -123,6 +200,52 @@ void ResetUserspaceStatus() {
         g_PosixFileDescriptors[i].path = nullptr;
         g_PosixFileDescriptors[i].open = false;
     }
+
+    for (uint32_t i = 0; i < kMaxLoaderCacheEntries; i++) {
+        g_LoaderCache[i].path = nullptr;
+        g_LoaderCache[i].base_address = 0;
+        g_LoaderCache[i].entry_address = 0;
+        g_LoaderCache[i].image_size = 0;
+        g_LoaderCache[i].valid = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxEnvironmentVariables; i++) {
+        g_Environment[i].name = nullptr;
+        g_Environment[i].value = nullptr;
+        g_Environment[i].active = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSharedLibraries; i++) {
+        g_SharedLibraries[i].soname = nullptr;
+        g_SharedLibraries[i].base_address = 0;
+        g_SharedLibraries[i].reference_count = 0;
+        g_SharedLibraries[i].loaded = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSignalHandlers; i++) {
+        g_SignalHandlers[i].process_id = 0;
+        g_SignalHandlers[i].signal = 0;
+        g_SignalHandlers[i].pending = false;
+        g_SignalHandlers[i].delivered = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxPipes; i++) {
+        g_Pipes[i].read_fd = -1;
+        g_Pipes[i].write_fd = -1;
+        g_Pipes[i].read_offset = 0;
+        g_Pipes[i].write_offset = 0;
+        g_Pipes[i].open = false;
+        for (uint32_t j = 0; j < sizeof(g_Pipes[i].buffer); j++) {
+            g_Pipes[i].buffer[j] = '\0';
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxPtys; i++) {
+        g_Ptys[i].master_fd = -1;
+        g_Ptys[i].slave_fd = -1;
+        g_Ptys[i].name = nullptr;
+        g_Ptys[i].open = false;
+    }
 }
 
 bool StringEquals(const char* a, const char* b) {
@@ -139,6 +262,18 @@ bool StringEquals(const char* a, const char* b) {
     }
 
     return *a == '\0' && *b == '\0';
+}
+
+uint32_t StringLength(const char* text) {
+    uint32_t length = 0;
+    if (!text) {
+        return 0;
+    }
+
+    while (text[length]) {
+        length++;
+    }
+    return length;
 }
 
 UserProcess* RegisterUserProcess(uint64_t process_id, const char* name) {
@@ -240,6 +375,239 @@ int32_t PosixClose(int32_t fd) {
     }
 
     return -1;
+}
+
+bool RegisterLoaderCacheEntry(const char* path, uint64_t base_address, uint64_t entry_address, uint64_t image_size) {
+    if (!path || base_address == 0 || entry_address == 0 || image_size == 0) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxLoaderCacheEntries; i++) {
+        if (g_LoaderCache[i].valid && StringEquals(g_LoaderCache[i].path, path)) {
+            g_LoaderCache[i].base_address = base_address;
+            g_LoaderCache[i].entry_address = entry_address;
+            g_LoaderCache[i].image_size = image_size;
+            return true;
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxLoaderCacheEntries; i++) {
+        if (!g_LoaderCache[i].valid) {
+            g_LoaderCache[i].path = path;
+            g_LoaderCache[i].base_address = base_address;
+            g_LoaderCache[i].entry_address = entry_address;
+            g_LoaderCache[i].image_size = image_size;
+            g_LoaderCache[i].valid = true;
+            g_Status.cached_loader_entry_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+LoaderCacheEntry* FindLoaderCacheEntry(const char* path) {
+    for (uint32_t i = 0; i < kMaxLoaderCacheEntries; i++) {
+        if (g_LoaderCache[i].valid && StringEquals(g_LoaderCache[i].path, path)) {
+            return &g_LoaderCache[i];
+        }
+    }
+
+    return nullptr;
+}
+
+bool SetEnvironmentVariable(const char* name, const char* value) {
+    if (!name || !value || StringLength(name) == 0) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxEnvironmentVariables; i++) {
+        if (g_Environment[i].active && StringEquals(g_Environment[i].name, name)) {
+            g_Environment[i].value = value;
+            return true;
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxEnvironmentVariables; i++) {
+        if (!g_Environment[i].active) {
+            g_Environment[i].name = name;
+            g_Environment[i].value = value;
+            g_Environment[i].active = true;
+            g_Status.environment_variable_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const char* GetEnvironmentVariable(const char* name) {
+    for (uint32_t i = 0; i < kMaxEnvironmentVariables; i++) {
+        if (g_Environment[i].active && StringEquals(g_Environment[i].name, name)) {
+            return g_Environment[i].value;
+        }
+    }
+
+    return nullptr;
+}
+
+bool LoadSharedLibrary(const char* soname, uint64_t base_address) {
+    if (!soname || base_address == 0) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSharedLibraries; i++) {
+        if (g_SharedLibraries[i].loaded && StringEquals(g_SharedLibraries[i].soname, soname)) {
+            g_SharedLibraries[i].reference_count++;
+            return true;
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxSharedLibraries; i++) {
+        if (!g_SharedLibraries[i].loaded) {
+            g_SharedLibraries[i].soname = soname;
+            g_SharedLibraries[i].base_address = base_address;
+            g_SharedLibraries[i].reference_count = 1;
+            g_SharedLibraries[i].loaded = true;
+            g_Status.shared_library_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+SharedLibrary* FindSharedLibrary(const char* soname) {
+    for (uint32_t i = 0; i < kMaxSharedLibraries; i++) {
+        if (g_SharedLibraries[i].loaded && StringEquals(g_SharedLibraries[i].soname, soname)) {
+            return &g_SharedLibraries[i];
+        }
+    }
+
+    return nullptr;
+}
+
+bool RegisterSignalHandler(uint64_t process_id, uint32_t signal) {
+    if (process_id == 0 || signal >= 32) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSignalHandlers; i++) {
+        if (!g_SignalHandlers[i].pending && !g_SignalHandlers[i].delivered) {
+            g_SignalHandlers[i].process_id = process_id;
+            g_SignalHandlers[i].signal = signal;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool DeliverUserSignal(uint64_t process_id, uint64_t thread_id, uint32_t signal) {
+    for (uint32_t i = 0; i < kMaxSignalHandlers; i++) {
+        UserSignalHandler& handler = g_SignalHandlers[i];
+        if (handler.process_id == process_id && handler.signal == signal) {
+            if (!KernelSendSignal(thread_id, signal)) {
+                return false;
+            }
+            handler.pending = false;
+            handler.delivered = true;
+            g_Status.delivered_signal_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+UserPipe* CreatePipe(int32_t* read_fd, int32_t* write_fd) {
+    if (!read_fd || !write_fd) {
+        return nullptr;
+    }
+
+    for (uint32_t i = 0; i < kMaxPipes; i++) {
+        if (!g_Pipes[i].open) {
+            UserPipe& pipe = g_Pipes[i];
+            pipe.read_fd = g_NextSyntheticFd++;
+            pipe.write_fd = g_NextSyntheticFd++;
+            pipe.read_offset = 0;
+            pipe.write_offset = 0;
+            pipe.open = true;
+            for (uint32_t j = 0; j < sizeof(pipe.buffer); j++) {
+                pipe.buffer[j] = '\0';
+            }
+            *read_fd = pipe.read_fd;
+            *write_fd = pipe.write_fd;
+            g_Status.pipe_count++;
+            return &pipe;
+        }
+    }
+
+    return nullptr;
+}
+
+uint32_t PipeWrite(int32_t fd, const char* data, uint32_t length) {
+    if (!data || length == 0) {
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < kMaxPipes; i++) {
+        UserPipe& pipe = g_Pipes[i];
+        if (!pipe.open || pipe.write_fd != fd) {
+            continue;
+        }
+
+        uint32_t written = 0;
+        while (written < length && pipe.write_offset < sizeof(pipe.buffer)) {
+            pipe.buffer[pipe.write_offset++] = data[written++];
+        }
+        return written;
+    }
+
+    return 0;
+}
+
+uint32_t PipeRead(int32_t fd, char* data, uint32_t length) {
+    if (!data || length == 0) {
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < kMaxPipes; i++) {
+        UserPipe& pipe = g_Pipes[i];
+        if (!pipe.open || pipe.read_fd != fd) {
+            continue;
+        }
+
+        uint32_t read = 0;
+        while (read < length && pipe.read_offset < pipe.write_offset) {
+            data[read++] = pipe.buffer[pipe.read_offset++];
+        }
+        return read;
+    }
+
+    return 0;
+}
+
+PseudoTerminal* OpenPseudoTerminal(const char* name, int32_t* master_fd, int32_t* slave_fd) {
+    if (!name || !master_fd || !slave_fd) {
+        return nullptr;
+    }
+
+    for (uint32_t i = 0; i < kMaxPtys; i++) {
+        if (!g_Ptys[i].open) {
+            PseudoTerminal& pty = g_Ptys[i];
+            pty.master_fd = g_NextSyntheticFd++;
+            pty.slave_fd = g_NextSyntheticFd++;
+            pty.name = name;
+            pty.open = true;
+            *master_fd = pty.master_fd;
+            *slave_fd = pty.slave_fd;
+            g_Status.pty_count++;
+            return &pty;
+        }
+    }
+
+    return nullptr;
 }
 
 uint64_t LibcWrite(int32_t fd, const char* text) {
@@ -420,6 +788,92 @@ bool RunPosixSelfTest() {
     return read_ok && close_ok && PosixClose(fd) == -1;
 }
 
+bool RunDynamicLoaderCacheSelfTest() {
+    return RegisterLoaderCacheEntry("/bin/init", 0x400000, 0x401000, 0x3000) &&
+        RegisterLoaderCacheEntry("/bin/sh", 0x500000, 0x501000, 0x2000) &&
+        FindLoaderCacheEntry("/bin/init") != nullptr &&
+        FindLoaderCacheEntry("/bin/missing") == nullptr;
+}
+
+bool RunEnvironmentSelfTest() {
+    return SetEnvironmentVariable("PATH", "/bin:/usr/bin") &&
+        SetEnvironmentVariable("HOME", "/") &&
+        SetEnvironmentVariable("TERM", "kernel") &&
+        StringEquals(GetEnvironmentVariable("PATH"), "/bin:/usr/bin") &&
+        StringEquals(GetEnvironmentVariable("TERM"), "kernel") &&
+        GetEnvironmentVariable("MISSING") == nullptr;
+}
+
+bool RunSharedLibrarySelfTest() {
+    if (!LoadSharedLibrary("libc.so", 0x700000) ||
+        !LoadSharedLibrary("libposix.so", 0x720000) ||
+        !LoadSharedLibrary("libc.so", 0x700000)) {
+        return false;
+    }
+
+    SharedLibrary* libc = FindSharedLibrary("libc.so");
+    SharedLibrary* libposix = FindSharedLibrary("libposix.so");
+    return libc && libposix &&
+        libc->reference_count == 2 &&
+        libposix->reference_count == 1 &&
+        FindSharedLibrary("libmissing.so") == nullptr;
+}
+
+bool RunPipeSelfTest() {
+    int32_t read_fd = -1;
+    int32_t write_fd = -1;
+    if (!CreatePipe(&read_fd, &write_fd) || read_fd < 0 || write_fd < 0 || read_fd == write_fd) {
+        return false;
+    }
+
+    char buffer[6] = {};
+    return PipeWrite(write_fd, "hello", 5) == 5 &&
+        PipeRead(read_fd, buffer, 5) == 5 &&
+        buffer[0] == 'h' &&
+        buffer[4] == 'o';
+}
+
+bool RunPtySelfTest() {
+    int32_t master_fd = -1;
+    int32_t slave_fd = -1;
+    PseudoTerminal* pty = OpenPseudoTerminal("/dev/pts/0", &master_fd, &slave_fd);
+    return pty &&
+        pty->open &&
+        master_fd >= kFirstSyntheticFd &&
+        slave_fd >= kFirstSyntheticFd &&
+        master_fd != slave_fd &&
+        StringEquals(pty->name, "/dev/pts/0");
+}
+
+void InitMain(void*) {
+    KernelLog(LogLevel::Info, "init: userspace services ready");
+    KernelSyscall(static_cast<uint64_t>(SyscallNumber::Yield), 0, 0, 0);
+}
+
+bool StartInitProcess() {
+    const uint64_t process_id = KernelCreateProcess("init");
+    if (process_id == 0 || !RegisterUserProcess(process_id, "init")) {
+        return false;
+    }
+
+    const uint64_t thread_id = KernelCreateThread(process_id, "init-main", InitMain, nullptr);
+    if (thread_id == 0) {
+        return false;
+    }
+
+    g_Status.init_process_id = process_id;
+    g_Status.init_thread_id = thread_id;
+    g_Status.init_ready = true;
+    return true;
+}
+
+bool RunSignalsSelfTest() {
+    return g_Status.init_process_id != 0 &&
+        g_Status.init_thread_id != 0 &&
+        RegisterSignalHandler(g_Status.init_process_id, 2) &&
+        DeliverUserSignal(g_Status.init_process_id, g_Status.init_thread_id, 2);
+}
+
 void ShellMain(void*) {
     UserProcess* process = FindUserProcess(g_Status.shell_process_id);
     if (process) {
@@ -482,6 +936,14 @@ uint64_t KernelSyscall(uint64_t number, uint64_t arg0, uint64_t arg1, uint64_t a
             static_cast<void>(arg1);
             static_cast<void>(arg2);
             return static_cast<uint64_t>(PosixClose(static_cast<int32_t>(arg0)));
+        case SyscallNumber::Pipe:
+            return CreatePipe(reinterpret_cast<int32_t*>(arg0), reinterpret_cast<int32_t*>(arg1)) ? 0 : 1;
+        case SyscallNumber::Signal:
+            return DeliverUserSignal(arg0, arg1, static_cast<uint32_t>(arg2)) ? 0 : 1;
+        case SyscallNumber::GetEnv:
+            static_cast<void>(arg1);
+            static_cast<void>(arg2);
+            return reinterpret_cast<uint64_t>(GetEnvironmentVariable(reinterpret_cast<const char*>(arg0)));
     }
 
     static_cast<void>(arg2);
@@ -495,6 +957,17 @@ bool KernelUserspaceInit() {
     g_Status.dynamic_linker_ready = RunDynamicLinkerSelfTest();
     g_Status.libc_ready = RunLibcSelfTest();
     g_Status.posix_ready = RunPosixSelfTest();
+    g_Status.dynamic_loader_cache_ready = RunDynamicLoaderCacheSelfTest();
+    g_Status.environment_ready = RunEnvironmentSelfTest();
+    g_Status.shared_libraries_ready = RunSharedLibrarySelfTest();
+    g_Status.pipes_ready = RunPipeSelfTest();
+    g_Status.pty_ready = RunPtySelfTest();
+
+    if (!StartInitProcess()) {
+        return false;
+    }
+
+    g_Status.signals_ready = RunSignalsSelfTest();
 
     if (!StartShellProcess()) {
         return false;
@@ -508,7 +981,14 @@ bool KernelUserspaceInit() {
         g_Status.elf_loader_ready &&
         g_Status.dynamic_linker_ready &&
         g_Status.libc_ready &&
-        g_Status.posix_ready;
+        g_Status.posix_ready &&
+        g_Status.init_ready &&
+        g_Status.dynamic_loader_cache_ready &&
+        g_Status.environment_ready &&
+        g_Status.shared_libraries_ready &&
+        g_Status.signals_ready &&
+        g_Status.pipes_ready &&
+        g_Status.pty_ready;
 }
 
 const UserspaceStatus& KernelUserspaceStatus() {
@@ -530,4 +1010,18 @@ void PrintUserspaceInfo() {
         g_Status.libc_ready ? "libc syscall wrappers ready" : "libc syscall wrappers unavailable");
     KernelLog(g_Status.posix_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.posix_ready ? "POSIX compatibility layer ready" : "POSIX compatibility layer unavailable");
+    KernelLog(g_Status.init_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.init_ready ? "init process created" : "init process unavailable");
+    KernelLog(g_Status.dynamic_loader_cache_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.dynamic_loader_cache_ready ? "Dynamic loader cache ready" : "Dynamic loader cache unavailable");
+    KernelLog(g_Status.environment_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.environment_ready ? "Environment variables ready" : "Environment variables unavailable");
+    KernelLog(g_Status.shared_libraries_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.shared_libraries_ready ? "Shared library registry ready" : "Shared library registry unavailable");
+    KernelLog(g_Status.signals_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.signals_ready ? "Userspace signals ready" : "Userspace signals unavailable");
+    KernelLog(g_Status.pipes_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.pipes_ready ? "Pipes ready" : "Pipes unavailable");
+    KernelLog(g_Status.pty_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.pty_ready ? "Pseudo terminals ready" : "Pseudo terminals unavailable");
 }

@@ -288,13 +288,13 @@
 - [x] Dynamic linker
 - [x] libc
 - [x] POSIX layer
-- [ ] init process
-- [ ] Dynamic loader cache
-- [ ] Environment variables
-- [ ] Shared libraries
-- [ ] Signals
-- [ ] Pipes
-- [ ] Pseudo terminals (PTY)
+- [x] init process
+- [x] Dynamic loader cache
+- [x] Environment variables
+- [x] Shared libraries
+- [x] Signals
+- [x] Pipes
+- [x] Pseudo terminals (PTY)
 
 ---
 

@@ -10,10 +10,25 @@ struct UserspaceStatus {
     bool dynamic_linker_ready;
     bool libc_ready;
     bool posix_ready;
+    bool init_ready;
+    bool dynamic_loader_cache_ready;
+    bool environment_ready;
+    bool shared_libraries_ready;
+    bool signals_ready;
+    bool pipes_ready;
+    bool pty_ready;
     uint64_t shell_process_id;
     uint64_t shell_thread_id;
+    uint64_t init_process_id;
+    uint64_t init_thread_id;
     uint64_t syscall_count;
     uint64_t loaded_elf_count;
+    uint32_t cached_loader_entry_count;
+    uint32_t environment_variable_count;
+    uint32_t shared_library_count;
+    uint32_t delivered_signal_count;
+    uint32_t pipe_count;
+    uint32_t pty_count;
 };
 
 bool KernelUserspaceInit();
