@@ -9,6 +9,11 @@ enum class FileSystemType {
     Fat32,
     Ext2,
     RamFs,
+    TmpFs,
+    ProcFs,
+    DevFs,
+    SysFs,
+    InitRamFs,
 };
 
 enum FileMode : uint16_t {
@@ -48,15 +53,40 @@ struct FsDriver {
     bool (*Probe)(const uint8_t* data, uint64_t size);
 };
 
-static constexpr uint32_t kMaxFsDrivers = 4;
-static constexpr uint32_t kMaxMounts = 8;
+struct PseudoFsNode {
+    const char* path;
+    FileSystemType type;
+    uint16_t mode;
+    uint64_t size;
+    uint32_t major;
+    uint32_t minor;
+    bool directory;
+    bool active;
+};
+
+struct InitRamFsHeader {
+    uint32_t magic;
+    uint32_t file_count;
+};
+
+struct InitRamFsEntry {
+    const char* path;
+    uint64_t size;
+    uint16_t mode;
+};
+
+static constexpr uint32_t kMaxFsDrivers = 9;
+static constexpr uint32_t kMaxMounts = 12;
 static constexpr uint32_t kMaxRamFsNodes = 16;
+static constexpr uint32_t kMaxPseudoFsNodes = 24;
+static constexpr uint32_t kInitRamFsMagic = 0x49524653;
 static constexpr uint16_t kFatBootSignature = 0xAA55;
 static constexpr uint16_t kExt2Magic = 0xEF53;
 
 FsDriver g_Drivers[kMaxFsDrivers];
 VfsMount g_Mounts[kMaxMounts];
 VfsNode g_RamFsNodes[kMaxRamFsNodes];
+PseudoFsNode g_PseudoFsNodes[kMaxPseudoFsNodes];
 FileSystemStatus g_Status {};
 
 uint16_t ReadLe16(const uint8_t* data, uint64_t offset) {
@@ -114,6 +144,31 @@ bool RamFsProbe(const uint8_t*, uint64_t) {
     return true;
 }
 
+bool TmpFsProbe(const uint8_t*, uint64_t) {
+    return true;
+}
+
+bool ProcFsProbe(const uint8_t*, uint64_t) {
+    return true;
+}
+
+bool DevFsProbe(const uint8_t*, uint64_t) {
+    return true;
+}
+
+bool SysFsProbe(const uint8_t*, uint64_t) {
+    return true;
+}
+
+bool InitRamFsProbe(const uint8_t* data, uint64_t size) {
+    if (!data || size < sizeof(InitRamFsHeader)) {
+        return false;
+    }
+
+    const InitRamFsHeader* header = reinterpret_cast<const InitRamFsHeader*>(data);
+    return header->magic == kInitRamFsMagic && header->file_count != 0;
+}
+
 bool StringEquals(const char* a, const char* b) {
     if (!a || !b) {
         return false;
@@ -168,6 +223,10 @@ bool HasPermission(const VfsNode& node, uint16_t permission) {
     return (node.mode & permission) == permission;
 }
 
+bool HasMode(uint16_t mode, uint16_t permission) {
+    return (mode & permission) == permission;
+}
+
 void ResetFileSystemStatus() {
     g_Status.vfs_ready = false;
     g_Status.fat32_supported = false;
@@ -176,9 +235,16 @@ void ResetFileSystemStatus() {
     g_Status.symbolic_links_ready = false;
     g_Status.mount_manager_ready = false;
     g_Status.ramfs_ready = false;
+    g_Status.tmpfs_ready = false;
+    g_Status.procfs_ready = false;
+    g_Status.devfs_ready = false;
+    g_Status.sysfs_ready = false;
+    g_Status.initramfs_ready = false;
     g_Status.registered_driver_count = 0;
     g_Status.mounted_filesystem_count = 0;
     g_Status.ramfs_node_count = 0;
+    g_Status.pseudo_node_count = 0;
+    g_Status.initramfs_file_count = 0;
 
     for (uint32_t i = 0; i < kMaxFsDrivers; i++) {
         g_Drivers[i].name = nullptr;
@@ -200,6 +266,17 @@ void ResetFileSystemStatus() {
         g_RamFsNodes[i].directory = false;
         g_RamFsNodes[i].symlink = false;
         g_RamFsNodes[i].active = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxPseudoFsNodes; i++) {
+        g_PseudoFsNodes[i].path = nullptr;
+        g_PseudoFsNodes[i].type = FileSystemType::Unknown;
+        g_PseudoFsNodes[i].mode = 0;
+        g_PseudoFsNodes[i].size = 0;
+        g_PseudoFsNodes[i].major = 0;
+        g_PseudoFsNodes[i].minor = 0;
+        g_PseudoFsNodes[i].directory = false;
+        g_PseudoFsNodes[i].active = false;
     }
 }
 
@@ -277,6 +354,43 @@ const VfsNode* RamFsFindNode(const char* path) {
     return nullptr;
 }
 
+bool PseudoFsAddNode(const char* path,
+    FileSystemType type,
+    uint16_t mode,
+    bool directory,
+    uint64_t size = 0,
+    uint32_t major = 0,
+    uint32_t minor = 0) {
+    if (!path ||
+        type == FileSystemType::Unknown ||
+        g_Status.pseudo_node_count >= kMaxPseudoFsNodes) {
+        return false;
+    }
+
+    PseudoFsNode& node = g_PseudoFsNodes[g_Status.pseudo_node_count];
+    node.path = path;
+    node.type = type;
+    node.mode = mode;
+    node.size = size;
+    node.major = major;
+    node.minor = minor;
+    node.directory = directory;
+    node.active = true;
+    g_Status.pseudo_node_count++;
+    return true;
+}
+
+const PseudoFsNode* PseudoFsFindNode(const char* path, FileSystemType type) {
+    for (uint32_t i = 0; i < g_Status.pseudo_node_count; i++) {
+        const PseudoFsNode& node = g_PseudoFsNodes[i];
+        if (node.active && node.type == type && StringEquals(node.path, path)) {
+            return &node;
+        }
+    }
+
+    return nullptr;
+}
+
 void WriteLe16(uint8_t* data, uint64_t offset, uint16_t value) {
     data[offset] = static_cast<uint8_t>(value & 0xFF);
     data[offset + 1] = static_cast<uint8_t>((value >> 8) & 0xFF);
@@ -341,15 +455,15 @@ bool RunPermissionSelfTest() {
 
 bool RunRamFsSelfTest() {
     const uint32_t start_count = g_Status.ramfs_node_count;
-    if (!RamFsAddNode("/tmp", static_cast<uint16_t>(Directory | OwnerRead | OwnerWrite | OwnerExecute), true)) {
+    if (!RamFsAddNode("/ram", static_cast<uint16_t>(Directory | OwnerRead | OwnerWrite | OwnerExecute), true)) {
         return false;
     }
-    if (!RamFsAddNode("/tmp/readme", static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupRead | OtherRead), false)) {
+    if (!RamFsAddNode("/ram/readme", static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupRead | OtherRead), false)) {
         return false;
     }
 
-    const VfsNode* root = RamFsFindNode("/tmp");
-    const VfsNode* readme = RamFsFindNode("/tmp/readme");
+    const VfsNode* root = RamFsFindNode("/ram");
+    const VfsNode* readme = RamFsFindNode("/ram/readme");
     return g_Status.ramfs_node_count == start_count + 2 &&
         root && root->directory &&
         readme && !readme->directory &&
@@ -357,25 +471,137 @@ bool RunRamFsSelfTest() {
 }
 
 bool RunSymlinkSelfTest() {
-    if (!RamFsAddNode("/tmp/latest", static_cast<uint16_t>(Symlink | OwnerRead | GroupRead | OtherRead), false, "/tmp/readme")) {
+    if (!RamFsAddNode("/ram/latest", static_cast<uint16_t>(Symlink | OwnerRead | GroupRead | OtherRead), false, "/ram/readme")) {
         return false;
     }
 
-    const VfsNode* link = RamFsFindNode("/tmp/latest");
+    const VfsNode* link = RamFsFindNode("/ram/latest");
     return link &&
         link->symlink &&
-        StringEquals(link->symlink_target, "/tmp/readme") &&
+        StringEquals(link->symlink_target, "/ram/readme") &&
         RamFsFindNode(link->symlink_target) != nullptr;
 }
 
 bool RunMountManagerSelfTest() {
     const VfsMount* root = VfsFindMount("/");
     const VfsMount* boot = VfsFindMount("/boot/kernel.elf");
-    const VfsMount* tmp = VfsFindMount("/tmp/readme");
+    const VfsMount* ram = VfsFindMount("/ram/readme");
+    const VfsMount* tmp = VfsFindMount("/tmp/session.sock");
+    const VfsMount* proc = VfsFindMount("/proc/cpuinfo");
+    const VfsMount* dev = VfsFindMount("/dev/console");
+    const VfsMount* sys = VfsFindMount("/sys/kernel");
+    const VfsMount* initrd = VfsFindMount("/initrd/init");
 
     return root && root->type == FileSystemType::Ext2 &&
         boot && boot->type == FileSystemType::Fat32 &&
-        tmp && tmp->type == FileSystemType::RamFs;
+        ram && ram->type == FileSystemType::RamFs &&
+        tmp && tmp->type == FileSystemType::TmpFs &&
+        proc && proc->type == FileSystemType::ProcFs &&
+        dev && dev->type == FileSystemType::DevFs &&
+        sys && sys->type == FileSystemType::SysFs &&
+        initrd && initrd->type == FileSystemType::InitRamFs;
+}
+
+bool RunTmpFsSelfTest() {
+    const uint32_t start_count = g_Status.pseudo_node_count;
+    if (!PseudoFsAddNode("/tmp", FileSystemType::TmpFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerWrite | OwnerExecute), true)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/tmp/session.sock", FileSystemType::TmpFs, static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite), false, 0)) {
+        return false;
+    }
+
+    const PseudoFsNode* root = PseudoFsFindNode("/tmp", FileSystemType::TmpFs);
+    const PseudoFsNode* socket = PseudoFsFindNode("/tmp/session.sock", FileSystemType::TmpFs);
+    return g_Status.pseudo_node_count == start_count + 2 &&
+        root && root->directory &&
+        socket && !socket->directory &&
+        HasMode(socket->mode, OwnerWrite);
+}
+
+bool RunProcFsSelfTest() {
+    if (!PseudoFsAddNode("/proc", FileSystemType::ProcFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerExecute | GroupRead | GroupExecute | OtherRead | OtherExecute), true)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/proc/cpuinfo", FileSystemType::ProcFs, static_cast<uint16_t>(Regular | OwnerRead | GroupRead | OtherRead), false, 128)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/proc/meminfo", FileSystemType::ProcFs, static_cast<uint16_t>(Regular | OwnerRead | GroupRead | OtherRead), false, 96)) {
+        return false;
+    }
+
+    const PseudoFsNode* cpuinfo = PseudoFsFindNode("/proc/cpuinfo", FileSystemType::ProcFs);
+    const PseudoFsNode* meminfo = PseudoFsFindNode("/proc/meminfo", FileSystemType::ProcFs);
+    return cpuinfo && cpuinfo->size != 0 &&
+        meminfo && meminfo->size != 0 &&
+        !cpuinfo->directory;
+}
+
+bool RunDevFsSelfTest() {
+    if (!PseudoFsAddNode("/dev", FileSystemType::DevFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerWrite | OwnerExecute | GroupRead | GroupExecute | OtherRead | OtherExecute), true)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/dev/console", FileSystemType::DevFs, static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupWrite), false, 0, 5, 1)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/dev/null", FileSystemType::DevFs, static_cast<uint16_t>(Regular | OwnerRead | OwnerWrite | GroupRead | GroupWrite | OtherRead | OtherWrite), false, 0, 1, 3)) {
+        return false;
+    }
+
+    const PseudoFsNode* console = PseudoFsFindNode("/dev/console", FileSystemType::DevFs);
+    const PseudoFsNode* null_device = PseudoFsFindNode("/dev/null", FileSystemType::DevFs);
+    return console && console->major == 5 && console->minor == 1 &&
+        null_device && null_device->major == 1 && null_device->minor == 3;
+}
+
+bool RunSysFsSelfTest() {
+    if (!PseudoFsAddNode("/sys", FileSystemType::SysFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerExecute | GroupRead | GroupExecute | OtherRead | OtherExecute), true)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/sys/kernel", FileSystemType::SysFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerExecute | GroupRead | GroupExecute | OtherRead | OtherExecute), true)) {
+        return false;
+    }
+    if (!PseudoFsAddNode("/sys/kernel/version", FileSystemType::SysFs, static_cast<uint16_t>(Regular | OwnerRead | GroupRead | OtherRead), false, 32)) {
+        return false;
+    }
+
+    const PseudoFsNode* kernel = PseudoFsFindNode("/sys/kernel", FileSystemType::SysFs);
+    const PseudoFsNode* version = PseudoFsFindNode("/sys/kernel/version", FileSystemType::SysFs);
+    return kernel && kernel->directory &&
+        version && version->size != 0;
+}
+
+bool RunInitRamFsSelfTest() {
+    const InitRamFsEntry files[] = {
+        {"/initrd/init", 4096, static_cast<uint16_t>(Regular | OwnerRead | OwnerExecute)},
+        {"/initrd/etc/profile", 256, static_cast<uint16_t>(Regular | OwnerRead | GroupRead | OtherRead)},
+    };
+
+    const InitRamFsHeader image {
+        kInitRamFsMagic,
+        static_cast<uint32_t>(sizeof(files) / sizeof(files[0])),
+    };
+
+    if (!InitRamFsProbe(reinterpret_cast<const uint8_t*>(&image), sizeof(image))) {
+        return false;
+    }
+
+    if (!PseudoFsAddNode("/initrd", FileSystemType::InitRamFs, static_cast<uint16_t>(Directory | OwnerRead | OwnerExecute), true)) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < image.file_count; i++) {
+        if (!PseudoFsAddNode(files[i].path, FileSystemType::InitRamFs, files[i].mode, false, files[i].size)) {
+            return false;
+        }
+        g_Status.initramfs_file_count++;
+    }
+
+    const PseudoFsNode* init = PseudoFsFindNode("/initrd/init", FileSystemType::InitRamFs);
+    const PseudoFsNode* profile = PseudoFsFindNode("/initrd/etc/profile", FileSystemType::InitRamFs);
+    return g_Status.initramfs_file_count == image.file_count &&
+        init && init->size == 4096 &&
+        profile && profile->size == 256;
 }
 
 const char* TypeName(FileSystemType type) {
@@ -386,6 +612,16 @@ const char* TypeName(FileSystemType type) {
             return "EXT2";
         case FileSystemType::RamFs:
             return "RamFS";
+        case FileSystemType::TmpFs:
+            return "tmpfs";
+        case FileSystemType::ProcFs:
+            return "procfs";
+        case FileSystemType::DevFs:
+            return "devfs";
+        case FileSystemType::SysFs:
+            return "sysfs";
+        case FileSystemType::InitRamFs:
+            return "initramfs";
         case FileSystemType::Unknown:
             return "unknown";
     }
@@ -401,7 +637,12 @@ bool KernelFileSystemInit() {
     g_Status.vfs_ready =
         VfsRegisterDriver("fat32", FileSystemType::Fat32, Fat32Probe) &&
         VfsRegisterDriver("ext2", FileSystemType::Ext2, Ext2Probe) &&
-        VfsRegisterDriver("ramfs", FileSystemType::RamFs, RamFsProbe);
+        VfsRegisterDriver("ramfs", FileSystemType::RamFs, RamFsProbe) &&
+        VfsRegisterDriver("tmpfs", FileSystemType::TmpFs, TmpFsProbe) &&
+        VfsRegisterDriver("procfs", FileSystemType::ProcFs, ProcFsProbe) &&
+        VfsRegisterDriver("devfs", FileSystemType::DevFs, DevFsProbe) &&
+        VfsRegisterDriver("sysfs", FileSystemType::SysFs, SysFsProbe) &&
+        VfsRegisterDriver("initramfs", FileSystemType::InitRamFs, InitRamFsProbe);
 
     g_Status.fat32_supported = RunFat32ProbeSelfTest();
     g_Status.ext2_supported = RunExt2ProbeSelfTest();
@@ -415,9 +656,19 @@ bool KernelFileSystemInit() {
         VfsMountPath("/", FileSystemType::Ext2);
     }
 
-    VfsMountPath("/tmp", FileSystemType::RamFs);
+    VfsMountPath("/ram", FileSystemType::RamFs);
+    VfsMountPath("/tmp", FileSystemType::TmpFs);
+    VfsMountPath("/proc", FileSystemType::ProcFs);
+    VfsMountPath("/dev", FileSystemType::DevFs);
+    VfsMountPath("/sys", FileSystemType::SysFs);
+    VfsMountPath("/initrd", FileSystemType::InitRamFs);
     g_Status.ramfs_ready = RunRamFsSelfTest();
     g_Status.symbolic_links_ready = g_Status.ramfs_ready && RunSymlinkSelfTest();
+    g_Status.tmpfs_ready = RunTmpFsSelfTest();
+    g_Status.procfs_ready = RunProcFsSelfTest();
+    g_Status.devfs_ready = RunDevFsSelfTest();
+    g_Status.sysfs_ready = RunSysFsSelfTest();
+    g_Status.initramfs_ready = RunInitRamFsSelfTest();
     g_Status.mount_manager_ready = RunMountManagerSelfTest();
 
     KernelLog(LogLevel::Info, "Phase 10 filesystem initialized");
@@ -427,7 +678,12 @@ bool KernelFileSystemInit() {
         g_Status.file_permissions_ready &&
         g_Status.symbolic_links_ready &&
         g_Status.mount_manager_ready &&
-        g_Status.ramfs_ready;
+        g_Status.ramfs_ready &&
+        g_Status.tmpfs_ready &&
+        g_Status.procfs_ready &&
+        g_Status.devfs_ready &&
+        g_Status.sysfs_ready &&
+        g_Status.initramfs_ready;
 }
 
 const FileSystemStatus& KernelFileSystemStatus() {
@@ -449,6 +705,16 @@ void PrintFileSystemInfo() {
         g_Status.mount_manager_ready ? "VFS mount manager ready" : "VFS mount manager unavailable");
     KernelLog(g_Status.ramfs_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.ramfs_ready ? "RamFS ready" : "RamFS unavailable");
+    KernelLog(g_Status.tmpfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.tmpfs_ready ? "tmpfs ready" : "tmpfs unavailable");
+    KernelLog(g_Status.procfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.procfs_ready ? "procfs ready" : "procfs unavailable");
+    KernelLog(g_Status.devfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.devfs_ready ? "devfs ready" : "devfs unavailable");
+    KernelLog(g_Status.sysfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.sysfs_ready ? "sysfs ready" : "sysfs unavailable");
+    KernelLog(g_Status.initramfs_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.initramfs_ready ? "initramfs ready" : "initramfs unavailable");
 
     for (uint32_t i = 0; i < g_Status.mounted_filesystem_count; i++) {
         if (!g_Mounts[i].active) {

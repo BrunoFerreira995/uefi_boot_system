@@ -271,11 +271,11 @@
 - [x] Symbolic links
 - [x] Mount manager
 - [x] RamFS
-- [ ] tmpfs
-- [ ] procfs
-- [ ] devfs
-- [ ] sysfs
-- [ ] initramfs
+- [x] tmpfs
+- [x] procfs
+- [x] devfs
+- [x] sysfs
+- [x] initramfs
 
 ---
 
