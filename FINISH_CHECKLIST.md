@@ -513,31 +513,31 @@
 - [x] Initial app placement avoids stacking every app in the top-left corner
 
 ## Priority 3 — App Launch Lifecycle
-- [ ] Launcher has a persistent native app registry
-- [ ] App registry stores id, display name, executable path, and icon path
-- [ ] Native app executables use `/system/apps/*.app` or `/bin/*` paths consistently
-- [ ] Launcher click requests app launch by app id
-- [ ] Missing app id shows visible error notification
-- [ ] Process manager creates a process for launched apps
-- [ ] ELF loader loads app executable for launched apps
-- [ ] App registers its persistent window after process creation
-- [ ] Taskbar adds running app after successful launch
-- [ ] Launching an already-running app focuses or restores it
-- [ ] Minimized app launch request restores existing app
-- [ ] Failed app launch reports visible failure state
-- [ ] App process exit removes taskbar entry and window
-- [ ] App cleanup releases process resources
-- [ ] App event loop starts after window registration
-- [ ] App launch logs include `[APP] launch requested`
-- [ ] ELF load logs include `[ELF] loading`
-- [ ] Process creation logs include `[PROC] process created`
-- [ ] Window registration logs include `[GUI] window registered`
-- [ ] Focus changes log `[GUI] focus changed`
-- [ ] App exit logs include exit code
-- [ ] Hung app is detected without freezing compositor/window manager
-- [ ] App watchdog marks unresponsive apps
-- [ ] App state model includes Opening, Running, Minimized, Not responding, and Failed
-- [ ] App launch integration test opens, focuses, minimizes, restores, and closes each native app
+- [x] Launcher has a persistent native app registry
+- [x] App registry stores id, display name, executable path, and icon path
+- [x] Native app executables use `/system/apps/*.app` or `/bin/*` paths consistently
+- [x] Launcher click requests app launch by app id
+- [x] Missing app id shows visible error notification
+- [x] Process manager creates a process for launched apps
+- [x] ELF loader loads app executable for launched apps
+- [x] App registers its persistent window after process creation
+- [x] Taskbar adds running app after successful launch
+- [x] Launching an already-running app focuses or restores it
+- [x] Minimized app launch request restores existing app
+- [x] Failed app launch reports visible failure state
+- [x] App process exit removes taskbar entry and window
+- [x] App cleanup releases process resources
+- [x] App event loop starts after window registration
+- [x] App launch logs include `[APP] launch requested`
+- [x] ELF load logs include `[ELF] loading`
+- [x] Process creation logs include `[PROC] process created`
+- [x] Window registration logs include `[GUI] window registered`
+- [x] Focus changes log `[GUI] focus changed`
+- [x] App exit logs include exit code
+- [x] Hung app is detected without freezing compositor/window manager
+- [x] App watchdog marks unresponsive apps
+- [x] App state model includes Opening, Running, Minimized, Not responding, and Failed
+- [x] App launch integration test opens, focuses, minimizes, restores, and closes each native app
 
 ## Priority 4 — Native Apps Usability
 

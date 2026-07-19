@@ -5,6 +5,7 @@
 bool KernelSchedulerInit();
 uint64_t KernelCreateProcess(const char* name);
 uint64_t KernelCreateThread(uint64_t process_id, const char* name, void (*entry)(void*), void* argument);
+bool KernelTerminateProcess(uint64_t process_id, int32_t exit_code);
 uint64_t KernelForkProcess(uint64_t parent_process_id);
 bool KernelExecProcess(uint64_t process_id, const char* image_name, void (*entry)(void*), void* argument);
 uint64_t KernelCloneThread(uint64_t process_id, void (*entry)(void*), void* argument);

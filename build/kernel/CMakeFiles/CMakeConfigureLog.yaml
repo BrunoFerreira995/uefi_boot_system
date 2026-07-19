@@ -21,7 +21,7 @@ events:
       - "uname"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -51,7 +51,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/uname"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/uname"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/uname"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/uname"
       - "/Users/bucha/.kimi-code/bin/uname"
       - "/Users/bucha/.opencode/bin/uname"
@@ -70,7 +70,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -2713,6 +2713,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -2997,7 +3009,7 @@ events:
       - "smake"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -3027,7 +3039,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/gmake"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/gmake"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/gmake"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/gmake"
       - "/Users/bucha/.kimi-code/bin/gmake"
       - "/Users/bucha/.opencode/bin/gmake"
@@ -3056,7 +3068,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/gmake"
       - "/Users/bucha/Library/Android/sdk/tools/bin/gmake"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/make"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/make"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/make"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/make"
       - "/Users/bucha/.kimi-code/bin/make"
       - "/Users/bucha/.opencode/bin/make"
@@ -3075,7 +3087,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -5718,6 +5730,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -5993,7 +6017,7 @@ events:
       - "clang++"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -6023,7 +6047,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/clang++"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/clang++"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/clang++"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/clang++"
       - "/Users/bucha/.kimi-code/bin/clang++"
       - "/Users/bucha/.opencode/bin/clang++"
@@ -6042,7 +6066,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -8685,6 +8709,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -8968,7 +9004,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -11611,6 +11647,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -11909,7 +11957,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -11941,7 +11989,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -14584,6 +14632,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -14860,7 +14920,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -14892,7 +14952,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -17535,6 +17595,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -17811,7 +17883,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -17843,7 +17915,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -20486,6 +20558,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -20762,7 +20846,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -20794,7 +20878,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -23437,6 +23521,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -23713,7 +23809,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -23745,7 +23841,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -26388,6 +26484,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -26664,7 +26772,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -26696,7 +26804,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -29339,6 +29447,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -29615,7 +29735,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -29645,7 +29765,7 @@ events:
     searched_directories:
       - "/usr/bin/objcopy"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/objcopy"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/objcopy"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/objcopy"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/objcopy"
       - "/Users/bucha/.kimi-code/bin/objcopy"
       - "/Users/bucha/.opencode/bin/objcopy"
@@ -29677,7 +29797,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -32320,6 +32440,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -32596,7 +32728,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -32626,7 +32758,7 @@ events:
     searched_directories:
       - "/usr/bin/readelf"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/readelf"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/readelf"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/readelf"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/readelf"
       - "/Users/bucha/.kimi-code/bin/readelf"
       - "/Users/bucha/.opencode/bin/readelf"
@@ -32658,7 +32790,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -35301,6 +35433,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -35577,7 +35721,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -35607,7 +35751,7 @@ events:
     searched_directories:
       - "/usr/bin/dlltool"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/dlltool"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/dlltool"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/dlltool"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/dlltool"
       - "/Users/bucha/.kimi-code/bin/dlltool"
       - "/Users/bucha/.opencode/bin/dlltool"
@@ -35639,7 +35783,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -38282,6 +38426,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -38558,7 +38714,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -38588,7 +38744,7 @@ events:
     searched_directories:
       - "/usr/bin/addr2line"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/addr2line"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/addr2line"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/addr2line"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/addr2line"
       - "/Users/bucha/.kimi-code/bin/addr2line"
       - "/Users/bucha/.opencode/bin/addr2line"
@@ -38620,7 +38776,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -41263,6 +41419,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -41539,7 +41707,7 @@ events:
     candidate_directories:
       - "/usr/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -41569,7 +41737,7 @@ events:
     searched_directories:
       - "/usr/bin/tapi"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/tapi"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/tapi"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/tapi"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/tapi"
       - "/Users/bucha/.kimi-code/bin/tapi"
       - "/Users/bucha/.opencode/bin/tapi"
@@ -41601,7 +41769,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -44244,6 +44412,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -44519,7 +44699,7 @@ events:
       - "clang"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -44549,7 +44729,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/clang"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/clang"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/clang"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/clang"
       - "/Users/bucha/.kimi-code/bin/clang"
       - "/Users/bucha/.opencode/bin/clang"
@@ -44568,7 +44748,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -47211,6 +47391,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -47498,8 +47690,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5"
-      binary: "/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5"
+      source: "/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT"
+      binary: "/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -47510,18 +47702,18 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5'
+        Change Dir: '/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT'
         
-        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_424f0/fast
-        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_424f0.dir/build.make CMakeFiles/cmTC_424f0.dir/build
-        Building CXX object CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj
-        /usr/bin/clang++   -v -MD -MT CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9353d/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_9353d.dir/build.make CMakeFiles/cmTC_9353d.dir/build
+        Building CXX object CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj
+        /usr/bin/clang++   -v -MD -MT CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Apple clang version 21.0.0 (clang-2100.1.1.101)
         Target: arm64-apple-darwin25.5.0
         Thread model: posix
         InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
         ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"
-         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5 -target-linker-version 1267 -v -fcoverage-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5 -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT -target-linker-version 1267 -v -fcoverage-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.5.0
         ignoring nonexistent directory "/usr/local/include"
         ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"
@@ -47535,14 +47727,14 @@ events:
          /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
          /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)
         End of search list.
-        Linking CXX executable cmTC_424f0
-        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_424f0.dir/link.txt --verbose=1
+        Linking CXX executable cmTC_9353d
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9353d.dir/link.txt --verbose=1
         Apple clang version 21.0.0 (clang-2100.1.1.101)
         Target: arm64-apple-darwin25.5.0
         Thread model: posix
         InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
-         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_424f0 -L/usr/local/lib CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a
-        /usr/bin/clang++  -v CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_424f0
+         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_9353d -L/usr/local/lib CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a
+        /usr/bin/clang++  -v CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_9353d
         
       exitCode: 0
   -
@@ -47577,18 +47769,18 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5']
+        ignore line: [Change Dir: '/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_424f0/fast]
-        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_424f0.dir/build.make CMakeFiles/cmTC_424f0.dir/build]
-        ignore line: [Building CXX object CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj]
-        ignore line: [/usr/bin/clang++   -v -MD -MT CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_9353d/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_9353d.dir/build.make CMakeFiles/cmTC_9353d.dir/build]
+        ignore line: [Building CXX object CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj]
+        ignore line: [/usr/bin/clang++   -v -MD -MT CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
         ignore line: [Target: arm64-apple-darwin25.5.0]
         ignore line: [Thread model: posix]
         ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
         ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1"]
-        ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5 -target-linker-version 1267 -v -fcoverage-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-qzlQv5 -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT -target-linker-version 1267 -v -fcoverage-compilation-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles/CMakeScratch/TryCompile-lYxcsT -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -x c++ /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.5.0]
         ignore line: [ignoring nonexistent directory "/usr/local/include"]
         ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/local/include"]
@@ -47602,13 +47794,13 @@ events:
         ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)]
         ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)]
         ignore line: [End of search list.]
-        ignore line: [Linking CXX executable cmTC_424f0]
-        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_424f0.dir/link.txt --verbose=1]
+        ignore line: [Linking CXX executable cmTC_9353d]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9353d.dir/link.txt --verbose=1]
         ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
         ignore line: [Target: arm64-apple-darwin25.5.0]
         ignore line: [Thread model: posix]
         ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
-        link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_424f0 -L/usr/local/lib CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+        link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_9353d -L/usr/local/lib CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
           arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld] ==> ignore
           arg [-demangle] ==> ignore
           arg [-lto_library] ==> ignore, skip following value
@@ -47625,9 +47817,9 @@ events:
           arg [-mllvm] ==> ignore
           arg [-enable-linkonceodr-outlining] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_424f0] ==> ignore
+          arg [cmTC_9353d] ==> ignore
           arg [-L/usr/local/lib] ==> dir [/usr/local/lib]
-          arg [CMakeFiles/cmTC_424f0.dir/CMakeCXXCompilerABI.cpp.obj] ==> ignore
+          arg [CMakeFiles/cmTC_9353d.dir/CMakeCXXCompilerABI.cpp.obj] ==> ignore
           arg [-lc++] ==> lib [c++]
           arg [-lSystem] ==> lib [System]
           arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a] ==> lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]

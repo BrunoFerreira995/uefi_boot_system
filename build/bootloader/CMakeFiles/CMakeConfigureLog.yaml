@@ -21,7 +21,7 @@ events:
       - "uname"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -51,7 +51,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/uname"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/uname"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/uname"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/uname"
       - "/Users/bucha/.kimi-code/bin/uname"
       - "/Users/bucha/.opencode/bin/uname"
@@ -70,7 +70,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -2713,6 +2713,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -2997,7 +3009,7 @@ events:
       - "smake"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -3027,7 +3039,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/gmake"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/gmake"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/gmake"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/gmake"
       - "/Users/bucha/.kimi-code/bin/gmake"
       - "/Users/bucha/.opencode/bin/gmake"
@@ -3056,7 +3068,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/gmake"
       - "/Users/bucha/Library/Android/sdk/tools/bin/gmake"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/make"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/make"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/make"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/make"
       - "/Users/bucha/.kimi-code/bin/make"
       - "/Users/bucha/.opencode/bin/make"
@@ -3075,7 +3087,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -5718,6 +5730,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -6001,7 +6025,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -8644,6 +8668,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -8943,7 +8979,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -8975,7 +9011,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -11618,6 +11654,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -11895,7 +11943,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -11927,7 +11975,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -14570,6 +14618,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -14847,7 +14907,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -14879,7 +14939,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -17522,6 +17582,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -17799,7 +17871,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -17831,7 +17903,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -20474,6 +20546,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -20751,7 +20835,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -20783,7 +20867,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -23426,6 +23510,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -23703,7 +23799,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -23735,7 +23831,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -26378,6 +26474,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -26655,7 +26763,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -26687,7 +26795,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -29330,6 +29438,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -29607,7 +29727,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -29639,7 +29759,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -32282,6 +32402,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -32559,7 +32691,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -32591,7 +32723,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -35234,6 +35366,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -35511,7 +35655,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -35543,7 +35687,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -38186,6 +38330,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -38463,7 +38619,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -38493,7 +38649,7 @@ events:
     searched_directories:
       - "/opt/homebrew/bin/x86_64-w64-mingw32-tapi"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-tapi"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-tapi"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-tapi"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-tapi"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-tapi"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-tapi"
@@ -38522,7 +38678,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/x86_64-w64-mingw32-tapi"
       - "/opt/homebrew/bin/tapi"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/tapi"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/tapi"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/tapi"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/tapi"
       - "/Users/bucha/.kimi-code/bin/tapi"
       - "/Users/bucha/.opencode/bin/tapi"
@@ -38554,7 +38710,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -41197,6 +41353,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -41476,7 +41644,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -41506,7 +41674,7 @@ events:
     searched_directories:
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ar-15.2"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ar-15.2"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ar-15.2"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ar-15.2"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ar-15.2"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ar-15.2"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ar-15.2"
@@ -41535,7 +41703,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/x86_64-w64-mingw32-gcc-ar-15.2"
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ar-15"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ar-15"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ar-15"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ar-15"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ar-15"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ar-15"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ar-15"
@@ -41564,7 +41732,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/x86_64-w64-mingw32-gcc-ar-15"
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ar15"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ar15"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ar15"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ar15"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ar15"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ar15"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ar15"
@@ -41596,7 +41764,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -44239,6 +44407,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -44518,7 +44698,7 @@ events:
     candidate_directories:
       - "/opt/homebrew/bin/"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -44548,7 +44728,7 @@ events:
     searched_directories:
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ranlib-15.2"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ranlib-15.2"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ranlib-15.2"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ranlib-15.2"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ranlib-15.2"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ranlib-15.2"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ranlib-15.2"
@@ -44577,7 +44757,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/x86_64-w64-mingw32-gcc-ranlib-15.2"
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ranlib-15"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ranlib-15"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ranlib-15"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ranlib-15"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ranlib-15"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ranlib-15"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ranlib-15"
@@ -44606,7 +44786,7 @@ events:
       - "/Users/bucha/Library/Android/sdk/tools/bin/x86_64-w64-mingw32-gcc-ranlib-15"
       - "/opt/homebrew/bin/x86_64-w64-mingw32-gcc-ranlib15"
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-gcc-ranlib15"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-gcc-ranlib15"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-gcc-ranlib15"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-gcc-ranlib15"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-gcc-ranlib15"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-gcc-ranlib15"
@@ -44638,7 +44818,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -47281,6 +47461,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
         - "/Users/bucha/Library/Android/sdk/emulator"
@@ -47559,7 +47751,7 @@ events:
       - "windres"
     candidate_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/"
       - "/Users/bucha/.kimi-code/bin/"
       - "/Users/bucha/.opencode/bin/"
@@ -47597,7 +47789,7 @@ events:
       - "/sbin/"
     searched_directories:
       - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/x86_64-w64-mingw32-windres"
-      - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv/x86_64-w64-mingw32-windres"
+      - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn/x86_64-w64-mingw32-windres"
       - "/Users/bucha/.antigravity-ide/antigravity-ide/bin/x86_64-w64-mingw32-windres"
       - "/Users/bucha/.kimi-code/bin/x86_64-w64-mingw32-windres"
       - "/Users/bucha/.opencode/bin/x86_64-w64-mingw32-windres"
@@ -47612,7 +47804,7 @@ events:
       ENV{PATH}:
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
         - "/Users/bucha/.nvm/versions/node/v24.15.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path"
-        - "/Users/bucha/.codex/tmp/arg0/codex-arg0KdNxwv"
+        - "/Users/bucha/.codex/tmp/arg0/codex-arg0DZ20nn"
         - "/Users/bucha/.antigravity-ide/antigravity-ide/bin"
         - "/Users/bucha/.kimi-code/bin"
         - "/Users/bucha/.opencode/bin"
@@ -50509,6 +50701,18 @@ events:
         - "/Users/bucha/Library/Android/sdk/platform-tools"
         - "/Users/bucha/Library/Android/sdk/tools"
         - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
+        - "/Users/bucha/Library/Android/sdk/emulator"
+        - "/Users/bucha/Library/Android/sdk/platform-tools"
+        - "/Users/bucha/Library/Android/sdk/tools"
+        - "/Users/bucha/Library/Android/sdk/tools/bin"
       CMAKE_INSTALL_PREFIX: "/usr/local"
       CMAKE_SYSTEM_PREFIX_PATH:
         - "/opt/homebrew"
@@ -50523,8 +50727,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-SPMr5M"
-      binary: "/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-SPMr5M"
+      source: "/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-5ZLe3C"
+      binary: "/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-5ZLe3C"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -50535,12 +50739,12 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-SPMr5M'
+        Change Dir: '/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-5ZLe3C'
         
-        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_58de5/fast
-        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_58de5.dir/build.make CMakeFiles/cmTC_58de5.dir/build
-        Building CXX object CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj
-        /opt/homebrew/bin/x86_64-w64-mingw32-g++   -v -o CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_95b0d/fast
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_95b0d.dir/build.make CMakeFiles/cmTC_95b0d.dir/build
+        Building CXX object CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj
+        /opt/homebrew/bin/x86_64-w64-mingw32-g++   -v -o CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/x86_64-w64-mingw32-g++
         Target: x86_64-w64-mingw32
@@ -50548,8 +50752,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 15.2.0 (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/'
-         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/cc1plus -quiet -v -D_REENTRANT /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_58de5.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccyq1QiI.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/'
+         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/cc1plus -quiet -v -D_REENTRANT /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_95b0d.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccCjZAcB.s
         GNU C++17 (GCC) version 15.2.0 (x86_64-w64-mingw32)
         	compiled by GNU C version Apple LLVM 17.0.0 (clang-1700.6.4.2), GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.4.0, isl version isl-0.28-GMP
         
@@ -50567,14 +50771,14 @@ events:
          /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/include
         End of search list.
         Compiler executable checksum: ffc5a63c91fa9522b664039c4f05ad92
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/'
-         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-as -v -o CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccyq1QiI.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/'
+         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-as -v -o CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccCjZAcB.s
         GNU assembler version 2.46.0 (x86_64-w64-mingw32) using BFD version (GNU Binutils) 2.46.0.20260210
         COMPILER_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_58de5.exe
-        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_58de5.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_95b0d.exe
+        /opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_95b0d.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/opt/homebrew/bin/x86_64-w64-mingw32-g++
         COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper
@@ -50585,15 +50789,15 @@ events:
         gcc version 15.2.0 (GCC) 
         COMPILER_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/
         LIBRARY_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_58de5.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_58de5.'
-         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/collect2 -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//cc2im9or.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_58de5.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_58de5.dir/objects.a --no-whole-archive --out-implib libcmTC_58de5.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_95b0d.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_95b0d.'
+         /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/collect2 -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccofxeF5.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_95b0d.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a --no-whole-archive --out-implib libcmTC_95b0d.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o
         collect2 version 15.2.0
-        /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//cc2im9or.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_58de5.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_58de5.dir/objects.a --no-whole-archive --out-implib libcmTC_58de5.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o
+        /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccofxeF5.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_95b0d.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a --no-whole-archive --out-implib libcmTC_95b0d.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o
         GNU ld (GNU Binutils) 2.46.0.20260210
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_58de5.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_58de5.'
-        /opt/homebrew/bin/cmake -E rm -f CMakeFiles/cmTC_58de5.dir/objects.a
-        /opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/cmTC_58de5.dir/objects.a @CMakeFiles/cmTC_58de5.dir/objects1.rsp
-        /opt/homebrew/bin/x86_64-w64-mingw32-g++  -v -Wl,-v -Wl,--whole-archive CMakeFiles/cmTC_58de5.dir/objects.a -Wl,--no-whole-archive -o cmTC_58de5.exe -Wl,--out-implib,libcmTC_58de5.dll.a -Wl,--major-image-version,0,--minor-image-version,0
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_95b0d.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_95b0d.'
+        /opt/homebrew/bin/cmake -E rm -f CMakeFiles/cmTC_95b0d.dir/objects.a
+        /opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/cmTC_95b0d.dir/objects.a @CMakeFiles/cmTC_95b0d.dir/objects1.rsp
+        /opt/homebrew/bin/x86_64-w64-mingw32-g++  -v -Wl,-v -Wl,--whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a -Wl,--no-whole-archive -o cmTC_95b0d.exe -Wl,--out-implib,libcmTC_95b0d.dll.a -Wl,--major-image-version,0,--minor-image-version,0
         
       exitCode: 0
   -
@@ -50632,12 +50836,12 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-SPMr5M']
+        ignore line: [Change Dir: '/Users/bucha/dev/uefi_boot_system/build/bootloader/CMakeFiles/CMakeScratch/TryCompile-5ZLe3C']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_58de5/fast]
-        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_58de5.dir/build.make CMakeFiles/cmTC_58de5.dir/build]
-        ignore line: [Building CXX object CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj]
-        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-g++   -v -o CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_95b0d/fast]
+        ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_95b0d.dir/build.make CMakeFiles/cmTC_95b0d.dir/build]
+        ignore line: [Building CXX object CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj]
+        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-g++   -v -o CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj -c /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/x86_64-w64-mingw32-g++]
         ignore line: [Target: x86_64-w64-mingw32]
@@ -50645,8 +50849,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 15.2.0 (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/']
-        ignore line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/cc1plus -quiet -v -D_REENTRANT /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_58de5.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccyq1QiI.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/']
+        ignore line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/cc1plus -quiet -v -D_REENTRANT /opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_95b0d.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -o /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccCjZAcB.s]
         ignore line: [GNU C++17 (GCC) version 15.2.0 (x86_64-w64-mingw32)]
         ignore line: [	compiled by GNU C version Apple LLVM 17.0.0 (clang-1700.6.4.2)  GMP version 6.3.0  MPFR version 4.2.2  MPC version 1.4.0  isl version isl-0.28-GMP]
         ignore line: []
@@ -50664,14 +50868,14 @@ events:
         ignore line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/include]
         ignore line: [End of search list.]
         ignore line: [Compiler executable checksum: ffc5a63c91fa9522b664039c4f05ad92]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/']
-        ignore line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-as -v -o CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccyq1QiI.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/']
+        ignore line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-as -v -o CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj /var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccCjZAcB.s]
         ignore line: [GNU assembler version 2.46.0 (x86_64-w64-mingw32) using BFD version (GNU Binutils) 2.46.0.20260210]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_58de5.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_58de5.exe]
-        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_58de5.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_95b0d.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_95b0d.exe]
+        ignore line: [/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/cmTC_95b0d.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/opt/homebrew/bin/x86_64-w64-mingw32-g++]
         ignore line: [COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper]
@@ -50682,13 +50886,13 @@ events:
         ignore line: [gcc version 15.2.0 (GCC) ]
         ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/bin/]
         ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/:/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_58de5.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_58de5.']
-        link line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/collect2 -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//cc2im9or.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_58de5.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_58de5.dir/objects.a --no-whole-archive --out-implib libcmTC_58de5.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_95b0d.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_95b0d.']
+        link line: [ /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/collect2 -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccofxeF5.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_95b0d.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a --no-whole-archive --out-implib libcmTC_95b0d.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o]
           arg [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//cc2im9or.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccofxeF5.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
@@ -50711,7 +50915,7 @@ events:
           arg [i386pep] ==> ignore
           arg [-Bdynamic] ==> search dynamic
           arg [-o] ==> ignore
-          arg [cmTC_58de5.exe] ==> ignore
+          arg [cmTC_95b0d.exe] ==> ignore
           arg [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o] ==> obj [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o]
           arg [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o] ==> obj [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o]
           arg [-L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0] ==> dir [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0]
@@ -50721,10 +50925,10 @@ events:
           arg [-L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib] ==> dir [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib]
           arg [-v] ==> ignore
           arg [--whole-archive] ==> ignore
-          arg [CMakeFiles/cmTC_58de5.dir/objects.a] ==> ignore
+          arg [CMakeFiles/cmTC_95b0d.dir/objects.a] ==> ignore
           arg [--no-whole-archive] ==> ignore
           arg [--out-implib] ==> ignore
-          arg [libcmTC_58de5.dll.a] ==> ignore
+          arg [libcmTC_95b0d.dll.a] ==> ignore
           arg [--major-image-version] ==> ignore
           arg [0] ==> ignore
           arg [--minor-image-version] ==> ignore
@@ -50749,12 +50953,12 @@ events:
           arg [-lkernel32] ==> lib [kernel32]
           arg [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o] ==> obj [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o]
         ignore line: [collect2 version 15.2.0]
-        ignore line: [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//cc2im9or.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_58de5.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_58de5.dir/objects.a --no-whole-archive --out-implib libcmTC_58de5.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o]
+        ignore line: [/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/bin/x86_64-w64-mingw32-ld -plugin /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/liblto_plugin.so -plugin-opt=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/libexec/gcc/x86_64-w64-mingw32/15.2.0/lto-wrapper -plugin-opt=-fresolution=/var/folders/d_/8ynsp4ps623c1q9hh0xlhmbm0000gn/T//ccofxeF5.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 --sysroot=/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64 -m i386pep -Bdynamic -o cmTC_95b0d.exe /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtbegin.o -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0 -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib/../lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/../../../../x86_64-w64-mingw32/lib -L/opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/mingw/lib -v --whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a --no-whole-archive --out-implib libcmTC_95b0d.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmingwex -lmsvcrt -lkernel32 /opt/homebrew/Cellar/mingw-w64/14.0.0/toolchain-x86_64/lib/gcc/x86_64-w64-mingw32/15.2.0/crtend.o]
         ignore line: [GNU ld (GNU Binutils) 2.46.0.20260210]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_58de5.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_58de5.']
-        ignore line: [/opt/homebrew/bin/cmake -E rm -f CMakeFiles/cmTC_58de5.dir/objects.a]
-        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/cmTC_58de5.dir/objects.a @CMakeFiles/cmTC_58de5.dir/objects1.rsp]
-        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-g++  -v -Wl -v -Wl --whole-archive CMakeFiles/cmTC_58de5.dir/objects.a -Wl --no-whole-archive -o cmTC_58de5.exe -Wl --out-implib libcmTC_58de5.dll.a -Wl --major-image-version 0 --minor-image-version 0]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_95b0d.exe' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_95b0d.']
+        ignore line: [/opt/homebrew/bin/cmake -E rm -f CMakeFiles/cmTC_95b0d.dir/objects.a]
+        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-ar qc CMakeFiles/cmTC_95b0d.dir/objects.a @CMakeFiles/cmTC_95b0d.dir/objects1.rsp]
+        ignore line: [/opt/homebrew/bin/x86_64-w64-mingw32-g++  -v -Wl -v -Wl --whole-archive CMakeFiles/cmTC_95b0d.dir/objects.a -Wl --no-whole-archive -o cmTC_95b0d.exe -Wl --out-implib libcmTC_95b0d.dll.a -Wl --major-image-version 0 --minor-image-version 0]
         ignore line: []
         ignore line: []
         remove lib [msvcrt]

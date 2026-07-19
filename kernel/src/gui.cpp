@@ -1,6 +1,7 @@
 #include "gui.hpp"
 
 #include "kernel.hpp"
+#include "userspace.hpp"
 
 namespace {
 
@@ -35,6 +36,8 @@ struct Window {
     bool focused;
     AppKind app;
     uint8_t desktop;
+    uint64_t process_id;
+    uint64_t thread_id;
 };
 
 struct AppPlacementState {
@@ -43,10 +46,28 @@ struct AppPlacementState {
     bool valid;
 };
 
+enum class AppLifecycleState : uint8_t {
+    NotRunning,
+    Opening,
+    Running,
+    Failed,
+    NotResponding,
+};
+
+struct AppRuntimeState {
+    AppKind app;
+    AppLifecycleState state;
+    uint64_t process_id;
+    uint64_t thread_id;
+    uint32_t launch_count;
+    uint32_t missed_heartbeat_count;
+    bool valid;
+};
+
 static constexpr uint32_t kMaxWindows = 12;
 static constexpr uint32_t kEventQueueCapacity = 64;
 static constexpr uint32_t kTopBarHeight = 38;
-static constexpr uint32_t kTaskBarHeight = 42;
+static constexpr uint32_t kTaskBarHeight = 78;
 static constexpr uint32_t kTitleBarHeight = 30;
 static constexpr uint32_t kWindowBorder = 2;
 static constexpr uint32_t kButtonSize = 16;
@@ -62,6 +83,9 @@ static constexpr uint32_t kDefaultAppMinWidth = 480;
 static constexpr uint32_t kDefaultAppMinHeight = 320;
 static constexpr uint32_t kCompactAppMinWidth = 360;
 static constexpr uint32_t kCompactAppMinHeight = 260;
+static constexpr uint32_t kApplicationCapacity = 10;
+static constexpr uint32_t kLauncherButtonWidth = 76;
+static constexpr uint32_t kLauncherButtonHeight = 26;
 
 struct CursorBackup {
     int32_t x;
@@ -152,6 +176,7 @@ GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
 Window g_Windows[kMaxWindows];
 AppPlacementState g_AppPlacements[kMaxWindows];
+AppRuntimeState g_AppRuntimes[kApplicationCapacity];
 GuiEvent g_EventQueue[kEventQueueCapacity];
 uint32_t g_BackBuffer[kBackBufferPixels];
 uint32_t* g_DrawTarget = nullptr;
@@ -188,6 +213,8 @@ bool g_TerminalShutdownRequested = false;
 char g_TerminalHistory[kTerminalHistoryEntries][kTerminalCommandLength];
 uint32_t g_TerminalHistoryCount = 0;
 int32_t g_TerminalHistoryCursor = -1;
+const char* g_NotificationText = nullptr;
+uint32_t g_NotificationColor = kTheme.text_muted;
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect);
 void CloseWindow(uint32_t index);
@@ -259,12 +286,24 @@ void ResetGuiStatus() {
         g_Windows[i].focused = false;
         g_Windows[i].app = AppKind::FileManager;
         g_Windows[i].desktop = 0;
+        g_Windows[i].process_id = 0;
+        g_Windows[i].thread_id = 0;
     }
 
     for (uint32_t i = 0; i < kMaxWindows; i++) {
         g_AppPlacements[i].app = AppKind::FileManager;
         g_AppPlacements[i].last_bounds = {0, 0, 0, 0};
         g_AppPlacements[i].valid = false;
+    }
+
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i].app = AppKind::FileManager;
+        g_AppRuntimes[i].state = AppLifecycleState::NotRunning;
+        g_AppRuntimes[i].process_id = 0;
+        g_AppRuntimes[i].thread_id = 0;
+        g_AppRuntimes[i].launch_count = 0;
+        g_AppRuntimes[i].missed_heartbeat_count = 0;
+        g_AppRuntimes[i].valid = false;
     }
 
     g_HoveredControl = WindowControl::None;
@@ -286,6 +325,8 @@ void ResetGuiStatus() {
     }
     g_TerminalHistoryCount = 0;
     g_TerminalHistoryCursor = -1;
+    g_NotificationText = nullptr;
+    g_NotificationColor = kTheme.text_muted;
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -665,6 +706,8 @@ void CopyWindow(Window& destination, const Window& source) {
     destination.focused = source.focused;
     destination.app = source.app;
     destination.desktop = source.desktop;
+    destination.process_id = source.process_id;
+    destination.thread_id = source.thread_id;
 }
 
 bool PointInTitleBar(int32_t x, int32_t y, const Window& window) {
@@ -784,7 +827,13 @@ void MoveWindow(Window& window, int32_t x, int32_t y) {
     RememberAppPlacement(window.app, window.bounds);
 }
 
-bool AddWindow(const char* title, Rect bounds, uint32_t color, AppKind app, uint8_t desktop) {
+bool AddWindow(const char* title,
+               Rect bounds,
+               uint32_t color,
+               AppKind app,
+               uint8_t desktop,
+               uint64_t process_id = 0,
+               uint64_t thread_id = 0) {
     if (!title || bounds.width == 0 || bounds.height == 0 ||
         desktop >= kVirtualDesktopCount || g_Status.window_count >= kMaxWindows) {
         return false;
@@ -801,8 +850,11 @@ bool AddWindow(const char* title, Rect bounds, uint32_t color, AppKind app, uint
     window.focused = false;
     window.app = app;
     window.desktop = desktop;
+    window.process_id = process_id;
+    window.thread_id = thread_id;
     RememberAppPlacement(app, window.bounds);
     g_Status.window_count++;
+    KernelLog(LogLevel::Info, "[GUI] window registered");
     return true;
 }
 
@@ -892,7 +944,10 @@ void RestoreWindowFromTaskbar(uint32_t index) {
 
 struct ApplicationDescriptor {
     AppKind app;
+    const char* id;
     const char* name;
+    const char* executable_path;
+    const char* icon_path;
     uint32_t color;
     uint8_t desktop;
     uint32_t min_width;
@@ -903,20 +958,22 @@ struct ApplicationDescriptor {
 };
 
 static constexpr ApplicationDescriptor kApplications[] = {
-    {AppKind::FileManager, "File Manager", kTheme.window, 0, 480, 320, 640, 420, false},
-    {AppKind::TextEditor, "Text Editor", 0xFF293844, 1, 560, 360, 760, 520, false},
-    {AppKind::ImageViewer, "Image Viewer", 0xFF263C3A, 1, 480, 320, 680, 440, false},
-    {AppKind::Calculator, "Calculator", 0xFF3C3443, 1, 360, 260, 380, 300, true},
-    {AppKind::Settings, "Settings", 0xFF303A45, 2, 420, 300, 520, 360, true},
-    {AppKind::TaskManager, "Task Manager", 0xFF303F38, 2, 480, 320, 640, 420, false},
-    {AppKind::PackageManager, "Package Manager", 0xFF3C3847, 2, 480, 320, 640, 420, false},
-    {AppKind::SystemMonitor, "System Monitor", kTheme.monitor, 0, 420, 300, 520, 360, true},
-    {AppKind::TerminalEmulator, "Terminal Emulator", kTheme.terminal, 0, 560, 360, 760, 480, false},
-    {AppKind::SoftwareCenter, "Software Center", 0xFF343D3B, 3, 480, 320, 680, 440, false},
+    {AppKind::FileManager, "files", "File Manager", "/system/apps/files.app", "/system/icons/files.bmp", kTheme.window, 0, 480, 320, 640, 420, false},
+    {AppKind::TextEditor, "edit", "Text Editor", "/system/apps/editor.app", "/system/icons/editor.bmp", 0xFF293844, 1, 560, 360, 760, 520, false},
+    {AppKind::ImageViewer, "image", "Image Viewer", "/system/apps/images.app", "/system/icons/images.bmp", 0xFF263C3A, 1, 480, 320, 680, 440, false},
+    {AppKind::Calculator, "calc", "Calculator", "/system/apps/calculator.app", "/system/icons/calculator.bmp", 0xFF3C3443, 1, 360, 260, 380, 300, true},
+    {AppKind::Settings, "set", "Settings", "/system/apps/settings.app", "/system/icons/settings.bmp", 0xFF303A45, 2, 420, 300, 520, 360, true},
+    {AppKind::TaskManager, "tasks", "Task Manager", "/system/apps/tasks.app", "/system/icons/tasks.bmp", 0xFF303F38, 2, 480, 320, 640, 420, false},
+    {AppKind::PackageManager, "pkg", "Package Manager", "/system/apps/packages.app", "/system/icons/packages.bmp", 0xFF3C3847, 2, 480, 320, 640, 420, false},
+    {AppKind::SystemMonitor, "mon", "System Monitor", "/system/apps/monitor.app", "/system/icons/monitor.bmp", kTheme.monitor, 0, 420, 300, 520, 360, true},
+    {AppKind::TerminalEmulator, "term", "Terminal Emulator", "/bin/terminal", "/system/icons/terminal.bmp", kTheme.terminal, 0, 560, 360, 760, 480, false},
+    {AppKind::SoftwareCenter, "store", "Software Center", "/system/apps/software.app", "/system/icons/software.bmp", 0xFF343D3B, 3, 480, 320, 680, 440, false},
 };
 
+static constexpr uint32_t kApplicationCount = sizeof(kApplications) / sizeof(kApplications[0]);
+
 bool ApplicationRegistered(AppKind app) {
-    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
         if (kApplications[i].app == app) {
             return true;
         }
@@ -925,12 +982,69 @@ bool ApplicationRegistered(AppKind app) {
 }
 
 const ApplicationDescriptor* FindApplication(AppKind app) {
-    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
         if (kApplications[i].app == app) {
             return &kApplications[i];
         }
     }
     return nullptr;
+}
+
+const ApplicationDescriptor* FindApplicationById(const char* id) {
+    if (!id) {
+        return nullptr;
+    }
+
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
+        const char* candidate = kApplications[i].id;
+        const char* requested = id;
+        bool matches = true;
+        while (*candidate || *requested) {
+            if (*candidate != *requested) {
+                matches = false;
+                break;
+            }
+            candidate++;
+            requested++;
+        }
+        if (matches) {
+            return &kApplications[i];
+        }
+    }
+
+    return nullptr;
+}
+
+AppRuntimeState* FindAppRuntime(AppKind app) {
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        if (g_AppRuntimes[i].valid && g_AppRuntimes[i].app == app) {
+            return &g_AppRuntimes[i];
+        }
+    }
+    return nullptr;
+}
+
+bool InitApplicationRegistry() {
+    if (kApplicationCount > kApplicationCapacity) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
+        g_AppRuntimes[i].app = kApplications[i].app;
+        g_AppRuntimes[i].state = AppLifecycleState::NotRunning;
+        g_AppRuntimes[i].process_id = 0;
+        g_AppRuntimes[i].thread_id = 0;
+        g_AppRuntimes[i].launch_count = 0;
+        g_AppRuntimes[i].missed_heartbeat_count = 0;
+        g_AppRuntimes[i].valid = true;
+    }
+
+    return true;
+}
+
+void ShowNotification(const char* text, uint32_t color) {
+    g_NotificationText = text;
+    g_NotificationColor = color;
 }
 
 Rect UsableDesktopRect() {
@@ -1054,16 +1168,136 @@ int32_t FindWindowByApp(AppKind app, uint8_t desktop) {
     return -1;
 }
 
-bool InitWindowManager() {
-    bool apps_created = true;
-
-    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
-        const ApplicationDescriptor& app = kApplications[i];
-        const Rect bounds = InitialWindowBounds(app, i);
-        apps_created = AddWindow(app.name, bounds, app.color, app.app, app.desktop) && apps_created;
+bool RestoreOrFocusRunningApp(const ApplicationDescriptor& app) {
+    const int32_t existing = FindWindowByApp(app.app, app.desktop);
+    if (existing < 0) {
+        return false;
     }
 
-    g_Status.window_manager_ready = apps_created;
+    g_Windows[existing].visible = true;
+    g_Windows[existing].minimized = false;
+    g_Windows[existing].maximized = false;
+    if (g_ActiveDesktop != app.desktop) {
+        SwitchVirtualDesktop(app.desktop);
+    }
+    FocusWindow(static_cast<uint32_t>(existing));
+    ShowNotification("app restored", kTheme.maximize);
+    return true;
+}
+
+bool LaunchApplication(const ApplicationDescriptor& app) {
+    AppRuntimeState* runtime = FindAppRuntime(app.app);
+    if (!runtime) {
+        ShowNotification("missing app id", kTheme.close);
+        KernelLog(LogLevel::Warn, "[APP] missing app id");
+        return false;
+    }
+
+    if (runtime->state == AppLifecycleState::Running ||
+        runtime->state == AppLifecycleState::NotResponding) {
+        return RestoreOrFocusRunningApp(app);
+    }
+
+    runtime->state = AppLifecycleState::Opening;
+    uint64_t process_id = 0;
+    uint64_t thread_id = 0;
+    if (!KernelLaunchUserApplication(app.id, app.executable_path, process_id, thread_id)) {
+        runtime->state = AppLifecycleState::Failed;
+        ShowNotification("app launch failed", kTheme.close);
+        return false;
+    }
+
+    const int32_t hidden = FindWindowByApp(app.app, app.desktop);
+    if (hidden >= 0) {
+        Window& window = g_Windows[hidden];
+        window.title = app.name;
+        window.bounds = InitialWindowBounds(app, runtime->launch_count);
+        window.restore_bounds = window.bounds;
+        window.color = app.color;
+        window.visible = true;
+        window.minimized = false;
+        window.maximized = false;
+        window.process_id = process_id;
+        window.thread_id = thread_id;
+    } else {
+        const Rect bounds = InitialWindowBounds(app, runtime->launch_count);
+        if (!AddWindow(app.name, bounds, app.color, app.app, app.desktop, process_id, thread_id)) {
+            runtime->state = AppLifecycleState::Failed;
+            ShowNotification("app launch failed", kTheme.close);
+            return false;
+        }
+    }
+
+    if (!KernelStartUserApplicationEventLoop(process_id, app.id, thread_id)) {
+        runtime->state = AppLifecycleState::Failed;
+        ShowNotification("app launch failed", kTheme.close);
+        return false;
+    }
+
+    const int32_t window_index = FindWindowByApp(app.app, app.desktop);
+    if (window_index >= 0) {
+        g_Windows[window_index].thread_id = thread_id;
+    }
+
+    runtime->state = AppLifecycleState::Running;
+    runtime->process_id = process_id;
+    runtime->thread_id = thread_id;
+    runtime->launch_count++;
+    runtime->missed_heartbeat_count = 0;
+    if (g_ActiveDesktop != app.desktop) {
+        SwitchVirtualDesktop(app.desktop);
+    }
+    RestoreOrFocusRunningApp(app);
+    ShowNotification("app running", kTheme.maximize);
+    return true;
+}
+
+bool LaunchApplicationById(const char* app_id) {
+    const ApplicationDescriptor* app = FindApplicationById(app_id);
+    if (!app) {
+        ShowNotification("missing app id", kTheme.close);
+        KernelLog(LogLevel::Warn, "[APP] missing app id");
+        return false;
+    }
+
+    return LaunchApplication(*app);
+}
+
+void AppWatchdogTick() {
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        AppRuntimeState& runtime = g_AppRuntimes[i];
+        if (!runtime.valid || runtime.state != AppLifecycleState::Running) {
+            continue;
+        }
+
+        runtime.missed_heartbeat_count++;
+        if (runtime.missed_heartbeat_count >= 3) {
+            runtime.state = AppLifecycleState::NotResponding;
+            ShowNotification("app not responding", kTheme.minimize);
+            KernelLog(LogLevel::Warn, "[APP] watchdog unresponsive");
+        }
+    }
+}
+
+void AppHeartbeat(AppKind app) {
+    AppRuntimeState* runtime = FindAppRuntime(app);
+    if (!runtime) {
+        return;
+    }
+
+    runtime->missed_heartbeat_count = 0;
+    if (runtime->state == AppLifecycleState::NotResponding) {
+        runtime->state = AppLifecycleState::Running;
+    }
+}
+
+bool InitWindowManager() {
+    const bool registry_ready = InitApplicationRegistry();
+    const bool default_apps_launched =
+        LaunchApplicationById("files") &&
+        LaunchApplicationById("term");
+
+    g_Status.window_manager_ready = registry_ready && default_apps_launched;
     FocusTopVisibleWindow();
     return g_Status.window_manager_ready;
 }
@@ -1147,6 +1381,20 @@ bool RunDesktopPhaseSelfTest() {
 }
 
 bool RunApplicationsSelfTest() {
+    Window saved_windows[kMaxWindows];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
+    }
+    const uint32_t saved_window_count = g_Status.window_count;
+    const uint8_t saved_desktop = g_ActiveDesktop;
+    const int32_t saved_active = g_ActiveWindowIndex;
+    const char* saved_notification = g_NotificationText;
+    const uint32_t saved_notification_color = g_NotificationColor;
+
     const bool registry_ok =
         ApplicationRegistered(AppKind::FileManager) &&
         ApplicationRegistered(AppKind::TextEditor) &&
@@ -1169,9 +1417,70 @@ bool RunApplicationsSelfTest() {
         FindApplication(AppKind::SystemMonitor) &&
         FindApplication(AppKind::TerminalEmulator) &&
         FindApplication(AppKind::SoftwareCenter);
+    const bool paths_ok =
+        FindApplication(AppKind::FileManager)->executable_path[0] == '/' &&
+        FindApplication(AppKind::FileManager)->icon_path[0] == '/' &&
+        FindApplication(AppKind::TerminalEmulator)->executable_path[0] == '/' &&
+        FindApplication(AppKind::TerminalEmulator)->icon_path[0] == '/';
+
+    bool launch_all_ok = true;
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
+        launch_all_ok = LaunchApplicationById(kApplications[i].id) && launch_all_ok;
+    }
+
+    const bool taskbar_running_ok = g_Status.window_count >= kApplicationCount;
+    const bool missing_id_ok = !LaunchApplicationById("missing") &&
+        g_NotificationText &&
+        g_NotificationColor == kTheme.close;
+
+    const ApplicationDescriptor* terminal = FindApplication(AppKind::TerminalEmulator);
+    const int32_t terminal_index = terminal ? FindWindowByApp(terminal->app, terminal->desktop) : -1;
+    bool restore_ok = false;
+    bool close_relaunch_ok = false;
+    bool watchdog_ok = false;
+    if (terminal && terminal_index >= 0) {
+        MinimizeWindow(static_cast<uint32_t>(terminal_index));
+        restore_ok = LaunchApplicationById(terminal->id) &&
+            FindWindowByApp(terminal->app, terminal->desktop) >= 0 &&
+            !g_Windows[FindWindowByApp(terminal->app, terminal->desktop)].minimized;
+
+        const int32_t close_index = FindWindowByApp(terminal->app, terminal->desktop);
+        CloseWindow(static_cast<uint32_t>(close_index));
+        close_relaunch_ok = LaunchApplicationById(terminal->id) &&
+            FindWindowByApp(terminal->app, terminal->desktop) >= 0 &&
+            g_Windows[FindWindowByApp(terminal->app, terminal->desktop)].visible;
+
+        AppRuntimeState* runtime = FindAppRuntime(terminal->app);
+        if (runtime) {
+            runtime->state = AppLifecycleState::Running;
+            runtime->missed_heartbeat_count = 2;
+            AppWatchdogTick();
+            watchdog_ok = runtime->state == AppLifecycleState::NotResponding;
+            AppHeartbeat(terminal->app);
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(g_Windows[i], saved_windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
+    g_Status.window_count = saved_window_count;
+    g_ActiveDesktop = saved_desktop;
+    g_ActiveWindowIndex = saved_active;
+    g_NotificationText = saved_notification;
+    g_NotificationColor = saved_notification_color;
+
     return registry_ok &&
         descriptors_ok &&
-        g_Status.window_count >= sizeof(kApplications) / sizeof(kApplications[0]);
+        paths_ok &&
+        launch_all_ok &&
+        taskbar_running_ok &&
+        missing_id_ok &&
+        restore_ok &&
+        close_relaunch_ok &&
+        watchdog_ok;
 }
 
 bool RunStableInterfaceSelfTest() {
@@ -1892,14 +2201,31 @@ void DrawBars() {
     Graphics::DrawText(190, 12, "CPU 3%", kTheme.text_muted);
     Graphics::DrawText(282, 12, "RAM 12 MB", kTheme.text_muted);
     Graphics::DrawText(410, 12, "FPS 60", kTheme.text_muted);
+    if (g_NotificationText) {
+        Graphics::DrawText(508, 12, g_NotificationText, g_NotificationColor);
+    }
     if (g_Framebuffer.width > 92) {
         Graphics::DrawText(g_Framebuffer.width - 82, 12, "22:45", kTheme.text);
+    }
+
+    uint32_t x = 18;
+    const uint32_t y = g_Framebuffer.height - kTaskBarHeight + 8;
+    for (uint32_t i = 0; i < kApplicationCount && x + kLauncherButtonWidth < g_Framebuffer.width; i++) {
+        AppRuntimeState* runtime = FindAppRuntime(kApplications[i].app);
+        const bool running = runtime && runtime->state == AppLifecycleState::Running;
+        const bool failed = runtime && runtime->state == AppLifecycleState::Failed;
+        const uint32_t fill = failed ? 0xFF4A2630 : (running ? 0xFF243A34 : 0xFF26313D);
+        const uint32_t edge = failed ? kTheme.close : (running ? kTheme.maximize : kTheme.border_inactive);
+        Graphics::FillRect({x, y, kLauncherButtonWidth, kLauncherButtonHeight}, fill);
+        Graphics::DrawRect({x, y, kLauncherButtonWidth, kLauncherButtonHeight}, edge);
+        Graphics::DrawText(x + 8, y + 7, kApplications[i].id, running ? kTheme.text : kTheme.text_muted);
+        x += kLauncherButtonWidth + 8;
     }
 }
 
 void DrawTaskbar() {
     uint32_t x = 18;
-    const uint32_t y = g_Framebuffer.height - kTaskBarHeight + 8;
+    const uint32_t y = g_Framebuffer.height - kTaskBarHeight + 40;
 
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
         const Window& window = g_Windows[i];
@@ -1988,6 +2314,14 @@ void CloseWindow(uint32_t index) {
         return;
     }
 
+    AppRuntimeState* runtime = FindAppRuntime(g_Windows[index].app);
+    if (runtime && runtime->process_id == g_Windows[index].process_id) {
+        KernelExitUserApplication(runtime->process_id, 0);
+        runtime->state = AppLifecycleState::NotRunning;
+        runtime->process_id = 0;
+        runtime->thread_id = 0;
+        runtime->missed_heartbeat_count = 0;
+    }
     g_Windows[index].visible = false;
     g_Windows[index].focused = false;
     if (g_DragWindowIndex == static_cast<int32_t>(index)) {
@@ -2002,12 +2336,12 @@ void CloseWindow(uint32_t index) {
 }
 
 int32_t FindTaskbarWindowAt(int32_t x, int32_t y) {
-    if (y < static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight)) {
+    if (y < static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 36)) {
         return -1;
     }
 
     int32_t button_x = 18;
-    const int32_t button_y = static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 8);
+    const int32_t button_y = static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 40);
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
         const Window& window = g_Windows[i];
         if (!window.visible || window.desktop != g_ActiveDesktop) {
@@ -2029,12 +2363,34 @@ int32_t FindTaskbarWindowAt(int32_t x, int32_t y) {
     return -1;
 }
 
+const ApplicationDescriptor* FindLauncherAppAt(int32_t x, int32_t y) {
+    const int32_t launcher_y = static_cast<int32_t>(g_Framebuffer.height - kTaskBarHeight + 8);
+    if (y < launcher_y || y >= launcher_y + static_cast<int32_t>(kLauncherButtonHeight)) {
+        return nullptr;
+    }
+
+    int32_t button_x = 18;
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
+        if (PointInRect(x, y, {
+            static_cast<uint32_t>(button_x),
+            static_cast<uint32_t>(launcher_y),
+            kLauncherButtonWidth,
+            kLauncherButtonHeight,
+        })) {
+            return &kApplications[i];
+        }
+        button_x += static_cast<int32_t>(kLauncherButtonWidth + 8);
+    }
+
+    return nullptr;
+}
+
 void UpdateHoverState() {
     g_HoveredWindowIndex = FindTopWindowAt(g_MouseX, g_MouseY, false);
     g_HoveredControl = WindowControl::None;
     g_CursorKind = CursorKind::Arrow;
 
-    if (FindTaskbarWindowAt(g_MouseX, g_MouseY) >= 0) {
+    if (FindLauncherAppAt(g_MouseX, g_MouseY) || FindTaskbarWindowAt(g_MouseX, g_MouseY) >= 0) {
         g_CursorKind = CursorKind::Hand;
         return;
     }
@@ -2054,6 +2410,12 @@ void UpdateHoverState() {
 
 void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
     if (button != 0) {
+        return;
+    }
+
+    const ApplicationDescriptor* launcher_app = FindLauncherAppAt(x, y);
+    if (launcher_app) {
+        LaunchApplicationById(launcher_app->id);
         return;
     }
 

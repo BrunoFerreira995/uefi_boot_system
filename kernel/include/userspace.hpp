@@ -61,4 +61,10 @@ struct UserspaceStatus {
 bool KernelUserspaceInit();
 const UserspaceStatus& KernelUserspaceStatus();
 uint64_t KernelSyscall(uint64_t number, uint64_t arg0, uint64_t arg1, uint64_t arg2);
+bool KernelLaunchUserApplication(const char* app_id,
+                                 const char* executable_path,
+                                 uint64_t& process_id,
+                                 uint64_t& thread_id);
+bool KernelStartUserApplicationEventLoop(uint64_t process_id, const char* app_id, uint64_t& thread_id);
+bool KernelExitUserApplication(uint64_t process_id, int32_t exit_code);
 void PrintUserspaceInfo();

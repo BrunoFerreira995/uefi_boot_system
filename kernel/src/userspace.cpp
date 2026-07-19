@@ -170,10 +170,10 @@ struct CompatibilityTarget {
     bool available;
 };
 
-static constexpr uint64_t kMaxUserProcesses = 8;
+static constexpr uint64_t kMaxUserProcesses = 24;
 static constexpr uint32_t kMaxDynamicSymbols = 24;
 static constexpr uint32_t kMaxPosixFileDescriptors = 8;
-static constexpr uint32_t kMaxLoaderCacheEntries = 8;
+static constexpr uint32_t kMaxLoaderCacheEntries = 32;
 static constexpr uint32_t kMaxEnvironmentVariables = 12;
 static constexpr uint32_t kMaxSharedLibraries = 16;
 static constexpr uint32_t kMaxSignalHandlers = 8;
@@ -366,6 +366,31 @@ uint32_t StringLength(const char* text) {
         length++;
     }
     return length;
+}
+
+bool StringStartsWith(const char* text, const char* prefix) {
+    if (!text || !prefix) {
+        return false;
+    }
+
+    while (*prefix) {
+        if (*text != *prefix) {
+            return false;
+        }
+        text++;
+        prefix++;
+    }
+    return true;
+}
+
+bool StringEndsWith(const char* text, const char* suffix) {
+    const uint32_t text_length = StringLength(text);
+    const uint32_t suffix_length = StringLength(suffix);
+    if (!text || !suffix || suffix_length > text_length) {
+        return false;
+    }
+
+    return StringEquals(text + text_length - suffix_length, suffix);
 }
 
 UserProcess* RegisterUserProcess(uint64_t process_id, const char* name) {
@@ -872,6 +897,55 @@ bool WindowProtocolHandshakeValid(const char* protocol, const char* display) {
         display &&
         StringLength(protocol) > 0 &&
         StringLength(display) > 0;
+}
+
+bool AppExecutablePathValid(const char* path) {
+    return path &&
+        (StringStartsWith(path, "/system/apps/") || StringStartsWith(path, "/bin/")) &&
+        (StringEndsWith(path, ".app") || StringStartsWith(path, "/bin/"));
+}
+
+void BuildSyntheticAppElf(uint8_t* image, uint64_t image_size, uint64_t base_address) {
+    if (!image || image_size < sizeof(Elf64Header) + sizeof(Elf64ProgramHeader) + 16) {
+        return;
+    }
+
+    for (uint64_t i = 0; i < image_size; i++) {
+        image[i] = 0;
+    }
+
+    Elf64Header* header = reinterpret_cast<Elf64Header*>(image);
+    header->ident[0] = 0x7F;
+    header->ident[1] = 'E';
+    header->ident[2] = 'L';
+    header->ident[3] = 'F';
+    header->ident[4] = kElfClass64;
+    header->ident[5] = kElfDataLittleEndian;
+    header->type = kElfTypeExecutable;
+    header->machine = kElfMachineX86_64;
+    header->version = kElfVersionCurrent;
+    header->entry = base_address;
+    header->program_header_offset = sizeof(Elf64Header);
+    header->header_size = sizeof(Elf64Header);
+    header->program_header_entry_size = sizeof(Elf64ProgramHeader);
+    header->program_header_count = 1;
+
+    Elf64ProgramHeader* program = reinterpret_cast<Elf64ProgramHeader*>(image + sizeof(Elf64Header));
+    program->type = kElfLoadSegment;
+    program->offset = sizeof(Elf64Header) + sizeof(Elf64ProgramHeader);
+    program->virtual_address = base_address;
+    program->physical_address = base_address;
+    program->file_size = 16;
+    program->memory_size = 16;
+    program->align = 0x1000;
+}
+
+void AppProcessMain(void* argument) {
+    const uint64_t process_id = reinterpret_cast<uint64_t>(argument);
+    UserProcess* process = FindUserProcess(process_id);
+    if (process) {
+        process->state = UserProcessState::Running;
+    }
 }
 
 bool ValidateElf64Header(const Elf64Header& header, uint64_t image_size) {
@@ -1505,6 +1579,72 @@ bool KernelUserspaceInit() {
 
 const UserspaceStatus& KernelUserspaceStatus() {
     return g_Status;
+}
+
+bool KernelLaunchUserApplication(const char* app_id,
+                                 const char* executable_path,
+                                 uint64_t& process_id,
+                                 uint64_t& thread_id) {
+    process_id = 0;
+    thread_id = 0;
+
+    KernelLog(LogLevel::Info, "[APP] launch requested");
+    if (!app_id || !AppExecutablePathValid(executable_path) || !g_Status.elf_loader_ready) {
+        KernelLog(LogLevel::Warn, "[APP] launch failed");
+        return false;
+    }
+
+    static uint64_t next_app_base = 0x900000;
+    uint8_t image[sizeof(Elf64Header) + sizeof(Elf64ProgramHeader) + 16];
+    BuildSyntheticAppElf(image, sizeof(image), next_app_base);
+
+    UserElfImage loaded;
+    KernelLog(LogLevel::Info, "[ELF] loading");
+    if (!LoadUserElfImage(image, sizeof(image), loaded) ||
+        !RegisterLoaderCacheEntry(executable_path, loaded.lowest_address, loaded.entry,
+            loaded.highest_address - loaded.lowest_address)) {
+        KernelLog(LogLevel::Warn, "[APP] launch failed");
+        return false;
+    }
+
+    process_id = KernelCreateProcess(executable_path);
+    if (process_id == 0 || !RegisterUserProcess(process_id, app_id)) {
+        KernelLog(LogLevel::Warn, "[APP] launch failed");
+        process_id = 0;
+        return false;
+    }
+    KernelLog(LogLevel::Info, "[PROC] process created");
+
+    next_app_base += 0x20000;
+    KernelLog(LogLevel::Info, "[APP] launch started");
+    return true;
+}
+
+bool KernelStartUserApplicationEventLoop(uint64_t process_id, const char* app_id, uint64_t& thread_id) {
+    thread_id = 0;
+    if (process_id == 0 || !app_id || !FindUserProcess(process_id)) {
+        return false;
+    }
+
+    thread_id = KernelCreateThread(process_id, app_id, AppProcessMain,
+        reinterpret_cast<void*>(process_id));
+    if (thread_id == 0) {
+        return false;
+    }
+
+    KernelLog(LogLevel::Info, "[APP] event loop started");
+    return true;
+}
+
+bool KernelExitUserApplication(uint64_t process_id, int32_t exit_code) {
+    UserProcess* process = FindUserProcess(process_id);
+    if (!process || !KernelTerminateProcess(process_id, exit_code)) {
+        return false;
+    }
+
+    process->state = UserProcessState::Exited;
+    KernelLog(LogLevel::Info, exit_code == 0 ? "[APP] exit code 0" : "[APP] exit code nonzero");
+    return true;
 }
 
 void PrintUserspaceInfo() {

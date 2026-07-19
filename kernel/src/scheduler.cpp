@@ -6,8 +6,8 @@ extern "C" uint64_t CpuXsaveMask;
 
 namespace {
 
-static constexpr uint64_t kMaxProcesses = 8;
-static constexpr uint64_t kMaxThreads = 16;
+static constexpr uint64_t kMaxProcesses = 24;
+static constexpr uint64_t kMaxThreads = 48;
 static constexpr uint64_t kThreadStackSize = 8192;
 static constexpr uint64_t kKernelProcessId = 1;
 static constexpr uint64_t kIpcQueueSize = 8;
@@ -369,6 +369,36 @@ uint64_t KernelCreateThread(uint64_t process_id, const char* name, void (*entry)
     thread->waiting_mutex_id = 0;
     PrepareInitialContext(*thread);
     return thread->id;
+}
+
+bool KernelTerminateProcess(uint64_t process_id, int32_t exit_code) {
+    static_cast<void>(exit_code);
+    Process* process = FindProcess(process_id);
+    if (!process || process_id == kKernelProcessId) {
+        return false;
+    }
+
+    process->active = false;
+    process->ipc_head = 0;
+    process->ipc_tail = 0;
+    process->ipc_count = 0;
+    for (uint64_t i = 0; i < kIpcQueueSize; i++) {
+        process->ipc_queue[i] = 0;
+    }
+
+    for (uint64_t i = 0; i < kMaxThreads; i++) {
+        Thread& thread = g_Threads[i];
+        if (thread.state != ThreadState::Empty && thread.process_id == process_id) {
+            thread.state = ThreadState::Empty;
+            thread.process_id = 0;
+            thread.entry = nullptr;
+            thread.argument = nullptr;
+            thread.stack_base = nullptr;
+            thread.stack_size = 0;
+        }
+    }
+
+    return true;
 }
 
 uint64_t KernelForkProcess(uint64_t parent_process_id) {
