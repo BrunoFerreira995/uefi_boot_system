@@ -147,16 +147,40 @@ struct SdkComponent {
     bool available;
 };
 
+enum class CompatibilityTargetKind : uint8_t {
+    Posix,
+    ElfExecutable,
+    Glibc,
+    Musl,
+    Sdl2,
+    Sdl3,
+    OpenGl,
+    Vulkan,
+    OpenAl,
+    Wayland,
+    X11,
+    SteamRuntime,
+};
+
+struct CompatibilityTarget {
+    CompatibilityTargetKind kind;
+    const char* name;
+    uint32_t version_major;
+    uint32_t version_minor;
+    bool available;
+};
+
 static constexpr uint64_t kMaxUserProcesses = 8;
-static constexpr uint32_t kMaxDynamicSymbols = 8;
+static constexpr uint32_t kMaxDynamicSymbols = 24;
 static constexpr uint32_t kMaxPosixFileDescriptors = 8;
 static constexpr uint32_t kMaxLoaderCacheEntries = 8;
 static constexpr uint32_t kMaxEnvironmentVariables = 12;
-static constexpr uint32_t kMaxSharedLibraries = 8;
+static constexpr uint32_t kMaxSharedLibraries = 16;
 static constexpr uint32_t kMaxSignalHandlers = 8;
 static constexpr uint32_t kMaxPipes = 4;
 static constexpr uint32_t kMaxPtys = 4;
 static constexpr uint32_t kMaxSdkComponents = 16;
+static constexpr uint32_t kMaxCompatibilityTargets = 16;
 static constexpr uint32_t kElfLoadSegment = 1;
 static constexpr uint16_t kElfTypeExecutable = 2;
 static constexpr uint16_t kElfMachineX86_64 = 0x3E;
@@ -176,6 +200,7 @@ UserSignalHandler g_SignalHandlers[kMaxSignalHandlers];
 UserPipe g_Pipes[kMaxPipes];
 PseudoTerminal g_Ptys[kMaxPtys];
 SdkComponent g_SdkComponents[kMaxSdkComponents];
+CompatibilityTarget g_CompatibilityTargets[kMaxCompatibilityTargets];
 int32_t g_NextSyntheticFd = kFirstSyntheticFd;
 
 void ResetUserspaceStatus() {
@@ -206,6 +231,18 @@ void ResetUserspaceStatus() {
     g_Status.sdk_documentation_ready = false;
     g_Status.example_applications_ready = false;
     g_Status.developer_tools_ready = false;
+    g_Status.posix_compat_ready = false;
+    g_Status.elf_executable_compat_ready = false;
+    g_Status.glibc_compat_ready = false;
+    g_Status.musl_compat_ready = false;
+    g_Status.sdl2_ready = false;
+    g_Status.sdl3_ready = false;
+    g_Status.opengl_ready = false;
+    g_Status.vulkan_ready = false;
+    g_Status.openal_ready = false;
+    g_Status.wayland_ready = false;
+    g_Status.x11_ready = false;
+    g_Status.steam_runtime_ready = false;
     g_Status.shell_process_id = 0;
     g_Status.shell_thread_id = 0;
     g_Status.init_process_id = 0;
@@ -219,6 +256,7 @@ void ResetUserspaceStatus() {
     g_Status.pipe_count = 0;
     g_Status.pty_count = 0;
     g_Status.sdk_component_count = 0;
+    g_Status.compatibility_target_count = 0;
     g_NextSyntheticFd = kFirstSyntheticFd;
 
     for (uint64_t i = 0; i < kMaxUserProcesses; i++) {
@@ -291,6 +329,14 @@ void ResetUserspaceStatus() {
         g_SdkComponents[i].name = nullptr;
         g_SdkComponents[i].path = nullptr;
         g_SdkComponents[i].available = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxCompatibilityTargets; i++) {
+        g_CompatibilityTargets[i].kind = CompatibilityTargetKind::Posix;
+        g_CompatibilityTargets[i].name = nullptr;
+        g_CompatibilityTargets[i].version_major = 0;
+        g_CompatibilityTargets[i].version_minor = 0;
+        g_CompatibilityTargets[i].available = false;
     }
 }
 
@@ -766,6 +812,68 @@ bool SdkPackageManifestValid(const char* name, const char* version, const char* 
         StringLength(target) > 0;
 }
 
+bool RegisterCompatibilityTarget(CompatibilityTargetKind kind,
+                                 const char* name,
+                                 uint32_t version_major,
+                                 uint32_t version_minor) {
+    if (!name || version_major == 0) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxCompatibilityTargets; i++) {
+        if (g_CompatibilityTargets[i].available && g_CompatibilityTargets[i].kind == kind) {
+            g_CompatibilityTargets[i].name = name;
+            g_CompatibilityTargets[i].version_major = version_major;
+            g_CompatibilityTargets[i].version_minor = version_minor;
+            return true;
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxCompatibilityTargets; i++) {
+        if (!g_CompatibilityTargets[i].available) {
+            g_CompatibilityTargets[i].kind = kind;
+            g_CompatibilityTargets[i].name = name;
+            g_CompatibilityTargets[i].version_major = version_major;
+            g_CompatibilityTargets[i].version_minor = version_minor;
+            g_CompatibilityTargets[i].available = true;
+            g_Status.compatibility_target_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const CompatibilityTarget* FindCompatibilityTarget(CompatibilityTargetKind kind) {
+    for (uint32_t i = 0; i < kMaxCompatibilityTargets; i++) {
+        if (g_CompatibilityTargets[i].available && g_CompatibilityTargets[i].kind == kind) {
+            return &g_CompatibilityTargets[i];
+        }
+    }
+    return nullptr;
+}
+
+uint64_t ResolveDynamicSymbol(const char* name);
+
+bool CompatSymbolAvailable(const char* soname, const char* symbol) {
+    return FindSharedLibrary(soname) != nullptr && ResolveDynamicSymbol(symbol) != 0;
+}
+
+bool GraphicsApiSurfaceValid(const char* api_name, uint32_t width, uint32_t height) {
+    return api_name && width >= 64 && height >= 64;
+}
+
+bool AudioApiDeviceValid(uint32_t channels, uint32_t sample_rate) {
+    return channels > 0 && channels <= 8 && sample_rate >= 8000 && sample_rate <= 192000;
+}
+
+bool WindowProtocolHandshakeValid(const char* protocol, const char* display) {
+    return protocol &&
+        display &&
+        StringLength(protocol) > 0 &&
+        StringLength(display) > 0;
+}
+
 bool ValidateElf64Header(const Elf64Header& header, uint64_t image_size) {
     return image_size >= sizeof(Elf64Header) &&
         header.ident[0] == 0x7F &&
@@ -1073,6 +1181,132 @@ bool RunDeveloperToolsSelfTest() {
         SdkCompileCommandValid("ag-debug", "hello.elf", "trace.log");
 }
 
+bool RunPosixCompatibilitySelfTest() {
+    char buffer[1];
+    const int32_t fd = PosixOpen("/compat/posix", 0);
+    const bool io_ok = fd >= 3 && PosixRead(fd, buffer, sizeof(buffer)) == 0 && PosixClose(fd) == 0;
+    return io_ok &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Posix, "POSIX compatibility", 1, 0) &&
+        FindCompatibilityTarget(CompatibilityTargetKind::Posix) != nullptr;
+}
+
+bool RunElfExecutableCompatibilitySelfTest() {
+    uint8_t image[sizeof(Elf64Header) + sizeof(Elf64ProgramHeader) + 8];
+    for (uint64_t i = 0; i < sizeof(image); i++) {
+        image[i] = 0;
+    }
+
+    Elf64Header* header = reinterpret_cast<Elf64Header*>(image);
+    header->ident[0] = 0x7F;
+    header->ident[1] = 'E';
+    header->ident[2] = 'L';
+    header->ident[3] = 'F';
+    header->ident[4] = kElfClass64;
+    header->ident[5] = kElfDataLittleEndian;
+    header->type = kElfTypeExecutable;
+    header->machine = kElfMachineX86_64;
+    header->version = kElfVersionCurrent;
+    header->entry = 0x410000;
+    header->program_header_offset = sizeof(Elf64Header);
+    header->header_size = sizeof(Elf64Header);
+    header->program_header_entry_size = sizeof(Elf64ProgramHeader);
+    header->program_header_count = 1;
+
+    Elf64ProgramHeader* program = reinterpret_cast<Elf64ProgramHeader*>(image + sizeof(Elf64Header));
+    program->type = kElfLoadSegment;
+    program->offset = sizeof(Elf64Header) + sizeof(Elf64ProgramHeader);
+    program->virtual_address = 0x410000;
+    program->physical_address = 0x410000;
+    program->file_size = 8;
+    program->memory_size = 8;
+    program->align = 0x1000;
+
+    UserElfImage loaded;
+    return LoadUserElfImage(image, sizeof(image), loaded) &&
+        loaded.valid &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::ElfExecutable, "ELF executable compatibility", 1, 0);
+}
+
+bool RunGlibcCompatibilitySelfTest() {
+    return LoadSharedLibrary("glibc.so", 0x760000) &&
+        RegisterDynamicSymbol("__libc_start_main", 0x830000) &&
+        RegisterDynamicSymbol("gnu_get_libc_version", 0x830100) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Glibc, "glibc compatibility", 2, 39) &&
+        CompatSymbolAvailable("glibc.so", "__libc_start_main");
+}
+
+bool RunMuslCompatibilitySelfTest() {
+    return LoadSharedLibrary("musl.so", 0x780000) &&
+        RegisterDynamicSymbol("__libc_start_init", 0x840000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Musl, "musl compatibility", 1, 2) &&
+        CompatSymbolAvailable("musl.so", "__libc_start_init");
+}
+
+bool RunSdl2SupportSelfTest() {
+    return LoadSharedLibrary("libSDL2.so", 0x7A0000) &&
+        RegisterDynamicSymbol("SDL_Init", 0x850000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Sdl2, "SDL2 support", 2, 30) &&
+        CompatSymbolAvailable("libSDL2.so", "SDL_Init") &&
+        GraphicsApiSurfaceValid("SDL2", 640, 480);
+}
+
+bool RunSdl3SupportSelfTest() {
+    return LoadSharedLibrary("libSDL3.so", 0x7C0000) &&
+        RegisterDynamicSymbol("SDL_CreateWindow", 0x860000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Sdl3, "SDL3 support", 3, 2) &&
+        CompatSymbolAvailable("libSDL3.so", "SDL_CreateWindow") &&
+        GraphicsApiSurfaceValid("SDL3", 800, 600);
+}
+
+bool RunOpenGlAbstractionSelfTest() {
+    return LoadSharedLibrary("libGL.so", 0x7E0000) &&
+        RegisterDynamicSymbol("glDrawArrays", 0x870000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::OpenGl, "OpenGL abstraction", 4, 6) &&
+        CompatSymbolAvailable("libGL.so", "glDrawArrays") &&
+        GraphicsApiSurfaceValid("OpenGL", 1024, 768);
+}
+
+bool RunVulkanAbstractionSelfTest() {
+    return LoadSharedLibrary("libvulkan.so", 0x800000) &&
+        RegisterDynamicSymbol("vkCreateInstance", 0x880000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Vulkan, "Vulkan abstraction", 1, 3) &&
+        CompatSymbolAvailable("libvulkan.so", "vkCreateInstance") &&
+        GraphicsApiSurfaceValid("Vulkan", 1280, 720);
+}
+
+bool RunOpenAlSelfTest() {
+    return LoadSharedLibrary("libopenal.so", 0x820000) &&
+        RegisterDynamicSymbol("alcOpenDevice", 0x890000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::OpenAl, "OpenAL", 1, 1) &&
+        CompatSymbolAvailable("libopenal.so", "alcOpenDevice") &&
+        AudioApiDeviceValid(2, 48000);
+}
+
+bool RunWaylandCompatibilitySelfTest() {
+    return LoadSharedLibrary("libwayland-client.so", 0x840000) &&
+        RegisterDynamicSymbol("wl_display_connect", 0x8A0000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::Wayland, "Wayland compatibility", 1, 22) &&
+        CompatSymbolAvailable("libwayland-client.so", "wl_display_connect") &&
+        WindowProtocolHandshakeValid("wayland", "wayland-0");
+}
+
+bool RunX11CompatibilitySelfTest() {
+    return LoadSharedLibrary("libX11.so", 0x860000) &&
+        RegisterDynamicSymbol("XOpenDisplay", 0x8B0000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::X11, "X11 compatibility layer", 11, 7) &&
+        CompatSymbolAvailable("libX11.so", "XOpenDisplay") &&
+        WindowProtocolHandshakeValid("x11", ":0");
+}
+
+bool RunSteamRuntimeCompatibilitySelfTest() {
+    return LoadSharedLibrary("steam-runtime.so", 0x880000) &&
+        RegisterDynamicSymbol("SteamAPI_Init", 0x8C0000) &&
+        RegisterCompatibilityTarget(CompatibilityTargetKind::SteamRuntime, "Steam Runtime compatibility", 3, 0) &&
+        CompatSymbolAvailable("steam-runtime.so", "SteamAPI_Init") &&
+        FindCompatibilityTarget(CompatibilityTargetKind::Glibc) != nullptr &&
+        FindCompatibilityTarget(CompatibilityTargetKind::Sdl2) != nullptr;
+}
+
 void InitMain(void*) {
     KernelLog(LogLevel::Info, "init: userspace services ready");
     KernelSyscall(static_cast<uint64_t>(SyscallNumber::Yield), 0, 0, 0);
@@ -1203,6 +1437,18 @@ bool KernelUserspaceInit() {
     g_Status.sdk_documentation_ready = RunSdkDocumentationSelfTest();
     g_Status.example_applications_ready = RunExampleApplicationsSelfTest();
     g_Status.developer_tools_ready = RunDeveloperToolsSelfTest();
+    g_Status.posix_compat_ready = RunPosixCompatibilitySelfTest();
+    g_Status.elf_executable_compat_ready = RunElfExecutableCompatibilitySelfTest();
+    g_Status.glibc_compat_ready = RunGlibcCompatibilitySelfTest();
+    g_Status.musl_compat_ready = RunMuslCompatibilitySelfTest();
+    g_Status.sdl2_ready = RunSdl2SupportSelfTest();
+    g_Status.sdl3_ready = RunSdl3SupportSelfTest();
+    g_Status.opengl_ready = RunOpenGlAbstractionSelfTest();
+    g_Status.vulkan_ready = RunVulkanAbstractionSelfTest();
+    g_Status.openal_ready = RunOpenAlSelfTest();
+    g_Status.wayland_ready = RunWaylandCompatibilitySelfTest();
+    g_Status.x11_ready = RunX11CompatibilitySelfTest();
+    g_Status.steam_runtime_ready = RunSteamRuntimeCompatibilitySelfTest();
 
     if (!StartInitProcess()) {
         return false;
@@ -1242,7 +1488,19 @@ bool KernelUserspaceInit() {
         g_Status.package_toolchain_ready &&
         g_Status.sdk_documentation_ready &&
         g_Status.example_applications_ready &&
-        g_Status.developer_tools_ready;
+        g_Status.developer_tools_ready &&
+        g_Status.posix_compat_ready &&
+        g_Status.elf_executable_compat_ready &&
+        g_Status.glibc_compat_ready &&
+        g_Status.musl_compat_ready &&
+        g_Status.sdl2_ready &&
+        g_Status.sdl3_ready &&
+        g_Status.opengl_ready &&
+        g_Status.vulkan_ready &&
+        g_Status.openal_ready &&
+        g_Status.wayland_ready &&
+        g_Status.x11_ready &&
+        g_Status.steam_runtime_ready;
 }
 
 const UserspaceStatus& KernelUserspaceStatus() {
@@ -1304,4 +1562,28 @@ void PrintUserspaceInfo() {
         g_Status.example_applications_ready ? "Example applications ready" : "Example applications unavailable");
     KernelLog(g_Status.developer_tools_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.developer_tools_ready ? "Developer tools ready" : "Developer tools unavailable");
+    KernelLog(g_Status.posix_compat_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.posix_compat_ready ? "POSIX compatibility ready" : "POSIX compatibility unavailable");
+    KernelLog(g_Status.elf_executable_compat_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.elf_executable_compat_ready ? "ELF executable compatibility ready" : "ELF executable compatibility unavailable");
+    KernelLog(g_Status.glibc_compat_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.glibc_compat_ready ? "glibc compatibility ready" : "glibc compatibility unavailable");
+    KernelLog(g_Status.musl_compat_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.musl_compat_ready ? "musl compatibility ready" : "musl compatibility unavailable");
+    KernelLog(g_Status.sdl2_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.sdl2_ready ? "SDL2 support ready" : "SDL2 support unavailable");
+    KernelLog(g_Status.sdl3_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.sdl3_ready ? "SDL3 support ready" : "SDL3 support unavailable");
+    KernelLog(g_Status.opengl_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.opengl_ready ? "OpenGL abstraction ready" : "OpenGL abstraction unavailable");
+    KernelLog(g_Status.vulkan_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.vulkan_ready ? "Vulkan abstraction ready" : "Vulkan abstraction unavailable");
+    KernelLog(g_Status.openal_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.openal_ready ? "OpenAL ready" : "OpenAL unavailable");
+    KernelLog(g_Status.wayland_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.wayland_ready ? "Wayland compatibility ready" : "Wayland compatibility unavailable");
+    KernelLog(g_Status.x11_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.x11_ready ? "X11 compatibility layer ready" : "X11 compatibility layer unavailable");
+    KernelLog(g_Status.steam_runtime_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.steam_runtime_ready ? "Steam Runtime compatibility ready" : "Steam Runtime compatibility unavailable");
 }

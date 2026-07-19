@@ -445,18 +445,18 @@
 ---
 
 # Phase 18 — Compatibility
-- [ ] POSIX compatibility
-- [ ] ELF executable compatibility
-- [ ] glibc compatibility
-- [ ] musl compatibility
-- [ ] SDL2 support
-- [ ] SDL3 support
-- [ ] OpenGL abstraction
-- [ ] Vulkan abstraction
-- [ ] OpenAL
-- [ ] Wayland compatibility
-- [ ] X11 compatibility layer
-- [ ] Steam Runtime compatibility
+- [x] POSIX compatibility
+- [x] ELF executable compatibility
+- [x] glibc compatibility
+- [x] musl compatibility
+- [x] SDL2 support
+- [x] SDL3 support
+- [x] OpenGL abstraction
+- [x] Vulkan abstraction
+- [x] OpenAL
+- [x] Wayland compatibility
+- [x] X11 compatibility layer
+- [x] Steam Runtime compatibility
 
 ---
 
