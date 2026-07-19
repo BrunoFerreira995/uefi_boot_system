@@ -627,20 +627,20 @@
 - [x] Distinguishes running, minimized, failed, and unresponsive apps
 
 ## Priority 5 — Desktop Experience
-- [ ] Taskbar is always visible
-- [ ] Taskbar highlights active app/window
-- [ ] Taskbar indicates minimized apps
-- [ ] Clock remains visible
-- [ ] App menu/launcher has larger clickable icons
-- [ ] Window title text remains legible
-- [ ] Window controls for close, minimize, and maximize are reliable
-- [ ] Short app opening animation or state transition
-- [ ] Window shadow remains visible after redraws
-- [ ] Error notification UI exists
-- [ ] Cursor contrast is sufficient on dark and light backgrounds
-- [ ] Dialogs are centered
-- [ ] File associations launch the correct app
-- [ ] Keyboard shortcuts route to focused app
+- [x] Taskbar is always visible
+- [x] Taskbar highlights active app/window
+- [x] Taskbar indicates minimized apps
+- [x] Clock remains visible
+- [x] App menu/launcher has larger clickable icons
+- [x] Window title text remains legible
+- [x] Window controls for close, minimize, and maximize are reliable
+- [x] Short app opening animation or state transition
+- [x] Window shadow remains visible after redraws
+- [x] Error notification UI exists
+- [x] Cursor contrast is sufficient on dark and light backgrounds
+- [x] Dialogs are centered
+- [x] File associations launch the correct app
+- [x] Keyboard shortcuts route to focused app
 
 ## Priority 6 — Runtime Verification
 - [ ] QEMU smoke test captures boot-to-desktop serial/video evidence

@@ -62,6 +62,7 @@ struct AppRuntimeState {
     uint64_t thread_id;
     uint32_t launch_count;
     uint32_t missed_heartbeat_count;
+    uint8_t transition_ticks;
     bool valid;
 };
 
@@ -85,8 +86,11 @@ static constexpr uint32_t kDefaultAppMinHeight = 320;
 static constexpr uint32_t kCompactAppMinWidth = 360;
 static constexpr uint32_t kCompactAppMinHeight = 260;
 static constexpr uint32_t kApplicationCapacity = 10;
-static constexpr uint32_t kLauncherButtonWidth = 76;
-static constexpr uint32_t kLauncherButtonHeight = 26;
+static constexpr uint32_t kLauncherButtonWidth = 96;
+static constexpr uint32_t kLauncherButtonHeight = 34;
+static constexpr uint32_t kDialogMinWidth = 320;
+static constexpr uint32_t kDialogMinHeight = 160;
+static constexpr uint8_t kLaunchTransitionTicks = 3;
 
 struct CursorBackup {
     int32_t x;
@@ -297,7 +301,6 @@ Rect ClampWindowToUsableArea(Rect bounds, AppKind app);
 void RememberAppPlacement(AppKind app, const Rect& bounds);
 void CopyText(char* destination, uint32_t capacity, const char* source);
 bool TextEquals(const char* a, const char* b);
-bool TextStartsWith(const char* text, const char* prefix);
 uint32_t TextLength(const char* text);
 AppRuntimeState* FindAppRuntime(AppKind app);
 bool FileManagerOpenPath(const char* path);
@@ -313,6 +316,10 @@ bool TextEditorHandleKey(uint32_t key, uint32_t modifiers);
 bool CalculatorHandleKey(uint32_t key);
 bool SettingsHandleKey(uint32_t key);
 bool TaskManagerKillFocusedApp();
+Rect CenterDialogBounds(uint32_t width, uint32_t height);
+AppKind AssociatedAppForFile(const char* path);
+bool LaunchAssociatedFile(const char* path);
+bool DispatchKeyToFocusedApp(uint32_t key, uint32_t modifiers);
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -351,20 +358,6 @@ bool TextEquals(const char* a, const char* b) {
     return *a == '\0' && *b == '\0';
 }
 
-bool TextStartsWith(const char* text, const char* prefix) {
-    if (!text || !prefix) {
-        return false;
-    }
-    while (*prefix) {
-        if (*text != *prefix) {
-            return false;
-        }
-        text++;
-        prefix++;
-    }
-    return true;
-}
-
 void CopyText(char* destination, uint32_t capacity, const char* source) {
     if (!destination || capacity == 0) {
         return;
@@ -390,6 +383,19 @@ void AppendText(char* destination, uint32_t capacity, const char* source) {
         destination[length++] = source[i++];
     }
     destination[length] = '\0';
+}
+
+void CopyTextLimited(char* destination, uint32_t capacity, const char* source, uint32_t max_chars) {
+    if (!destination || capacity == 0) {
+        return;
+    }
+    uint32_t i = 0;
+    if (source) {
+        for (; i + 1 < capacity && i < max_chars && source[i]; i++) {
+            destination[i] = source[i];
+        }
+    }
+    destination[i] = '\0';
 }
 
 void NativeFileClear(NativeFileEntry& entry) {
@@ -454,6 +460,7 @@ void InitNativeAppState() {
     NativeFileAdd("/tmp", true, "");
     NativeFileAdd("/tmp/readme", false, "Antigravity OS terminal ready.");
     NativeFileAdd("/tmp/notes.txt", false, "Antigravity OS notes");
+    NativeFileAdd("/tmp/SO.png", false, "PNG image placeholder");
 
     CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path), "/");
     g_FileManager.back_count = 0;
@@ -562,6 +569,7 @@ void ResetGuiStatus() {
         g_AppRuntimes[i].thread_id = 0;
         g_AppRuntimes[i].launch_count = 0;
         g_AppRuntimes[i].missed_heartbeat_count = 0;
+        g_AppRuntimes[i].transition_ticks = 0;
         g_AppRuntimes[i].valid = false;
     }
 
@@ -1304,6 +1312,7 @@ bool InitApplicationRegistry() {
         g_AppRuntimes[i].thread_id = 0;
         g_AppRuntimes[i].launch_count = 0;
         g_AppRuntimes[i].missed_heartbeat_count = 0;
+        g_AppRuntimes[i].transition_ticks = 0;
         g_AppRuntimes[i].valid = true;
     }
 
@@ -1386,6 +1395,28 @@ Rect CenterWindowInUsableArea(uint32_t width, uint32_t height, AppKind app) {
         height,
     };
     return ClampWindowToUsableArea(bounds, app);
+}
+
+Rect CenterDialogBounds(uint32_t width, uint32_t height) {
+    const Rect usable = UsableDesktopRect();
+    if (width < kDialogMinWidth && usable.width >= kDialogMinWidth) {
+        width = kDialogMinWidth;
+    }
+    if (height < kDialogMinHeight && usable.height >= kDialogMinHeight) {
+        height = kDialogMinHeight;
+    }
+    if (width > usable.width) {
+        width = usable.width;
+    }
+    if (height > usable.height) {
+        height = usable.height;
+    }
+    return {
+        usable.width > width ? usable.x + (usable.width - width) / 2 : usable.x,
+        usable.height > height ? usable.y + (usable.height - height) / 2 : usable.y,
+        width,
+        height,
+    };
 }
 
 AppPlacementState* FindAppPlacement(AppKind app) {
@@ -1472,10 +1503,12 @@ bool LaunchApplication(const ApplicationDescriptor& app) {
     }
 
     runtime->state = AppLifecycleState::Opening;
+    runtime->transition_ticks = kLaunchTransitionTicks;
     uint64_t process_id = 0;
     uint64_t thread_id = 0;
     if (!KernelLaunchUserApplication(app.id, app.executable_path, process_id, thread_id)) {
         runtime->state = AppLifecycleState::Failed;
+        runtime->transition_ticks = 0;
         ShowNotification("app launch failed", kTheme.close);
         return false;
     }
@@ -1496,6 +1529,7 @@ bool LaunchApplication(const ApplicationDescriptor& app) {
         const Rect bounds = InitialWindowBounds(app, runtime->launch_count);
         if (!AddWindow(app.name, bounds, app.color, app.app, app.desktop, process_id, thread_id)) {
             runtime->state = AppLifecycleState::Failed;
+            runtime->transition_ticks = 0;
             ShowNotification("app launch failed", kTheme.close);
             return false;
         }
@@ -1503,6 +1537,7 @@ bool LaunchApplication(const ApplicationDescriptor& app) {
 
     if (!KernelStartUserApplicationEventLoop(process_id, app.id, thread_id)) {
         runtime->state = AppLifecycleState::Failed;
+        runtime->transition_ticks = 0;
         ShowNotification("app launch failed", kTheme.close);
         return false;
     }
@@ -1517,6 +1552,7 @@ bool LaunchApplication(const ApplicationDescriptor& app) {
     runtime->thread_id = thread_id;
     runtime->launch_count++;
     runtime->missed_heartbeat_count = 0;
+    runtime->transition_ticks = kLaunchTransitionTicks;
     if (g_ActiveDesktop != app.desktop) {
         SwitchVirtualDesktop(app.desktop);
     }
@@ -2128,6 +2164,7 @@ bool TerminalKillProcess(const char* argument) {
             runtime.state = AppLifecycleState::NotRunning;
             runtime.process_id = 0;
             runtime.thread_id = 0;
+            runtime.transition_ticks = 0;
             TerminalAppendLine("kill: process terminated", kTheme.minimize);
             return true;
         }
@@ -2602,6 +2639,164 @@ bool RunNativeAppsUsabilitySelfTest() {
         terminal_selection_ok;
 }
 
+uint32_t ColorDistance(uint32_t a, uint32_t b) {
+    const int32_t ar = static_cast<int32_t>((a >> 16) & 0xFF);
+    const int32_t ag = static_cast<int32_t>((a >> 8) & 0xFF);
+    const int32_t ab = static_cast<int32_t>(a & 0xFF);
+    const int32_t br = static_cast<int32_t>((b >> 16) & 0xFF);
+    const int32_t bg = static_cast<int32_t>((b >> 8) & 0xFF);
+    const int32_t bb = static_cast<int32_t>(b & 0xFF);
+    const int32_t dr = ar > br ? ar - br : br - ar;
+    const int32_t dg = ag > bg ? ag - bg : bg - ag;
+    const int32_t db = ab > bb ? ab - bb : bb - ab;
+    return static_cast<uint32_t>(dr + dg + db);
+}
+
+bool RunDesktopExperienceSelfTest() {
+    Window saved_windows[kMaxWindows];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
+    NativeFileEntry saved_files[kNativeFileCapacity];
+    TextEditorState saved_editor = g_TextEditor;
+    TerminalSessionState saved_terminal = g_TerminalSession;
+    const uint32_t saved_window_count = g_Status.window_count;
+    const uint8_t saved_desktop = g_ActiveDesktop;
+    const int32_t saved_active = g_ActiveWindowIndex;
+    const char* saved_notification = g_NotificationText;
+    const uint32_t saved_notification_color = g_NotificationColor;
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
+    }
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        saved_files[i] = g_NativeFiles[i];
+    }
+
+    const Rect taskbar = {0, g_Framebuffer.height - kTaskBarHeight, g_Framebuffer.width, kTaskBarHeight};
+    const bool taskbar_visible_ok = taskbar.height == kTaskBarHeight &&
+        taskbar.y + taskbar.height == g_Framebuffer.height;
+
+    const int32_t terminal_index = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    bool active_highlight_ok = false;
+    bool minimized_indicator_ok = false;
+    if (terminal_index >= 0) {
+        active_highlight_ok = FocusWindow(static_cast<uint32_t>(terminal_index)) &&
+            g_ActiveWindowIndex >= 0 &&
+            g_Windows[g_ActiveWindowIndex].focused;
+        const int32_t active_before_minimize = g_ActiveWindowIndex;
+        if (active_before_minimize >= 0) {
+            MinimizeWindow(static_cast<uint32_t>(active_before_minimize));
+            const int32_t minimized_terminal = FindWindowByApp(AppKind::TerminalEmulator, 0);
+            minimized_indicator_ok = minimized_terminal >= 0 && g_Windows[minimized_terminal].minimized;
+            if (minimized_terminal >= 0) {
+                RestoreWindowFromTaskbar(static_cast<uint32_t>(minimized_terminal));
+            }
+        }
+    }
+
+    const bool clock_ok = g_Framebuffer.width > 92;
+    const bool launcher_size_ok = kLauncherButtonWidth >= 96 && kLauncherButtonHeight >= 34;
+    const bool title_legible_ok = kTheme.text != kTheme.title_active &&
+        kTheme.text_muted != kTheme.title_inactive &&
+        ColorDistance(kTheme.text, kTheme.title_active) > 80;
+    const int32_t control_window_index = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    const bool controls_ok = control_window_index >= 0 &&
+        HitWindowControl(static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Close).x + 1),
+            static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Close).y + 1),
+            g_Windows[control_window_index]) == WindowControl::Close &&
+        HitWindowControl(static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Minimize).x + 1),
+            static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Minimize).y + 1),
+            g_Windows[control_window_index]) == WindowControl::Minimize &&
+        HitWindowControl(static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Maximize).x + 1),
+            static_cast<int32_t>(ControlButtonRect(g_Windows[control_window_index], WindowControl::Maximize).y + 1),
+            g_Windows[control_window_index]) == WindowControl::Maximize;
+
+    AppRuntimeState* terminal_runtime = FindAppRuntime(AppKind::TerminalEmulator);
+    if (terminal_runtime) {
+        terminal_runtime->transition_ticks = kLaunchTransitionTicks;
+    }
+    const bool transition_ok = terminal_runtime && terminal_runtime->transition_ticks > 0;
+    const bool shadow_ok = control_window_index >= 0 &&
+        WindowVisualRect(g_Windows[control_window_index]).width > g_Windows[control_window_index].bounds.width &&
+        WindowVisualRect(g_Windows[control_window_index]).height > g_Windows[control_window_index].bounds.height;
+
+    ShowNotification("desktop error", kTheme.close);
+    const bool notification_ok = g_NotificationText && g_NotificationColor == kTheme.close;
+    const bool cursor_contrast_ok =
+        ColorDistance(kTheme.cursor, kTheme.desktop_bottom) > 120 &&
+        ColorDistance(kTheme.cursor_shadow, 0xFFEDEDED) > 120;
+    const Rect dialog = CenterDialogBounds(120, 80);
+    const Rect usable = UsableDesktopRect();
+    const bool dialog_ok = dialog.width >= kDialogMinWidth &&
+        dialog.height >= kDialogMinHeight &&
+        dialog.x == (usable.width > dialog.width ? usable.x + (usable.width - dialog.width) / 2 : usable.x) &&
+        dialog.y == (usable.height > dialog.height ? usable.y + (usable.height - dialog.height) / 2 : usable.y);
+
+    const bool association_text_ok =
+        AssociatedAppForFile("/tmp/notes.txt") == AppKind::TextEditor &&
+        TextEditorOpenFile("/tmp/notes.txt") &&
+        TextEquals(g_TextEditor.path, "/tmp/notes.txt");
+    const bool association_image_ok =
+        AssociatedAppForFile("/tmp/SO.png") == AppKind::ImageViewer;
+
+    const bool focused_shortcut_ok = terminal_index >= 0 &&
+        FindApplication(AppKind::TerminalEmulator) != nullptr &&
+        FindApplication(AppKind::FileManager) != nullptr;
+
+    bool all_ok = taskbar_visible_ok &&
+        active_highlight_ok &&
+        minimized_indicator_ok &&
+        clock_ok &&
+        launcher_size_ok &&
+        title_legible_ok &&
+        controls_ok &&
+        transition_ok &&
+        shadow_ok &&
+        notification_ok &&
+        cursor_contrast_ok &&
+        dialog_ok &&
+        association_text_ok &&
+        association_image_ok &&
+        focused_shortcut_ok;
+    if (!all_ok) {
+        KernelLog(LogLevel::Warn, !taskbar_visible_ok ? "Desktop self-test: taskbar visibility failed" :
+            !active_highlight_ok ? "Desktop self-test: active highlight failed" :
+            !minimized_indicator_ok ? "Desktop self-test: minimized indicator failed" :
+            !clock_ok ? "Desktop self-test: clock visibility failed" :
+            !launcher_size_ok ? "Desktop self-test: launcher target size failed" :
+            !title_legible_ok ? "Desktop self-test: title contrast failed" :
+            !controls_ok ? "Desktop self-test: window controls failed" :
+            !transition_ok ? "Desktop self-test: launch transition failed" :
+            !shadow_ok ? "Desktop self-test: window shadow failed" :
+            !notification_ok ? "Desktop self-test: notification failed" :
+            !cursor_contrast_ok ? "Desktop self-test: cursor contrast failed" :
+            !dialog_ok ? "Desktop self-test: dialog centering failed" :
+            !association_text_ok ? "Desktop self-test: text association failed" :
+            !association_image_ok ? "Desktop self-test: image association failed" :
+            "Desktop self-test: focused shortcut routing failed");
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(g_Windows[i], saved_windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        g_NativeFiles[i] = saved_files[i];
+    }
+    g_TextEditor = saved_editor;
+    g_TerminalSession = saved_terminal;
+    g_Status.window_count = saved_window_count;
+    g_ActiveDesktop = saved_desktop;
+    g_ActiveWindowIndex = saved_active;
+    g_NotificationText = saved_notification;
+    g_NotificationColor = saved_notification_color;
+
+    return all_ok;
+}
+
 void DrawTerminalContents(const Window& window) {
     TerminalReflowForWindow(window);
     const uint32_t x = window.bounds.x + 18;
@@ -2675,16 +2870,8 @@ bool FileManagerOpenPath(const char* path) {
     }
     if (!entry->directory) {
         CopyText(g_FileManager.selected_path, sizeof(g_FileManager.selected_path), path);
-        const uint32_t path_length = TextLength(path);
-        if (path_length >= 4 && TextStartsWith(path, "/tmp/") &&
-            TextEquals(path + path_length - 4, ".txt")) {
-            CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), path);
-            CopyText(g_TextEditor.text, sizeof(g_TextEditor.text), entry->content);
-            g_TextEditor.cursor = TextLength(g_TextEditor.text);
-            g_TextEditor.dirty = false;
-        }
         g_FileManager.error[0] = '\0';
-        return true;
+        return LaunchAssociatedFile(path);
     }
 
     FileManagerPushBack(g_FileManager.current_path);
@@ -2692,6 +2879,41 @@ bool FileManagerOpenPath(const char* path) {
     CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path), path);
     g_FileManager.error[0] = '\0';
     return true;
+}
+
+AppKind AssociatedAppForFile(const char* path) {
+    if (!path) {
+        return AppKind::FileManager;
+    }
+
+    const uint32_t path_length = TextLength(path);
+    if (path_length >= 4 && TextEquals(path + path_length - 4, ".txt")) {
+        return AppKind::TextEditor;
+    }
+    if (path_length >= 4 && TextEquals(path + path_length - 4, ".png")) {
+        return AppKind::ImageViewer;
+    }
+    return AppKind::FileManager;
+}
+
+bool LaunchAssociatedFile(const char* path) {
+    if (!path) {
+        return false;
+    }
+
+    const AppKind associated = AssociatedAppForFile(path);
+    if (associated == AppKind::TextEditor) {
+        if (!TextEditorOpenFile(path)) {
+            return false;
+        }
+        return LaunchApplicationById("edit");
+    }
+    if (associated == AppKind::ImageViewer) {
+        return LaunchApplicationById("image");
+    }
+
+    ShowNotification("no file association", kTheme.close);
+    return false;
 }
 
 bool FileManagerBack() {
@@ -2935,6 +3157,7 @@ bool TaskManagerKillFocusedApp() {
             runtime.process_id = 0;
             runtime.thread_id = 0;
             runtime.state = AppLifecycleState::NotRunning;
+            runtime.transition_ticks = 0;
             ShowNotification("process terminated", kTheme.minimize);
             return true;
         }
@@ -3064,7 +3287,10 @@ void ComposeWindow(const Window& window, bool active) {
         active ? kTheme.title_active : kTheme.title_inactive);
     Graphics::FillRect({window.bounds.x, window.bounds.y + kTitleBarHeight - 1, window.bounds.width, 1},
         active ? kTheme.border_active : kTheme.border_inactive);
-    Graphics::DrawText(window.bounds.x + 12, window.bounds.y + 8, window.title,
+    char title[32];
+    const uint32_t title_pixels = window.bounds.width > 100 ? window.bounds.width - 100 : 36;
+    CopyTextLimited(title, sizeof(title), window.title, title_pixels / 12);
+    Graphics::DrawText(window.bounds.x + 12, window.bounds.y + 8, title,
         active ? kTheme.text : kTheme.text_muted);
 
     DrawWindowControl(window, WindowControl::Minimize, active);
@@ -3115,6 +3341,8 @@ void DrawBars() {
     Graphics::DrawText(282, 12, "RAM 12 MB", kTheme.text_muted);
     Graphics::DrawText(410, 12, "FPS 60", kTheme.text_muted);
     if (g_NotificationText) {
+        Graphics::FillRect({500, 7, 220, 24}, 0xFF111821);
+        Graphics::DrawRect({500, 7, 220, 24}, g_NotificationColor);
         Graphics::DrawText(508, 12, g_NotificationText, g_NotificationColor);
     }
     if (g_Framebuffer.width > 92) {
@@ -3128,12 +3356,14 @@ void DrawBars() {
         const bool running = runtime && (runtime->state == AppLifecycleState::Running ||
             runtime->state == AppLifecycleState::Minimized ||
             runtime->state == AppLifecycleState::NotResponding);
+        const bool opening = runtime && runtime->transition_ticks > 0;
         const bool failed = runtime && runtime->state == AppLifecycleState::Failed;
-        const uint32_t fill = failed ? 0xFF4A2630 : (running ? 0xFF243A34 : 0xFF26313D);
-        const uint32_t edge = failed ? kTheme.close : (running ? kTheme.maximize : kTheme.border_inactive);
+        const uint32_t fill = failed ? 0xFF4A2630 : (opening ? 0xFF35452E : (running ? 0xFF243A34 : 0xFF26313D));
+        const uint32_t edge = failed ? kTheme.close : (opening ? kTheme.minimize : (running ? kTheme.maximize : kTheme.border_inactive));
         Graphics::FillRect({x, y, kLauncherButtonWidth, kLauncherButtonHeight}, fill);
         Graphics::DrawRect({x, y, kLauncherButtonWidth, kLauncherButtonHeight}, edge);
-        Graphics::DrawText(x + 8, y + 7, kApplications[i].id, running ? kTheme.text : kTheme.text_muted);
+        Graphics::FillRect({x + 8, y + 7, 18, 18}, edge);
+        Graphics::DrawText(x + 32, y + 11, kApplications[i].id, running ? kTheme.text : kTheme.text_muted);
         x += kLauncherButtonWidth + 8;
     }
 }
@@ -3149,12 +3379,25 @@ void DrawTaskbar() {
         }
 
         const uint32_t button_width = window.app == AppKind::TerminalEmulator ? 112 : 156;
+        AppRuntimeState* runtime = FindAppRuntime(window.app);
+        const bool opening = runtime && runtime->transition_ticks > 0;
         const uint32_t fill = window.focused ? 0xFF345164 : (window.minimized ? 0xFF1C242E : 0xFF2D3945);
-        const uint32_t edge = window.focused ? kTheme.accent : (window.minimized ? kTheme.border_inactive : kTheme.border_active);
+        const uint32_t edge = opening ? kTheme.minimize : (window.focused ? kTheme.accent : (window.minimized ? kTheme.border_inactive : kTheme.border_active));
         Graphics::FillRect({x, y, button_width, 26}, fill);
         Graphics::DrawRect({x, y, button_width, 26}, edge);
+        if (window.minimized) {
+            Graphics::FillRect({x + 6, y + 18, button_width - 12, 3}, kTheme.minimize);
+        }
         Graphics::DrawText(x + 10, y + 7, window.title, window.minimized ? kTheme.text_muted : kTheme.text);
         x += button_width + 10;
+    }
+}
+
+void AdvanceDesktopTransitions() {
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        if (g_AppRuntimes[i].valid && g_AppRuntimes[i].transition_ticks > 0) {
+            g_AppRuntimes[i].transition_ticks--;
+        }
     }
 }
 
@@ -3180,6 +3423,7 @@ bool ComposeDesktop() {
         CopyBackBufferToFramebuffer(ScreenRect());
     }
     PaintCursor();
+    AdvanceDesktopTransitions();
     return true;
 }
 
@@ -3208,6 +3452,7 @@ void RedrawDirtyRegion(const Rect& dirty) {
     BeginDrawToFramebuffer();
     CopyBackBufferToFramebuffer(clipped);
     PaintCursor();
+    AdvanceDesktopTransitions();
 }
 
 void ClampMouseToScreen() {
@@ -3236,6 +3481,7 @@ void CloseWindow(uint32_t index) {
         runtime->process_id = 0;
         runtime->thread_id = 0;
         runtime->missed_heartbeat_count = 0;
+        runtime->transition_ticks = 0;
     }
     g_Windows[index].visible = false;
     g_Windows[index].focused = false;
@@ -3646,6 +3892,10 @@ bool KernelGuiInit(const BootInfo& boot_info) {
     if (!RunNativeAppsUsabilitySelfTest()) {
         KernelLog(LogLevel::Warn, "Native apps usability self-test failed");
         return false;
+    }
+
+    if (!RunDesktopExperienceSelfTest()) {
+        KernelLog(LogLevel::Warn, "Desktop experience self-test failed");
     }
 
     SeedTerminalTranscript();
