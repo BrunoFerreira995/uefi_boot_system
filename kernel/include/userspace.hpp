@@ -17,6 +17,19 @@ struct UserspaceStatus {
     bool signals_ready;
     bool pipes_ready;
     bool pty_ready;
+    bool full_libc_ready;
+    bool libm_ready;
+    bool libpthread_ready;
+    bool libdl_ready;
+    bool cpp_stl_ready;
+    bool gcc_support_ready;
+    bool clang_support_ready;
+    bool build_sdk_ready;
+    bool cross_compiler_ready;
+    bool package_toolchain_ready;
+    bool sdk_documentation_ready;
+    bool example_applications_ready;
+    bool developer_tools_ready;
     uint64_t shell_process_id;
     uint64_t shell_thread_id;
     uint64_t init_process_id;
@@ -29,6 +42,7 @@ struct UserspaceStatus {
     uint32_t delivered_signal_count;
     uint32_t pipe_count;
     uint32_t pty_count;
+    uint32_t sdk_component_count;
 };
 
 bool KernelUserspaceInit();

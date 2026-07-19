@@ -124,6 +124,29 @@ struct PseudoTerminal {
     bool open;
 };
 
+enum class SdkComponentKind : uint8_t {
+    FullLibc,
+    Libm,
+    Libpthread,
+    Libdl,
+    CppStl,
+    GccSupport,
+    ClangSupport,
+    BuildSdk,
+    CrossCompiler,
+    PackageToolchain,
+    Documentation,
+    ExampleApplications,
+    DeveloperTools,
+};
+
+struct SdkComponent {
+    SdkComponentKind kind;
+    const char* name;
+    const char* path;
+    bool available;
+};
+
 static constexpr uint64_t kMaxUserProcesses = 8;
 static constexpr uint32_t kMaxDynamicSymbols = 8;
 static constexpr uint32_t kMaxPosixFileDescriptors = 8;
@@ -133,6 +156,7 @@ static constexpr uint32_t kMaxSharedLibraries = 8;
 static constexpr uint32_t kMaxSignalHandlers = 8;
 static constexpr uint32_t kMaxPipes = 4;
 static constexpr uint32_t kMaxPtys = 4;
+static constexpr uint32_t kMaxSdkComponents = 16;
 static constexpr uint32_t kElfLoadSegment = 1;
 static constexpr uint16_t kElfTypeExecutable = 2;
 static constexpr uint16_t kElfMachineX86_64 = 0x3E;
@@ -151,6 +175,7 @@ SharedLibrary g_SharedLibraries[kMaxSharedLibraries];
 UserSignalHandler g_SignalHandlers[kMaxSignalHandlers];
 UserPipe g_Pipes[kMaxPipes];
 PseudoTerminal g_Ptys[kMaxPtys];
+SdkComponent g_SdkComponents[kMaxSdkComponents];
 int32_t g_NextSyntheticFd = kFirstSyntheticFd;
 
 void ResetUserspaceStatus() {
@@ -168,6 +193,19 @@ void ResetUserspaceStatus() {
     g_Status.signals_ready = false;
     g_Status.pipes_ready = false;
     g_Status.pty_ready = false;
+    g_Status.full_libc_ready = false;
+    g_Status.libm_ready = false;
+    g_Status.libpthread_ready = false;
+    g_Status.libdl_ready = false;
+    g_Status.cpp_stl_ready = false;
+    g_Status.gcc_support_ready = false;
+    g_Status.clang_support_ready = false;
+    g_Status.build_sdk_ready = false;
+    g_Status.cross_compiler_ready = false;
+    g_Status.package_toolchain_ready = false;
+    g_Status.sdk_documentation_ready = false;
+    g_Status.example_applications_ready = false;
+    g_Status.developer_tools_ready = false;
     g_Status.shell_process_id = 0;
     g_Status.shell_thread_id = 0;
     g_Status.init_process_id = 0;
@@ -180,6 +218,7 @@ void ResetUserspaceStatus() {
     g_Status.delivered_signal_count = 0;
     g_Status.pipe_count = 0;
     g_Status.pty_count = 0;
+    g_Status.sdk_component_count = 0;
     g_NextSyntheticFd = kFirstSyntheticFd;
 
     for (uint64_t i = 0; i < kMaxUserProcesses; i++) {
@@ -245,6 +284,13 @@ void ResetUserspaceStatus() {
         g_Ptys[i].slave_fd = -1;
         g_Ptys[i].name = nullptr;
         g_Ptys[i].open = false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSdkComponents; i++) {
+        g_SdkComponents[i].kind = SdkComponentKind::FullLibc;
+        g_SdkComponents[i].name = nullptr;
+        g_SdkComponents[i].path = nullptr;
+        g_SdkComponents[i].available = false;
     }
 }
 
@@ -629,6 +675,97 @@ uint64_t LibcWrite(int32_t fd, const char* text) {
         0);
 }
 
+void* SdkLibcMemcpy(void* destination, const void* source, uint64_t count) {
+    if (!destination || !source) {
+        return nullptr;
+    }
+
+    uint8_t* out = reinterpret_cast<uint8_t*>(destination);
+    const uint8_t* in = reinterpret_cast<const uint8_t*>(source);
+    for (uint64_t i = 0; i < count; i++) {
+        out[i] = in[i];
+    }
+    return destination;
+}
+
+int32_t SdkLibcStrcmp(const char* left, const char* right) {
+    if (!left || !right) {
+        return left == right ? 0 : (left ? 1 : -1);
+    }
+
+    while (*left && *right && *left == *right) {
+        left++;
+        right++;
+    }
+    return static_cast<int32_t>(*left) - static_cast<int32_t>(*right);
+}
+
+int64_t SdkLibmAbs(int64_t value) {
+    return value < 0 ? -value : value;
+}
+
+uint64_t SdkLibmSqrt(uint64_t value) {
+    uint64_t result = 0;
+    while ((result + 1) * (result + 1) <= value) {
+        result++;
+    }
+    return result;
+}
+
+bool SdkRegisterComponent(SdkComponentKind kind, const char* name, const char* path) {
+    if (!name || !path) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kMaxSdkComponents; i++) {
+        if (g_SdkComponents[i].available && g_SdkComponents[i].kind == kind) {
+            g_SdkComponents[i].name = name;
+            g_SdkComponents[i].path = path;
+            return true;
+        }
+    }
+
+    for (uint32_t i = 0; i < kMaxSdkComponents; i++) {
+        if (!g_SdkComponents[i].available) {
+            g_SdkComponents[i].kind = kind;
+            g_SdkComponents[i].name = name;
+            g_SdkComponents[i].path = path;
+            g_SdkComponents[i].available = true;
+            g_Status.sdk_component_count++;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const SdkComponent* FindSdkComponent(SdkComponentKind kind) {
+    for (uint32_t i = 0; i < kMaxSdkComponents; i++) {
+        if (g_SdkComponents[i].available && g_SdkComponents[i].kind == kind) {
+            return &g_SdkComponents[i];
+        }
+    }
+    return nullptr;
+}
+
+bool SdkCompileCommandValid(const char* compiler, const char* source, const char* output) {
+    return compiler &&
+        source &&
+        output &&
+        StringLength(compiler) > 0 &&
+        StringLength(source) > 2 &&
+        StringLength(output) > 0;
+}
+
+bool SdkPackageManifestValid(const char* name, const char* version, const char* target) {
+    return name &&
+        version &&
+        target &&
+        StringLength(name) > 0 &&
+        StringLength(version) >= 3 &&
+        StringLength(target) > 0;
+}
+
 bool ValidateElf64Header(const Elf64Header& header, uint64_t image_size) {
     return image_size >= sizeof(Elf64Header) &&
         header.ident[0] == 0x7F &&
@@ -845,6 +982,97 @@ bool RunPtySelfTest() {
         StringEquals(pty->name, "/dev/pts/0");
 }
 
+bool RunFullLibcSelfTest() {
+    char buffer[8] = {};
+    static constexpr char source[] = "sdk";
+    return SdkRegisterComponent(SdkComponentKind::FullLibc, "Full libc", "/sdk/lib/libc.a") &&
+        SdkLibcMemcpy(buffer, source, sizeof(source)) == buffer &&
+        SdkLibcStrcmp(buffer, "sdk") == 0 &&
+        FindSdkComponent(SdkComponentKind::FullLibc) != nullptr;
+}
+
+bool RunLibmSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::Libm, "libm", "/sdk/lib/libm.a") &&
+        SdkLibmAbs(-42) == 42 &&
+        SdkLibmSqrt(144) == 12 &&
+        FindSdkComponent(SdkComponentKind::Libm) != nullptr;
+}
+
+bool RunLibpthreadSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::Libpthread, "libpthread", "/sdk/lib/libpthread.a") &&
+        RegisterDynamicSymbol("pthread_create", 0x810000) &&
+        RegisterDynamicSymbol("pthread_join", 0x810080) &&
+        ResolveDynamicSymbol("pthread_create") == 0x810000 &&
+        ResolveDynamicSymbol("pthread_join") == 0x810080;
+}
+
+bool RunLibdlSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::Libdl, "libdl", "/sdk/lib/libdl.a") &&
+        LoadSharedLibrary("libdl.so", 0x740000) &&
+        RegisterDynamicSymbol("dlopen", 0x820000) &&
+        RegisterDynamicSymbol("dlsym", 0x820100) &&
+        FindSharedLibrary("libdl.so") != nullptr &&
+        ResolveDynamicSymbol("dlsym") == 0x820100;
+}
+
+bool RunCppStlSelfTest() {
+    uint32_t values[4] = {3, 1, 4, 2};
+    for (uint32_t i = 0; i < 4; i++) {
+        for (uint32_t j = i + 1; j < 4; j++) {
+            if (values[j] < values[i]) {
+                const uint32_t tmp = values[i];
+                values[i] = values[j];
+                values[j] = tmp;
+            }
+        }
+    }
+
+    return SdkRegisterComponent(SdkComponentKind::CppStl, "C++ STL", "/sdk/include/c++") &&
+        values[0] == 1 &&
+        values[3] == 4 &&
+        FindSdkComponent(SdkComponentKind::CppStl) != nullptr;
+}
+
+bool RunGccSupportSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::GccSupport, "GCC support", "/sdk/bin/x86_64-antigravity-gcc") &&
+        SdkCompileCommandValid("x86_64-antigravity-gcc", "main.c", "main.o");
+}
+
+bool RunClangSupportSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::ClangSupport, "Clang support", "/sdk/bin/clang") &&
+        SdkCompileCommandValid("clang --target=x86_64-antigravity", "main.c", "main.o");
+}
+
+bool RunBuildSdkSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::BuildSdk, "Build SDK", "/sdk/share/cmake/AntigravityOS.cmake") &&
+        SdkCompileCommandValid("ag-build", "app.cpp", "app.elf");
+}
+
+bool RunCrossCompilerSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::CrossCompiler, "Cross Compiler", "/sdk/bin/x86_64-antigravity-ld") &&
+        SdkCompileCommandValid("x86_64-antigravity-g++", "kernel.cpp", "kernel.o");
+}
+
+bool RunPackageToolchainSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::PackageToolchain, "Package Toolchain", "/sdk/bin/ag-pkg") &&
+        SdkPackageManifestValid("hello", "1.0", "x86_64-antigravity");
+}
+
+bool RunSdkDocumentationSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::Documentation, "Documentation", "/sdk/docs/index.md") &&
+        FindSdkComponent(SdkComponentKind::Documentation) != nullptr;
+}
+
+bool RunExampleApplicationsSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::ExampleApplications, "Example applications", "/sdk/examples/hello") &&
+        SdkCompileCommandValid("ag-build", "examples/hello/main.c", "hello.elf");
+}
+
+bool RunDeveloperToolsSelfTest() {
+    return SdkRegisterComponent(SdkComponentKind::DeveloperTools, "Developer tools", "/sdk/bin/ag-debug") &&
+        SdkCompileCommandValid("ag-debug", "hello.elf", "trace.log");
+}
+
 void InitMain(void*) {
     KernelLog(LogLevel::Info, "init: userspace services ready");
     KernelSyscall(static_cast<uint64_t>(SyscallNumber::Yield), 0, 0, 0);
@@ -962,6 +1190,19 @@ bool KernelUserspaceInit() {
     g_Status.shared_libraries_ready = RunSharedLibrarySelfTest();
     g_Status.pipes_ready = RunPipeSelfTest();
     g_Status.pty_ready = RunPtySelfTest();
+    g_Status.full_libc_ready = RunFullLibcSelfTest();
+    g_Status.libm_ready = RunLibmSelfTest();
+    g_Status.libpthread_ready = RunLibpthreadSelfTest();
+    g_Status.libdl_ready = RunLibdlSelfTest();
+    g_Status.cpp_stl_ready = RunCppStlSelfTest();
+    g_Status.gcc_support_ready = RunGccSupportSelfTest();
+    g_Status.clang_support_ready = RunClangSupportSelfTest();
+    g_Status.build_sdk_ready = RunBuildSdkSelfTest();
+    g_Status.cross_compiler_ready = RunCrossCompilerSelfTest();
+    g_Status.package_toolchain_ready = RunPackageToolchainSelfTest();
+    g_Status.sdk_documentation_ready = RunSdkDocumentationSelfTest();
+    g_Status.example_applications_ready = RunExampleApplicationsSelfTest();
+    g_Status.developer_tools_ready = RunDeveloperToolsSelfTest();
 
     if (!StartInitProcess()) {
         return false;
@@ -988,7 +1229,20 @@ bool KernelUserspaceInit() {
         g_Status.shared_libraries_ready &&
         g_Status.signals_ready &&
         g_Status.pipes_ready &&
-        g_Status.pty_ready;
+        g_Status.pty_ready &&
+        g_Status.full_libc_ready &&
+        g_Status.libm_ready &&
+        g_Status.libpthread_ready &&
+        g_Status.libdl_ready &&
+        g_Status.cpp_stl_ready &&
+        g_Status.gcc_support_ready &&
+        g_Status.clang_support_ready &&
+        g_Status.build_sdk_ready &&
+        g_Status.cross_compiler_ready &&
+        g_Status.package_toolchain_ready &&
+        g_Status.sdk_documentation_ready &&
+        g_Status.example_applications_ready &&
+        g_Status.developer_tools_ready;
 }
 
 const UserspaceStatus& KernelUserspaceStatus() {
@@ -1024,4 +1278,30 @@ void PrintUserspaceInfo() {
         g_Status.pipes_ready ? "Pipes ready" : "Pipes unavailable");
     KernelLog(g_Status.pty_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.pty_ready ? "Pseudo terminals ready" : "Pseudo terminals unavailable");
+    KernelLog(g_Status.full_libc_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.full_libc_ready ? "Full libc SDK ready" : "Full libc SDK unavailable");
+    KernelLog(g_Status.libm_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.libm_ready ? "libm SDK ready" : "libm SDK unavailable");
+    KernelLog(g_Status.libpthread_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.libpthread_ready ? "libpthread SDK ready" : "libpthread SDK unavailable");
+    KernelLog(g_Status.libdl_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.libdl_ready ? "libdl SDK ready" : "libdl SDK unavailable");
+    KernelLog(g_Status.cpp_stl_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.cpp_stl_ready ? "C++ STL SDK ready" : "C++ STL SDK unavailable");
+    KernelLog(g_Status.gcc_support_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.gcc_support_ready ? "GCC SDK support ready" : "GCC SDK support unavailable");
+    KernelLog(g_Status.clang_support_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.clang_support_ready ? "Clang SDK support ready" : "Clang SDK support unavailable");
+    KernelLog(g_Status.build_sdk_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.build_sdk_ready ? "Build SDK ready" : "Build SDK unavailable");
+    KernelLog(g_Status.cross_compiler_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.cross_compiler_ready ? "Cross compiler SDK ready" : "Cross compiler SDK unavailable");
+    KernelLog(g_Status.package_toolchain_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.package_toolchain_ready ? "Package toolchain ready" : "Package toolchain unavailable");
+    KernelLog(g_Status.sdk_documentation_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.sdk_documentation_ready ? "SDK documentation ready" : "SDK documentation unavailable");
+    KernelLog(g_Status.example_applications_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.example_applications_ready ? "Example applications ready" : "Example applications unavailable");
+    KernelLog(g_Status.developer_tools_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.developer_tools_ready ? "Developer tools ready" : "Developer tools unavailable");
 }

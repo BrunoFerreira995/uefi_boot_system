@@ -428,19 +428,19 @@
 ---
 
 # Phase 17 — Development SDK
-- [ ] Full libc
-- [ ] libm
-- [ ] libpthread
-- [ ] libdl
-- [ ] C++ STL
-- [ ] GCC support
-- [ ] Clang support
-- [ ] Build SDK
-- [ ] Cross Compiler
-- [ ] Package Toolchain
-- [ ] Documentation
-- [ ] Example applications
-- [ ] Developer tools
+- [x] Full libc
+- [x] libm
+- [x] libpthread
+- [x] libdl
+- [x] C++ STL
+- [x] GCC support
+- [x] Clang support
+- [x] Build SDK
+- [x] Cross Compiler
+- [x] Package Toolchain
+- [x] Documentation
+- [x] Example applications
+- [x] Developer tools
 
 ---
 
