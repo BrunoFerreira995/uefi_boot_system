@@ -11,6 +11,19 @@ struct Rect {
     uint32_t height;
 };
 
+enum class AppKind : uint8_t {
+    FileManager,
+    TextEditor,
+    ImageViewer,
+    Calculator,
+    Settings,
+    TaskManager,
+    PackageManager,
+    SystemMonitor,
+    TerminalEmulator,
+    SoftwareCenter,
+};
+
 struct Window {
     const char* title;
     Rect bounds;
@@ -19,11 +32,11 @@ struct Window {
     bool visible;
     bool minimized;
     bool maximized;
-    bool terminal;
+    AppKind app;
     uint8_t desktop;
 };
 
-static constexpr uint32_t kMaxWindows = 8;
+static constexpr uint32_t kMaxWindows = 12;
 static constexpr uint32_t kEventQueueCapacity = 64;
 static constexpr uint32_t kTopBarHeight = 38;
 static constexpr uint32_t kTaskBarHeight = 42;
@@ -220,7 +233,7 @@ void ResetGuiStatus() {
         g_Windows[i].visible = false;
         g_Windows[i].minimized = false;
         g_Windows[i].maximized = false;
-        g_Windows[i].terminal = false;
+        g_Windows[i].app = AppKind::FileManager;
         g_Windows[i].desktop = 0;
     }
 
@@ -619,7 +632,7 @@ void CopyWindow(Window& destination, const Window& source) {
     destination.visible = source.visible;
     destination.minimized = source.minimized;
     destination.maximized = source.maximized;
-    destination.terminal = source.terminal;
+    destination.app = source.app;
     destination.desktop = source.desktop;
 }
 
@@ -711,8 +724,9 @@ void MoveWindow(Window& window, int32_t x, int32_t y) {
     window.bounds.y = static_cast<uint32_t>(y);
 }
 
-bool AddWindow(const char* title, Rect bounds, uint32_t color, bool terminal) {
-    if (!title || bounds.width == 0 || bounds.height == 0 || g_Status.window_count >= kMaxWindows) {
+bool AddWindow(const char* title, Rect bounds, uint32_t color, AppKind app, uint8_t desktop) {
+    if (!title || bounds.width == 0 || bounds.height == 0 ||
+        desktop >= kVirtualDesktopCount || g_Status.window_count >= kMaxWindows) {
         return false;
     }
 
@@ -724,8 +738,8 @@ bool AddWindow(const char* title, Rect bounds, uint32_t color, bool terminal) {
     window.visible = true;
     window.minimized = false;
     window.maximized = false;
-    window.terminal = terminal;
-    window.desktop = g_ActiveDesktop;
+    window.app = app;
+    window.desktop = desktop;
     g_Status.window_count++;
     return true;
 }
@@ -806,6 +820,44 @@ void RestoreWindowFromTaskbar(uint32_t index) {
     BringWindowToFront(index);
 }
 
+struct ApplicationDescriptor {
+    AppKind app;
+    const char* name;
+    uint32_t color;
+    uint8_t desktop;
+};
+
+static constexpr ApplicationDescriptor kApplications[] = {
+    {AppKind::FileManager, "File Manager", kTheme.window, 0},
+    {AppKind::TextEditor, "Text Editor", 0xFF293844, 1},
+    {AppKind::ImageViewer, "Image Viewer", 0xFF263C3A, 1},
+    {AppKind::Calculator, "Calculator", 0xFF3C3443, 1},
+    {AppKind::Settings, "Settings", 0xFF303A45, 2},
+    {AppKind::TaskManager, "Task Manager", 0xFF303F38, 2},
+    {AppKind::PackageManager, "Package Manager", 0xFF3C3847, 2},
+    {AppKind::SystemMonitor, "System Monitor", kTheme.monitor, 0},
+    {AppKind::TerminalEmulator, "Terminal Emulator", kTheme.terminal, 0},
+    {AppKind::SoftwareCenter, "Software Center", 0xFF343D3B, 3},
+};
+
+bool ApplicationRegistered(AppKind app) {
+    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
+        if (kApplications[i].app == app) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const ApplicationDescriptor* FindApplication(AppKind app) {
+    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
+        if (kApplications[i].app == app) {
+            return &kApplications[i];
+        }
+    }
+    return nullptr;
+}
+
 bool InitWindowManager() {
     const uint32_t margin = 32;
     const uint32_t usable_width = g_Framebuffer.width > margin * 2 ? g_Framebuffer.width - margin * 2 : g_Framebuffer.width;
@@ -813,22 +865,30 @@ bool InitWindowManager() {
         ? g_Framebuffer.height - kTopBarHeight - kTaskBarHeight - 48
         : g_Framebuffer.height;
 
-    const Rect shell = {
-        margin,
-        kTopBarHeight + 30,
-        usable_width > 520 ? 520 : usable_width,
-        usable_height > 260 ? 260 : usable_height,
-    };
-    const Rect monitor = {
-        margin + shell.width / 2,
-        138,
-        usable_width > 460 ? 460 : usable_width,
-        usable_height > 220 ? 220 : usable_height,
-    };
+    const uint32_t app_width = usable_width > 420 ? 420 : usable_width;
+    const uint32_t app_height = usable_height > 220 ? 220 : usable_height;
+    bool apps_created = true;
 
-    g_Status.window_manager_ready =
-        AddWindow("Terminal", shell, kTheme.terminal, true) &&
-        AddWindow("System Monitor", monitor, kTheme.monitor, false);
+    for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
+        const ApplicationDescriptor& app = kApplications[i];
+        const uint32_t column = i % 3;
+        const uint32_t row = (i / 3) % 2;
+        Rect bounds = {
+            margin + column * 34,
+            kTopBarHeight + 28 + row * 32,
+            app_width,
+            app_height,
+        };
+
+        if (app.app == AppKind::TerminalEmulator) {
+            bounds.width = usable_width > 520 ? 520 : usable_width;
+            bounds.height = usable_height > 260 ? 260 : usable_height;
+        }
+
+        apps_created = AddWindow(app.name, bounds, app.color, app.app, app.desktop) && apps_created;
+    }
+
+    g_Status.window_manager_ready = apps_created;
     return g_Status.window_manager_ready;
 }
 
@@ -908,6 +968,34 @@ bool RunDesktopPhaseSelfTest() {
         DecodeBmpHeader(bmp, sizeof(bmp), width, height) && width == 2 && height == 3 &&
         DecodeJpegHeader(jpeg, sizeof(jpeg)) && DecodeSvgDocument("<svg></svg>") &&
         LoadTrueTypeFont(ttf, sizeof(ttf)) && CacheFontGlyph('A', glyph);
+}
+
+bool RunApplicationsSelfTest() {
+    const bool registry_ok =
+        ApplicationRegistered(AppKind::FileManager) &&
+        ApplicationRegistered(AppKind::TextEditor) &&
+        ApplicationRegistered(AppKind::ImageViewer) &&
+        ApplicationRegistered(AppKind::Calculator) &&
+        ApplicationRegistered(AppKind::Settings) &&
+        ApplicationRegistered(AppKind::TaskManager) &&
+        ApplicationRegistered(AppKind::PackageManager) &&
+        ApplicationRegistered(AppKind::SystemMonitor) &&
+        ApplicationRegistered(AppKind::TerminalEmulator) &&
+        ApplicationRegistered(AppKind::SoftwareCenter);
+    const bool descriptors_ok =
+        FindApplication(AppKind::FileManager) &&
+        FindApplication(AppKind::TextEditor) &&
+        FindApplication(AppKind::ImageViewer) &&
+        FindApplication(AppKind::Calculator) &&
+        FindApplication(AppKind::Settings) &&
+        FindApplication(AppKind::TaskManager) &&
+        FindApplication(AppKind::PackageManager) &&
+        FindApplication(AppKind::SystemMonitor) &&
+        FindApplication(AppKind::TerminalEmulator) &&
+        FindApplication(AppKind::SoftwareCenter);
+    return registry_ok &&
+        descriptors_ok &&
+        g_Status.window_count >= sizeof(kApplications) / sizeof(kApplications[0]);
 }
 
 bool TerminalTextEquals(const char* a, const char* b) {
@@ -1351,6 +1439,61 @@ void DrawSystemMonitorContents(const Window& window) {
     Graphics::FillRect({x, y, 48, 10}, kTheme.accent);
 }
 
+void DrawApplicationContents(const Window& window) {
+    const uint32_t x = window.bounds.x + 18;
+    uint32_t y = window.bounds.y + kTitleBarHeight + 18;
+
+    switch (window.app) {
+        case AppKind::FileManager:
+            Graphics::DrawText(x, y, "/  boot  kernel  tmp  readme", kTheme.text);
+            Graphics::DrawRect({x, y + 28, 180, 74}, kTheme.border_active);
+            Graphics::DrawText(x + 12, y + 44, "Files ready", kTheme.text_muted);
+            break;
+        case AppKind::TextEditor:
+            Graphics::DrawText(x, y, "readme.txt", kTheme.accent);
+            Graphics::DrawRect({x, y + 26, 220, 90}, kTheme.border_inactive);
+            Graphics::DrawText(x + 10, y + 44, "Antigravity OS notes", kTheme.text);
+            break;
+        case AppKind::ImageViewer:
+            Graphics::DrawText(x, y, "SO.png", kTheme.text);
+            Graphics::FillRect({x, y + 26, 150, 84}, 0xFF1E2D34);
+            Graphics::DrawImage({x + 18, y + 38, 114, 60}, kTheme.accent);
+            break;
+        case AppKind::Calculator:
+            Graphics::DrawText(x, y, "42", kTheme.text);
+            for (uint32_t row = 0; row < 3; row++) {
+                for (uint32_t col = 0; col < 4; col++) {
+                    Graphics::DrawRect({x + col * 34, y + 30 + row * 28, 26, 20}, kTheme.border_inactive);
+                }
+            }
+            break;
+        case AppKind::Settings:
+            Graphics::DrawText(x, y, "Display  Network  Security", kTheme.text);
+            Graphics::FillRect({x, y + 30, 130, 10}, kTheme.accent);
+            Graphics::FillRect({x, y + 54, 96, 10}, kTheme.minimize);
+            break;
+        case AppKind::TaskManager:
+            Graphics::DrawText(x, y, "PID  Name        State", kTheme.text_muted);
+            Graphics::DrawText(x, y + 24, "1    kernel      running", kTheme.text);
+            Graphics::DrawText(x, y + 48, "2    shell       ready", kTheme.text);
+            break;
+        case AppKind::PackageManager:
+            Graphics::DrawText(x, y, "base  gui  net  dev", kTheme.text);
+            Graphics::DrawText(x, y + 28, "updates: none", kTheme.maximize);
+            break;
+        case AppKind::SystemMonitor:
+            DrawSystemMonitorContents(window);
+            break;
+        case AppKind::TerminalEmulator:
+            DrawTerminalContents(window);
+            break;
+        case AppKind::SoftwareCenter:
+            Graphics::DrawText(x, y, "Installed: Terminal Files Settings", kTheme.text);
+            Graphics::DrawText(x, y + 28, "Catalog cache ready", kTheme.accent);
+            break;
+    }
+}
+
 void DrawWindowControl(const Window& window, WindowControl control, bool active) {
     const Rect rect = ControlButtonRect(window, control);
     const bool hovered = active && g_HoveredControl == control && g_HoveredWindowIndex >= 0;
@@ -1409,11 +1552,7 @@ void ComposeWindow(const Window& window, bool active) {
             active ? kTheme.border_active : kTheme.border_inactive);
     }
 
-    if (window.terminal) {
-        DrawTerminalContents(window);
-    } else {
-        DrawSystemMonitorContents(window);
-    }
+    DrawApplicationContents(window);
 }
 
 void DrawWallpaper() {
@@ -1466,7 +1605,7 @@ void DrawTaskbar() {
             continue;
         }
 
-        const uint32_t button_width = window.terminal ? 112 : 156;
+        const uint32_t button_width = window.app == AppKind::TerminalEmulator ? 112 : 156;
         Graphics::FillRect({x, y, button_width, 26}, window.minimized ? 0xFF1C242E : 0xFF2D3945);
         Graphics::DrawRect({x, y, button_width, 26}, window.minimized ? kTheme.border_inactive : kTheme.border_active);
         Graphics::DrawText(x + 10, y + 7, window.title, window.minimized ? kTheme.text_muted : kTheme.text);
@@ -1583,7 +1722,7 @@ int32_t FindTaskbarWindowAt(int32_t x, int32_t y) {
             continue;
         }
 
-        const int32_t button_width = window.terminal ? 112 : 156;
+        const int32_t button_width = window.app == AppKind::TerminalEmulator ? 112 : 156;
         if (PointInRect(x, y, {
             static_cast<uint32_t>(button_x),
             static_cast<uint32_t>(button_y),
@@ -1832,6 +1971,11 @@ bool KernelGuiInit(const BootInfo& boot_info) {
 
     if (!RunDesktopPhaseSelfTest()) {
         KernelLog(LogLevel::Warn, "Desktop/window/image/font self-test failed");
+        return false;
+    }
+
+    if (!RunApplicationsSelfTest()) {
+        KernelLog(LogLevel::Warn, "Application registry self-test failed");
         return false;
     }
 

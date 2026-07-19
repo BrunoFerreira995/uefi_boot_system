@@ -167,6 +167,17 @@ require_text "$ROOT_DIR/kernel/src/gui.cpp" "kVisibleTerminalLines" "terminal sc
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalRecallHistory" "terminal command history present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalAutocompleteCommand" "terminal autocomplete present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "ExecuteTerminalScript" "terminal shell scripting present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "RunApplicationsSelfTest" "application registry self-test present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "File Manager" "file manager application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Text Editor" "text editor application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Image Viewer" "image viewer application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Calculator" "calculator application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Settings" "settings application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Task Manager" "task manager application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Package Manager" "package manager application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "System Monitor" "system monitor application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Terminal Emulator" "terminal emulator application present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Software Center" "software center application present"
 
 echo
 echo "== Regression tests =="

@@ -414,16 +414,16 @@
 ---
 
 # Phase 16 — Applications
-- [ ] File Manager
-- [ ] Text Editor
-- [ ] Image Viewer
-- [ ] Calculator
-- [ ] Settings
-- [ ] Task Manager
-- [ ] Package Manager
-- [ ] System Monitor
-- [ ] Terminal Emulator
-- [ ] Software Center
+- [x] File Manager
+- [x] Text Editor
+- [x] Image Viewer
+- [x] Calculator
+- [x] Settings
+- [x] Task Manager
+- [x] Package Manager
+- [x] System Monitor
+- [x] Terminal Emulator
+- [x] Software Center
 
 ---
 
