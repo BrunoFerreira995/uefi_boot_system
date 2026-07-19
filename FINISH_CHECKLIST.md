@@ -391,11 +391,11 @@
 - [x] HTTP
 - [x] HTTPS
 - [x] Socket API
-- [ ] IPv6
-- [ ] TLS
-- [ ] WebSocket
-- [ ] mDNS
-- [ ] NTP
+- [x] IPv6
+- [x] TLS
+- [x] WebSocket
+- [x] mDNS
+- [x] NTP
 
 ---
 

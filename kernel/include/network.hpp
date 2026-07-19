@@ -14,6 +14,11 @@ struct NetworkStatus {
     bool http_ready;
     bool https_ready;
     bool socket_api_ready;
+    bool ipv6_ready;
+    bool tls_ready;
+    bool websocket_ready;
+    bool mdns_ready;
+    bool ntp_ready;
     uint32_t socket_count;
 };
 
