@@ -32,8 +32,15 @@ struct Window {
     bool visible;
     bool minimized;
     bool maximized;
+    bool focused;
     AppKind app;
     uint8_t desktop;
+};
+
+struct AppPlacementState {
+    AppKind app;
+    Rect last_bounds;
+    bool valid;
 };
 
 static constexpr uint32_t kMaxWindows = 12;
@@ -46,11 +53,15 @@ static constexpr uint32_t kButtonSize = 16;
 static constexpr uint32_t kButtonGap = 7;
 static constexpr uint32_t kCursorHeight = 16;
 static constexpr uint32_t kCursorBackupSize = 20;
-static constexpr uint32_t kBackBufferMaxWidth = 1024;
-static constexpr uint32_t kBackBufferMaxHeight = 768;
+static constexpr uint32_t kBackBufferMaxWidth = 2048;
+static constexpr uint32_t kBackBufferMaxHeight = 2048;
 static constexpr uint32_t kBackBufferPixels = kBackBufferMaxWidth * kBackBufferMaxHeight;
 static constexpr uint8_t kVirtualDesktopCount = 4;
 static constexpr uint32_t kFontCacheEntries = 32;
+static constexpr uint32_t kDefaultAppMinWidth = 480;
+static constexpr uint32_t kDefaultAppMinHeight = 320;
+static constexpr uint32_t kCompactAppMinWidth = 360;
+static constexpr uint32_t kCompactAppMinHeight = 260;
 
 struct CursorBackup {
     int32_t x;
@@ -140,6 +151,7 @@ static constexpr uint32_t kTerminalCommandLength = 64;
 GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
 Window g_Windows[kMaxWindows];
+AppPlacementState g_AppPlacements[kMaxWindows];
 GuiEvent g_EventQueue[kEventQueueCapacity];
 uint32_t g_BackBuffer[kBackBufferPixels];
 uint32_t* g_DrawTarget = nullptr;
@@ -161,6 +173,8 @@ int32_t g_MouseDownX = 0;
 int32_t g_MouseDownY = 0;
 bool g_Dragging = false;
 uint8_t g_ActiveDesktop = 0;
+int32_t g_ActiveWindowIndex = -1;
+bool g_DebugFullRedraw = true;
 int32_t g_TerminalScrollOffset = 0;
 WindowControl g_HoveredControl = WindowControl::None;
 int32_t g_HoveredWindowIndex = -1;
@@ -176,6 +190,13 @@ uint32_t g_TerminalHistoryCount = 0;
 int32_t g_TerminalHistoryCursor = -1;
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect);
+void CloseWindow(uint32_t index);
+void RedrawDirtyRegion(const Rect& dirty);
+uint32_t AppMinWidth(AppKind app);
+uint32_t AppMinHeight(AppKind app);
+Rect UsableDesktopRect();
+Rect ClampWindowToUsableArea(Rect bounds, AppKind app);
+void RememberAppPlacement(AppKind app, const Rect& bounds);
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -223,6 +244,8 @@ void ResetGuiStatus() {
     g_MouseDownY = 0;
     g_Dragging = false;
     g_ActiveDesktop = 0;
+    g_ActiveWindowIndex = -1;
+    g_DebugFullRedraw = true;
     g_TerminalScrollOffset = 0;
 
     for (uint32_t i = 0; i < kMaxWindows; i++) {
@@ -233,8 +256,15 @@ void ResetGuiStatus() {
         g_Windows[i].visible = false;
         g_Windows[i].minimized = false;
         g_Windows[i].maximized = false;
+        g_Windows[i].focused = false;
         g_Windows[i].app = AppKind::FileManager;
         g_Windows[i].desktop = 0;
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        g_AppPlacements[i].app = AppKind::FileManager;
+        g_AppPlacements[i].last_bounds = {0, 0, 0, 0};
+        g_AppPlacements[i].valid = false;
     }
 
     g_HoveredControl = WindowControl::None;
@@ -632,6 +662,7 @@ void CopyWindow(Window& destination, const Window& source) {
     destination.visible = source.visible;
     destination.minimized = source.minimized;
     destination.maximized = source.maximized;
+    destination.focused = source.focused;
     destination.app = source.app;
     destination.desktop = source.desktop;
 }
@@ -682,9 +713,9 @@ int32_t FindTopWindowAt(int32_t x, int32_t y, bool title_bar_only) {
     return -1;
 }
 
-void BringWindowToFront(uint32_t index) {
+int32_t BringWindowToFront(uint32_t index) {
     if (index >= g_Status.window_count || index + 1 == g_Status.window_count) {
-        return;
+        return index < g_Status.window_count ? static_cast<int32_t>(index) : -1;
     }
 
     Window selected;
@@ -694,6 +725,51 @@ void BringWindowToFront(uint32_t index) {
     }
     CopyWindow(g_Windows[g_Status.window_count - 1], selected);
     g_DragWindowIndex = static_cast<int32_t>(g_Status.window_count - 1);
+    return g_DragWindowIndex;
+}
+
+int32_t FindTopVisibleWindow() {
+    for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
+        const Window& window = g_Windows[i];
+        if (window.visible && !window.minimized && window.desktop == g_ActiveDesktop) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void ClearWindowFocus() {
+    for (uint32_t i = 0; i < g_Status.window_count; i++) {
+        g_Windows[i].focused = false;
+    }
+    g_ActiveWindowIndex = -1;
+}
+
+bool FocusWindow(uint32_t index) {
+    if (index >= g_Status.window_count || !g_Windows[index].visible ||
+        g_Windows[index].minimized || g_Windows[index].desktop != g_ActiveDesktop) {
+        return false;
+    }
+
+    ClearWindowFocus();
+    const int32_t front_index = BringWindowToFront(index);
+    if (front_index < 0) {
+        return false;
+    }
+
+    g_ActiveWindowIndex = front_index;
+    g_Windows[front_index].focused = true;
+    KernelLog(LogLevel::Info, "[GUI] focus changed");
+    return true;
+}
+
+void FocusTopVisibleWindow() {
+    const int32_t top = FindTopVisibleWindow();
+    if (top >= 0) {
+        FocusWindow(static_cast<uint32_t>(top));
+    } else {
+        ClearWindowFocus();
+    }
 }
 
 void MoveWindow(Window& window, int32_t x, int32_t y) {
@@ -701,27 +777,11 @@ void MoveWindow(Window& window, int32_t x, int32_t y) {
         return;
     }
 
-    const int32_t max_x = g_Framebuffer.width > window.bounds.width
-        ? static_cast<int32_t>(g_Framebuffer.width - window.bounds.width)
-        : 0;
-    const int32_t max_y = g_Framebuffer.height > window.bounds.height
-        ? static_cast<int32_t>(g_Framebuffer.height - window.bounds.height)
-        : 0;
-
-    if (x < 0) {
-        x = 0;
-    } else if (x > max_x) {
-        x = max_x;
-    }
-
-    if (y < static_cast<int32_t>(kTopBarHeight + 6)) {
-        y = static_cast<int32_t>(kTopBarHeight + 6);
-    } else if (y > max_y) {
-        y = max_y;
-    }
-
-    window.bounds.x = static_cast<uint32_t>(x);
-    window.bounds.y = static_cast<uint32_t>(y);
+    Rect moved = window.bounds;
+    moved.x = x < 0 ? 0 : static_cast<uint32_t>(x);
+    moved.y = y < 0 ? 0 : static_cast<uint32_t>(y);
+    window.bounds = ClampWindowToUsableArea(moved, window.app);
+    RememberAppPlacement(window.app, window.bounds);
 }
 
 bool AddWindow(const char* title, Rect bounds, uint32_t color, AppKind app, uint8_t desktop) {
@@ -732,42 +792,47 @@ bool AddWindow(const char* title, Rect bounds, uint32_t color, AppKind app, uint
 
     Window& window = g_Windows[g_Status.window_count];
     window.title = title;
-    window.bounds = bounds;
-    window.restore_bounds = bounds;
+    window.bounds = ClampWindowToUsableArea(bounds, app);
+    window.restore_bounds = window.bounds;
     window.color = color;
     window.visible = true;
     window.minimized = false;
     window.maximized = false;
+    window.focused = false;
     window.app = app;
     window.desktop = desktop;
+    RememberAppPlacement(app, window.bounds);
     g_Status.window_count++;
     return true;
 }
 
 bool ResizeWindow(Window& window, uint32_t width, uint32_t height) {
-    if (window.maximized || width < 180 || height < 120) return false;
-    const uint32_t max_width = g_Framebuffer.width > window.bounds.x ? g_Framebuffer.width - window.bounds.x : 0;
-    const uint32_t bottom = g_Framebuffer.height > kTaskBarHeight ? g_Framebuffer.height - kTaskBarHeight : g_Framebuffer.height;
-    const uint32_t max_height = bottom > window.bounds.y ? bottom - window.bounds.y : 0;
-    window.bounds.width = width < max_width ? width : max_width;
-    window.bounds.height = height < max_height ? height : max_height;
-    return window.bounds.width >= 180 && window.bounds.height >= 120;
+    if (window.maximized) return false;
+    Rect resized = window.bounds;
+    resized.width = width;
+    resized.height = height;
+    window.bounds = ClampWindowToUsableArea(resized, window.app);
+    RememberAppPlacement(window.app, window.bounds);
+    return window.bounds.width >= AppMinWidth(window.app) &&
+        window.bounds.height >= AppMinHeight(window.app);
 }
 
 enum class SnapEdge : uint8_t { Left, Right, Top };
 bool SnapWindow(Window& window, SnapEdge edge) {
     if (g_Framebuffer.width == 0 || g_Framebuffer.height <= kTopBarHeight + kTaskBarHeight) return false;
     window.restore_bounds = window.bounds;
-    const uint32_t usable_height = g_Framebuffer.height - kTopBarHeight - kTaskBarHeight;
+    const Rect usable = UsableDesktopRect();
     if (edge == SnapEdge::Top) {
-        window.bounds = {0, kTopBarHeight, g_Framebuffer.width, usable_height};
+        window.bounds = usable;
         window.maximized = true;
     } else {
-        const uint32_t half = g_Framebuffer.width / 2;
-        window.bounds = {edge == SnapEdge::Left ? 0u : half, kTopBarHeight,
-            edge == SnapEdge::Left ? half : g_Framebuffer.width - half, usable_height};
+        const uint32_t half = usable.width / 2;
+        window.bounds = {edge == SnapEdge::Left ? usable.x : usable.x + half, usable.y,
+            edge == SnapEdge::Left ? half : usable.width - half, usable.height};
         window.maximized = false;
     }
+    window.bounds = ClampWindowToUsableArea(window.bounds, window.app);
+    RememberAppPlacement(window.app, window.bounds);
     return true;
 }
 
@@ -775,6 +840,7 @@ bool SwitchVirtualDesktop(uint8_t desktop) {
     if (desktop >= kVirtualDesktopCount) return false;
     g_ActiveDesktop = desktop;
     g_DragWindowIndex = -1;
+    FocusTopVisibleWindow();
     return true;
 }
 
@@ -785,6 +851,9 @@ void MinimizeWindow(uint32_t index) {
 
     g_Windows[index].minimized = true;
     g_DragWindowIndex = -1;
+    if (g_ActiveWindowIndex == static_cast<int32_t>(index)) {
+        FocusTopVisibleWindow();
+    }
 }
 
 void ToggleMaximizeWindow(uint32_t index) {
@@ -794,20 +863,21 @@ void ToggleMaximizeWindow(uint32_t index) {
 
     Window& window = g_Windows[index];
     if (window.maximized) {
-        window.bounds = window.restore_bounds;
+        window.bounds = ClampWindowToUsableArea(window.restore_bounds, window.app);
         window.maximized = false;
+        RememberAppPlacement(window.app, window.bounds);
         return;
     }
 
     window.restore_bounds = window.bounds;
+    const Rect usable = UsableDesktopRect();
     window.bounds = {
-        8,
-        kTopBarHeight + 8,
-        g_Framebuffer.width > 16 ? g_Framebuffer.width - 16 : g_Framebuffer.width,
-        g_Framebuffer.height > kTopBarHeight + kTaskBarHeight + 20
-            ? g_Framebuffer.height - kTopBarHeight - kTaskBarHeight - 20
-            : g_Framebuffer.height,
+        usable.x + 8,
+        usable.y,
+        usable.width > 16 ? usable.width - 16 : usable.width,
+        usable.height,
     };
+    window.bounds = ClampWindowToUsableArea(window.bounds, window.app);
     window.maximized = true;
 }
 
@@ -817,7 +887,7 @@ void RestoreWindowFromTaskbar(uint32_t index) {
     }
 
     g_Windows[index].minimized = false;
-    BringWindowToFront(index);
+    FocusWindow(index);
 }
 
 struct ApplicationDescriptor {
@@ -825,19 +895,24 @@ struct ApplicationDescriptor {
     const char* name;
     uint32_t color;
     uint8_t desktop;
+    uint32_t min_width;
+    uint32_t min_height;
+    uint32_t preferred_width;
+    uint32_t preferred_height;
+    bool compact;
 };
 
 static constexpr ApplicationDescriptor kApplications[] = {
-    {AppKind::FileManager, "File Manager", kTheme.window, 0},
-    {AppKind::TextEditor, "Text Editor", 0xFF293844, 1},
-    {AppKind::ImageViewer, "Image Viewer", 0xFF263C3A, 1},
-    {AppKind::Calculator, "Calculator", 0xFF3C3443, 1},
-    {AppKind::Settings, "Settings", 0xFF303A45, 2},
-    {AppKind::TaskManager, "Task Manager", 0xFF303F38, 2},
-    {AppKind::PackageManager, "Package Manager", 0xFF3C3847, 2},
-    {AppKind::SystemMonitor, "System Monitor", kTheme.monitor, 0},
-    {AppKind::TerminalEmulator, "Terminal Emulator", kTheme.terminal, 0},
-    {AppKind::SoftwareCenter, "Software Center", 0xFF343D3B, 3},
+    {AppKind::FileManager, "File Manager", kTheme.window, 0, 480, 320, 640, 420, false},
+    {AppKind::TextEditor, "Text Editor", 0xFF293844, 1, 560, 360, 760, 520, false},
+    {AppKind::ImageViewer, "Image Viewer", 0xFF263C3A, 1, 480, 320, 680, 440, false},
+    {AppKind::Calculator, "Calculator", 0xFF3C3443, 1, 360, 260, 380, 300, true},
+    {AppKind::Settings, "Settings", 0xFF303A45, 2, 420, 300, 520, 360, true},
+    {AppKind::TaskManager, "Task Manager", 0xFF303F38, 2, 480, 320, 640, 420, false},
+    {AppKind::PackageManager, "Package Manager", 0xFF3C3847, 2, 480, 320, 640, 420, false},
+    {AppKind::SystemMonitor, "System Monitor", kTheme.monitor, 0, 420, 300, 520, 360, true},
+    {AppKind::TerminalEmulator, "Terminal Emulator", kTheme.terminal, 0, 560, 360, 760, 480, false},
+    {AppKind::SoftwareCenter, "Software Center", 0xFF343D3B, 3, 480, 320, 680, 440, false},
 };
 
 bool ApplicationRegistered(AppKind app) {
@@ -858,37 +933,138 @@ const ApplicationDescriptor* FindApplication(AppKind app) {
     return nullptr;
 }
 
-bool InitWindowManager() {
-    const uint32_t margin = 32;
-    const uint32_t usable_width = g_Framebuffer.width > margin * 2 ? g_Framebuffer.width - margin * 2 : g_Framebuffer.width;
-    const uint32_t usable_height = g_Framebuffer.height > kTopBarHeight + kTaskBarHeight + 48
-        ? g_Framebuffer.height - kTopBarHeight - kTaskBarHeight - 48
+Rect UsableDesktopRect() {
+    const uint32_t width = g_Framebuffer.width;
+    const uint32_t top = kTopBarHeight + 8;
+    const uint32_t bottom = g_Framebuffer.height > kTaskBarHeight + 8
+        ? g_Framebuffer.height - kTaskBarHeight - 8
         : g_Framebuffer.height;
+    const uint32_t height = bottom > top ? bottom - top : g_Framebuffer.height;
+    return {0, top, width, height};
+}
 
-    const uint32_t app_width = usable_width > 420 ? 420 : usable_width;
-    const uint32_t app_height = usable_height > 220 ? 220 : usable_height;
+uint32_t AppMinWidth(AppKind app) {
+    const ApplicationDescriptor* descriptor = FindApplication(app);
+    if (!descriptor) {
+        return kDefaultAppMinWidth;
+    }
+    return descriptor->min_width;
+}
+
+uint32_t AppMinHeight(AppKind app) {
+    const ApplicationDescriptor* descriptor = FindApplication(app);
+    if (!descriptor) {
+        return kDefaultAppMinHeight;
+    }
+    return descriptor->min_height;
+}
+
+Rect ClampWindowToUsableArea(Rect bounds, AppKind app) {
+    const Rect usable = UsableDesktopRect();
+    const uint32_t min_width = AppMinWidth(app);
+    const uint32_t min_height = AppMinHeight(app);
+
+    if (bounds.width < min_width && usable.width >= min_width) {
+        bounds.width = min_width;
+    }
+    if (bounds.height < min_height && usable.height >= min_height) {
+        bounds.height = min_height;
+    }
+    if (bounds.width > usable.width) {
+        bounds.width = usable.width;
+    }
+    if (bounds.height > usable.height) {
+        bounds.height = usable.height;
+    }
+
+    const uint32_t max_x = usable.width > bounds.width ? usable.x + usable.width - bounds.width : usable.x;
+    const uint32_t max_y = usable.height > bounds.height ? usable.y + usable.height - bounds.height : usable.y;
+
+    if (bounds.x < usable.x) {
+        bounds.x = usable.x;
+    } else if (bounds.x > max_x) {
+        bounds.x = max_x;
+    }
+
+    if (bounds.y < usable.y) {
+        bounds.y = usable.y;
+    } else if (bounds.y > max_y) {
+        bounds.y = max_y;
+    }
+
+    return bounds;
+}
+
+Rect CenterWindowInUsableArea(uint32_t width, uint32_t height, AppKind app) {
+    const Rect usable = UsableDesktopRect();
+    Rect bounds = {
+        usable.width > width ? usable.x + (usable.width - width) / 2 : usable.x,
+        usable.height > height ? usable.y + (usable.height - height) / 2 : usable.y,
+        width,
+        height,
+    };
+    return ClampWindowToUsableArea(bounds, app);
+}
+
+AppPlacementState* FindAppPlacement(AppKind app) {
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        if (g_AppPlacements[i].valid && g_AppPlacements[i].app == app) {
+            return &g_AppPlacements[i];
+        }
+    }
+    return nullptr;
+}
+
+void RememberAppPlacement(AppKind app, const Rect& bounds) {
+    AppPlacementState* existing = FindAppPlacement(app);
+    if (existing) {
+        existing->last_bounds = bounds;
+        return;
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        if (!g_AppPlacements[i].valid) {
+            g_AppPlacements[i].app = app;
+            g_AppPlacements[i].last_bounds = bounds;
+            g_AppPlacements[i].valid = true;
+            return;
+        }
+    }
+}
+
+Rect InitialWindowBounds(const ApplicationDescriptor& app, uint32_t ordinal) {
+    AppPlacementState* placement = FindAppPlacement(app.app);
+    if (placement) {
+        return ClampWindowToUsableArea(placement->last_bounds, app.app);
+    }
+
+    Rect centered = CenterWindowInUsableArea(app.preferred_width, app.preferred_height, app.app);
+    const uint32_t stagger = (ordinal % 3) * 28;
+    centered.x += stagger;
+    centered.y += stagger;
+    return ClampWindowToUsableArea(centered, app.app);
+}
+
+int32_t FindWindowByApp(AppKind app, uint8_t desktop) {
+    for (uint32_t i = 0; i < g_Status.window_count; i++) {
+        if (g_Windows[i].app == app && g_Windows[i].desktop == desktop) {
+            return static_cast<int32_t>(i);
+        }
+    }
+    return -1;
+}
+
+bool InitWindowManager() {
     bool apps_created = true;
 
     for (uint32_t i = 0; i < sizeof(kApplications) / sizeof(kApplications[0]); i++) {
         const ApplicationDescriptor& app = kApplications[i];
-        const uint32_t column = i % 3;
-        const uint32_t row = (i / 3) % 2;
-        Rect bounds = {
-            margin + column * 34,
-            kTopBarHeight + 28 + row * 32,
-            app_width,
-            app_height,
-        };
-
-        if (app.app == AppKind::TerminalEmulator) {
-            bounds.width = usable_width > 520 ? 520 : usable_width;
-            bounds.height = usable_height > 260 ? 260 : usable_height;
-        }
-
+        const Rect bounds = InitialWindowBounds(app, i);
         apps_created = AddWindow(app.name, bounds, app.color, app.app, app.desktop) && apps_created;
     }
 
     g_Status.window_manager_ready = apps_created;
+    FocusTopVisibleWindow();
     return g_Status.window_manager_ready;
 }
 
@@ -996,6 +1172,132 @@ bool RunApplicationsSelfTest() {
     return registry_ok &&
         descriptors_ok &&
         g_Status.window_count >= sizeof(kApplications) / sizeof(kApplications[0]);
+}
+
+bool RunStableInterfaceSelfTest() {
+    Window saved_windows[kMaxWindows];
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    const uint32_t saved_window_count = g_Status.window_count;
+    const uint8_t saved_desktop = g_ActiveDesktop;
+    const int32_t saved_active = g_ActiveWindowIndex;
+    const bool saved_full_redraw = g_DebugFullRedraw;
+
+    g_DebugFullRedraw = true;
+    const bool switched = SwitchVirtualDesktop(0);
+    const int32_t file_index = FindWindowByApp(AppKind::FileManager, 0);
+    const int32_t terminal_index = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    const bool focus_file_ok = file_index >= 0 && FocusWindow(static_cast<uint32_t>(file_index));
+    const bool focus_terminal_ok = terminal_index >= 0 && FocusWindow(static_cast<uint32_t>(FindWindowByApp(AppKind::TerminalEmulator, 0)));
+    const bool active_terminal_ok = g_ActiveWindowIndex >= 0 &&
+        g_Windows[g_ActiveWindowIndex].focused &&
+        g_Windows[g_ActiveWindowIndex].app == AppKind::TerminalEmulator;
+    const bool previous_unfocused_ok = FindWindowByApp(AppKind::FileManager, 0) >= 0 &&
+        !g_Windows[FindWindowByApp(AppKind::FileManager, 0)].focused;
+
+    const uint32_t before_minimize_count = g_Status.window_count;
+    MinimizeWindow(static_cast<uint32_t>(g_ActiveWindowIndex));
+    const bool minimize_persistent_ok = g_Status.window_count == before_minimize_count &&
+        FindWindowByApp(AppKind::TerminalEmulator, 0) >= 0;
+    RestoreWindowFromTaskbar(static_cast<uint32_t>(FindWindowByApp(AppKind::TerminalEmulator, 0)));
+
+    const int32_t active_before_close = g_ActiveWindowIndex;
+    CloseWindow(static_cast<uint32_t>(active_before_close));
+    const int32_t terminal_after_close = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    const bool close_persistent_ok = g_Status.window_count == before_minimize_count &&
+        terminal_after_close >= 0 &&
+        !g_Windows[terminal_after_close].visible;
+
+    RedrawDirtyRegion({0, 0, 0, 0});
+    const bool full_redraw_fallback_ok = g_DebugFullRedraw && g_BackBufferReady;
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(g_Windows[i], saved_windows[i]);
+    }
+    g_Status.window_count = saved_window_count;
+    g_ActiveDesktop = saved_desktop;
+    g_ActiveWindowIndex = saved_active;
+    g_DebugFullRedraw = saved_full_redraw;
+
+    return switched &&
+        focus_file_ok &&
+        focus_terminal_ok &&
+        active_terminal_ok &&
+        previous_unfocused_ok &&
+        minimize_persistent_ok &&
+        close_persistent_ok &&
+        full_redraw_fallback_ok;
+}
+
+bool RunWindowPlacementSelfTest() {
+    AppPlacementState saved_placements[kMaxWindows];
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        saved_placements[i] = g_AppPlacements[i];
+        g_AppPlacements[i].valid = false;
+    }
+
+    const Rect usable = UsableDesktopRect();
+    const ApplicationDescriptor* files = FindApplication(AppKind::FileManager);
+    const ApplicationDescriptor* terminal = FindApplication(AppKind::TerminalEmulator);
+    const ApplicationDescriptor* editor = FindApplication(AppKind::TextEditor);
+    const ApplicationDescriptor* calculator = FindApplication(AppKind::Calculator);
+    const ApplicationDescriptor* settings = FindApplication(AppKind::Settings);
+    if (!files || !terminal || !editor || !calculator || !settings) {
+        for (uint32_t i = 0; i < kMaxWindows; i++) {
+            g_AppPlacements[i] = saved_placements[i];
+        }
+        return false;
+    }
+
+    const Rect first = InitialWindowBounds(*files, 0);
+    const uint32_t expected_x = usable.width > first.width ? usable.x + (usable.width - first.width) / 2 : usable.x;
+    const uint32_t expected_y = usable.height > first.height ? usable.y + (usable.height - first.height) / 2 : usable.y;
+    const bool first_centered_ok = first.x == expected_x && first.y == expected_y;
+
+    Rect tiny = {0, 0, 20, 20};
+    const Rect clamped_files = ClampWindowToUsableArea(tiny, AppKind::FileManager);
+    const bool default_min_ok = clamped_files.width >= kDefaultAppMinWidth &&
+        clamped_files.height >= kDefaultAppMinHeight &&
+        clamped_files.y >= usable.y &&
+        clamped_files.y + clamped_files.height <= usable.y + usable.height;
+
+    const Rect clamped_calc = ClampWindowToUsableArea(tiny, AppKind::Calculator);
+    const bool compact_ok = calculator->compact &&
+        settings->compact &&
+        clamped_calc.width >= kCompactAppMinWidth &&
+        clamped_calc.height >= kCompactAppMinHeight;
+
+    const Rect terminal_bounds = InitialWindowBounds(*terminal, 0);
+    const Rect editor_bounds = InitialWindowBounds(*editor, 0);
+    const bool terminal_editor_ok = terminal_bounds.width >= terminal->min_width &&
+        terminal_bounds.height >= terminal->min_height &&
+        editor_bounds.width >= editor->min_width &&
+        editor_bounds.height >= editor->min_height;
+
+    const Rect offscreen = {g_Framebuffer.width + 200, g_Framebuffer.height + 200, 900, 700};
+    const Rect visible = ClampWindowToUsableArea(offscreen, AppKind::TextEditor);
+    const bool visible_ok = visible.x + visible.width <= usable.x + usable.width &&
+        visible.y + visible.height <= usable.y + usable.height;
+
+    const Rect remembered = {usable.x + 40, usable.y + 44, files->min_width, files->min_height};
+    RememberAppPlacement(AppKind::FileManager, remembered);
+    const Rect restored = InitialWindowBounds(*files, 0);
+    const bool remembered_ok = restored.x == remembered.x &&
+        restored.y == remembered.y &&
+        restored.width == remembered.width &&
+        restored.height == remembered.height;
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        g_AppPlacements[i] = saved_placements[i];
+    }
+
+    return first_centered_ok &&
+        default_min_ok &&
+        compact_ok &&
+        terminal_editor_ok &&
+        visible_ok &&
+        remembered_ok;
 }
 
 bool TerminalTextEquals(const char* a, const char* b) {
@@ -1606,8 +1908,10 @@ void DrawTaskbar() {
         }
 
         const uint32_t button_width = window.app == AppKind::TerminalEmulator ? 112 : 156;
-        Graphics::FillRect({x, y, button_width, 26}, window.minimized ? 0xFF1C242E : 0xFF2D3945);
-        Graphics::DrawRect({x, y, button_width, 26}, window.minimized ? kTheme.border_inactive : kTheme.border_active);
+        const uint32_t fill = window.focused ? 0xFF345164 : (window.minimized ? 0xFF1C242E : 0xFF2D3945);
+        const uint32_t edge = window.focused ? kTheme.accent : (window.minimized ? kTheme.border_inactive : kTheme.border_active);
+        Graphics::FillRect({x, y, button_width, 26}, fill);
+        Graphics::DrawRect({x, y, button_width, 26}, edge);
         Graphics::DrawText(x + 10, y + 7, window.title, window.minimized ? kTheme.text_muted : kTheme.text);
         x += button_width + 10;
     }
@@ -1625,16 +1929,8 @@ bool ComposeDesktop() {
     DrawDesktopIcons();
     DrawBars();
 
-    int32_t active_window = -1;
-    for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
-        if (g_Windows[i].visible && !g_Windows[i].minimized && g_Windows[i].desktop == g_ActiveDesktop) {
-            active_window = i;
-            break;
-        }
-    }
-
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
-        ComposeWindow(g_Windows[i], static_cast<int32_t>(i) == active_window);
+        ComposeWindow(g_Windows[i], g_Windows[i].focused);
     }
 
     DrawTaskbar();
@@ -1647,14 +1943,14 @@ bool ComposeDesktop() {
 }
 
 void RedrawDirtyRegion(const Rect& dirty) {
-    if (!g_BackBufferReady) {
+    if (!g_BackBufferReady || g_DebugFullRedraw) {
         ComposeDesktop();
         return;
     }
 
     const Rect clipped = IntersectRect(dirty, ScreenRect());
     if (RectEmpty(clipped)) {
-        PaintCursor();
+        ComposeDesktop();
         return;
     }
 
@@ -1663,16 +1959,8 @@ void RedrawDirtyRegion(const Rect& dirty) {
     DrawDesktopIcons();
     DrawBars();
 
-    int32_t active_window = -1;
-    for (int32_t i = static_cast<int32_t>(g_Status.window_count) - 1; i >= 0; i--) {
-        if (g_Windows[i].visible && !g_Windows[i].minimized && g_Windows[i].desktop == g_ActiveDesktop) {
-            active_window = i;
-            break;
-        }
-    }
-
     for (uint32_t i = 0; i < g_Status.window_count; i++) {
-        ComposeWindow(g_Windows[i], static_cast<int32_t>(i) == active_window);
+        ComposeWindow(g_Windows[i], g_Windows[i].focused);
     }
 
     DrawTaskbar();
@@ -1701,11 +1989,15 @@ void CloseWindow(uint32_t index) {
     }
 
     g_Windows[index].visible = false;
+    g_Windows[index].focused = false;
     if (g_DragWindowIndex == static_cast<int32_t>(index)) {
         g_DragWindowIndex = -1;
     }
     if (g_MouseDownWindowIndex == static_cast<int32_t>(index)) {
         g_MouseDownWindowIndex = -1;
+    }
+    if (g_ActiveWindowIndex == static_cast<int32_t>(index)) {
+        FocusTopVisibleWindow();
     }
 }
 
@@ -1776,14 +2068,19 @@ void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
         return;
     }
 
-    Window& window = g_Windows[window_index];
-    const WindowControl control = HitWindowControl(x, y, window);
+    const WindowControl control = HitWindowControl(x, y, g_Windows[window_index]);
+    FocusWindow(static_cast<uint32_t>(window_index));
+    const int32_t focused_index = g_ActiveWindowIndex;
+    if (focused_index < 0) {
+        return;
+    }
+
     if (control == WindowControl::Close) {
-        CloseWindow(static_cast<uint32_t>(window_index));
+        CloseWindow(static_cast<uint32_t>(focused_index));
     } else if (control == WindowControl::Minimize) {
-        MinimizeWindow(static_cast<uint32_t>(window_index));
+        MinimizeWindow(static_cast<uint32_t>(focused_index));
     } else if (control == WindowControl::Maximize) {
-        ToggleMaximizeWindow(static_cast<uint32_t>(window_index));
+        ToggleMaximizeWindow(static_cast<uint32_t>(focused_index));
     }
 }
 
@@ -1823,7 +2120,7 @@ void DispatchEvent(const GuiEvent& event) {
 
                 const int32_t front_window = g_MouseDownWindowIndex;
                 if (front_window >= 0) {
-                    BringWindowToFront(static_cast<uint32_t>(front_window));
+                    FocusWindow(static_cast<uint32_t>(front_window));
                     if (g_DragWindowIndex == front_window) {
                         g_DragWindowIndex = static_cast<int32_t>(g_Status.window_count - 1);
                     }
@@ -1873,13 +2170,16 @@ void DispatchEvent(const GuiEvent& event) {
 
         case GuiEventType::MouseWheel:
             // Wheel delta is carried as a signed value in key for scrollable clients.
-            g_TerminalScrollOffset += static_cast<int32_t>(event.key);
-            if (g_TerminalScrollOffset < 0) g_TerminalScrollOffset = 0;
-            if (g_TerminalLineCount > kVisibleTerminalLines) {
-                const int32_t max_scroll = static_cast<int32_t>(g_TerminalLineCount - kVisibleTerminalLines);
-                if (g_TerminalScrollOffset > max_scroll) g_TerminalScrollOffset = max_scroll;
-            } else {
-                g_TerminalScrollOffset = 0;
+            if (g_ActiveWindowIndex >= 0 &&
+                g_Windows[g_ActiveWindowIndex].app == AppKind::TerminalEmulator) {
+                g_TerminalScrollOffset += static_cast<int32_t>(event.key);
+                if (g_TerminalScrollOffset < 0) g_TerminalScrollOffset = 0;
+                if (g_TerminalLineCount > kVisibleTerminalLines) {
+                    const int32_t max_scroll = static_cast<int32_t>(g_TerminalLineCount - kVisibleTerminalLines);
+                    if (g_TerminalScrollOffset > max_scroll) g_TerminalScrollOffset = max_scroll;
+                } else {
+                    g_TerminalScrollOffset = 0;
+                }
             }
             UpdateHoverState();
             break;
@@ -1976,6 +2276,16 @@ bool KernelGuiInit(const BootInfo& boot_info) {
 
     if (!RunApplicationsSelfTest()) {
         KernelLog(LogLevel::Warn, "Application registry self-test failed");
+        return false;
+    }
+
+    if (!RunStableInterfaceSelfTest()) {
+        KernelLog(LogLevel::Warn, "Stable interface self-test failed");
+        return false;
+    }
+
+    if (!RunWindowPlacementSelfTest()) {
+        KernelLog(LogLevel::Warn, "Window placement self-test failed");
         return false;
     }
 

@@ -74,6 +74,7 @@ static constexpr uint32_t kMaxVmRegions = 8;
 static constexpr uint64_t kUserAslrBase = 0x400000;
 static constexpr uint64_t kKernelAslrBase = 0xFFFFFFFF80000000ull;
 static constexpr uint64_t kAslrPageMask = 0xFFFFFull;
+static constexpr uint64_t kKernelAslrPageMask = 0x7FFFFull;
 static constexpr uint64_t kStackCanaryTerminator = 0x00FF0A0000000000ull;
 
 SecurityStatus g_Status {};
@@ -332,12 +333,17 @@ uint64_t GenerateAslrOffset(uint64_t image_id, uint64_t salt) {
     return (mixed & kAslrPageMask) << 12;
 }
 
+uint64_t GenerateKernelAslrOffset(uint64_t image_id, uint64_t salt) {
+    const uint64_t mixed = MixSecurityEntropy(image_id ^ salt);
+    return (mixed & kKernelAslrPageMask) << 12;
+}
+
 uint64_t ApplyUserAslr(uint64_t image_id, uint64_t salt) {
     return kUserAslrBase + GenerateAslrOffset(image_id, salt);
 }
 
 uint64_t ApplyKernelAslr(uint64_t boot_seed) {
-    return kKernelAslrBase + GenerateAslrOffset(0xC0DEF00Dull, boot_seed);
+    return kKernelAslrBase + GenerateKernelAslrOffset(0xC0DEF00Dull, boot_seed);
 }
 
 uint64_t GenerateStackCanary(uint64_t thread_id) {

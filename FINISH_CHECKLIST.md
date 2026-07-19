@@ -460,6 +460,204 @@
 
 ---
 
+# Phase 18.5 — Runtime Desktop & App Stabilization
+
+> Goal: turn the QEMU demo into a repeatable desktop workflow: click, open, focus, interact, save, minimize, restore, and close native apps without losing the desktop.
+
+## Video-Observed Working Baseline
+- [x] Boot reaches graphical desktop in QEMU
+- [x] Desktop wallpaper/background is displayed
+- [x] Mouse cursor moves
+- [x] Mouse clicks are processed
+- [x] Menu or launcher can open
+- [x] Multiple windows/screens can appear
+- [x] Native app launch path is partially present
+- [x] System remains alive during short recording
+- [x] Bootloader to kernel to drivers to window manager to events to apps path exists
+
+## Priority 1 — Stable Interface
+- [x] Desktop never disappears after opening or closing apps
+- [x] Full-frame compositor path always redraws wallpaper, desktop icons, windows, taskbar, and cursor
+- [x] Dirty-rectangle compositor has debug fallback to full redraw
+- [x] Dirty-region invalidation detects unsafe regions and triggers full redraw
+- [x] Backbuffer is mandatory for desktop composition
+- [x] Framebuffer presentation happens after full backbuffer render
+- [x] Cursor restore never damages desktop pixels
+- [x] Window close restores/redraws the region underneath
+- [x] Window minimize does not destroy the window object
+- [x] Window restore redraws desktop and taskbar
+- [x] Window Z-order is preserved across clicks, launches, minimize, restore, and close
+- [x] Clicking a window brings it to front
+- [x] Active window focus is explicit and persistent
+- [x] Previous active window loses focus before new window receives focus
+- [x] Active and inactive windows have visibly different borders/title bars
+- [x] Mouse and keyboard events are dispatched only to the focused window/app
+- [x] Window list survives launcher/app creation functions
+- [x] Window objects are stored in persistent window/process tables
+- [x] No pointers to stack-allocated windows are stored by the window manager
+- [x] Closing a window separates GUI cleanup from process cleanup
+- [x] Full redraw mode can be toggled for compositor debugging
+- [x] Z-order/focus/redraw self-test covers two overlapping windows
+- [ ] QEMU regression confirms desktop remains visible after repeated app launches
+
+## Priority 2 — Window Sizing & Placement
+- [x] Default app window minimum is at least 480x320 where screen size allows
+- [x] Per-app minimum window size is defined
+- [x] First launched app opens centered in usable desktop area
+- [x] New windows are clamped inside visible screen bounds
+- [x] Windows do not open under the taskbar
+- [x] Window manager remembers last position and size per app
+- [x] Dialogs and small utility windows are centered
+- [x] Calculator and settings use compact but readable fixed minimum sizes
+- [x] Terminal and editor open large enough for useful text
+- [x] Initial app placement avoids stacking every app in the top-left corner
+
+## Priority 3 — App Launch Lifecycle
+- [ ] Launcher has a persistent native app registry
+- [ ] App registry stores id, display name, executable path, and icon path
+- [ ] Native app executables use `/system/apps/*.app` or `/bin/*` paths consistently
+- [ ] Launcher click requests app launch by app id
+- [ ] Missing app id shows visible error notification
+- [ ] Process manager creates a process for launched apps
+- [ ] ELF loader loads app executable for launched apps
+- [ ] App registers its persistent window after process creation
+- [ ] Taskbar adds running app after successful launch
+- [ ] Launching an already-running app focuses or restores it
+- [ ] Minimized app launch request restores existing app
+- [ ] Failed app launch reports visible failure state
+- [ ] App process exit removes taskbar entry and window
+- [ ] App cleanup releases process resources
+- [ ] App event loop starts after window registration
+- [ ] App launch logs include `[APP] launch requested`
+- [ ] ELF load logs include `[ELF] loading`
+- [ ] Process creation logs include `[PROC] process created`
+- [ ] Window registration logs include `[GUI] window registered`
+- [ ] Focus changes log `[GUI] focus changed`
+- [ ] App exit logs include exit code
+- [ ] Hung app is detected without freezing compositor/window manager
+- [ ] App watchdog marks unresponsive apps
+- [ ] App state model includes Opening, Running, Minimized, Not responding, and Failed
+- [ ] App launch integration test opens, focuses, minimizes, restores, and closes each native app
+
+## Priority 4 — Native Apps Usability
+
+### Terminal
+- [x] `help`
+- [x] `clear`
+- [x] `ls`
+- [x] `cd`
+- [x] `pwd`
+- [x] `cat`
+- [x] `mem`
+- [x] `cpu`
+- [x] `uptime`
+- [x] `reboot`
+- [x] `shutdown`
+- [x] ANSI handling scaffold
+- [x] History scaffold
+- [x] Scrollback scaffold
+- [ ] `mkdir`
+- [ ] `touch`
+- [ ] `echo`
+- [ ] `ps`
+- [ ] `kill`
+- [ ] Blinking cursor
+- [ ] Text selection
+- [ ] Clipboard copy from selection
+- [ ] Consistent keyboard input path
+- [ ] Real PTY-backed terminal IO
+- [ ] Terminal resize reflows visible rows/columns
+- [ ] Terminal command tests run through keyboard events, not only direct parser calls
+
+### File Manager
+- [ ] List directories from VFS
+- [ ] Open folders
+- [ ] Back navigation
+- [ ] Forward navigation
+- [ ] Create folder
+- [ ] Rename file/folder
+- [ ] Copy file/folder
+- [ ] Move file/folder
+- [ ] Delete file/folder
+- [ ] Open files by association
+- [ ] Show filesystem errors in UI
+- [ ] Path bar shows current path
+- [ ] Path bar supports root-to-current breadcrumb navigation
+
+### Text Editor
+- [ ] New file
+- [ ] Open file
+- [ ] Save
+- [ ] Save as
+- [ ] Text cursor
+- [ ] Text selection
+- [ ] Line wrapping
+- [ ] Vertical scrolling
+- [ ] Ctrl+S shortcut
+- [ ] Ctrl+O shortcut
+- [ ] Ctrl+A shortcut
+- [ ] Unsaved changes indicator
+
+### Calculator
+- [ ] Button grid dispatches click events
+- [ ] Keyboard input updates expression
+- [ ] Display text updates after every operation
+- [ ] App maintains internal calculation state
+- [ ] Basic arithmetic: add, subtract, multiply, divide
+- [ ] Clear and backspace actions
+
+### Settings
+- [ ] Resolution settings page
+- [ ] Wallpaper settings page
+- [ ] Theme settings page
+- [ ] Volume settings page
+- [ ] Mouse settings page
+- [ ] Keyboard settings page
+- [ ] Network settings page
+- [ ] System information page
+
+### Task Manager
+- [ ] Shows PID
+- [ ] Shows process name
+- [ ] Shows process state
+- [ ] Shows CPU usage
+- [ ] Shows memory usage
+- [ ] Shows window count per process
+- [ ] Can request process termination
+- [ ] Distinguishes running, minimized, failed, and unresponsive apps
+
+## Priority 5 — Desktop Experience
+- [ ] Taskbar is always visible
+- [ ] Taskbar highlights active app/window
+- [ ] Taskbar indicates minimized apps
+- [ ] Clock remains visible
+- [ ] App menu/launcher has larger clickable icons
+- [ ] Window title text remains legible
+- [ ] Window controls for close, minimize, and maximize are reliable
+- [ ] Short app opening animation or state transition
+- [ ] Window shadow remains visible after redraws
+- [ ] Error notification UI exists
+- [ ] Cursor contrast is sufficient on dark and light backgrounds
+- [ ] Dialogs are centered
+- [ ] File associations launch the correct app
+- [ ] Keyboard shortcuts route to focused app
+
+## Priority 6 — Runtime Verification
+- [ ] QEMU smoke test captures boot-to-desktop serial/video evidence
+- [ ] QEMU test opens launcher and launches Terminal
+- [ ] QEMU test launches Calculator and verifies display update
+- [ ] QEMU test launches File Manager and verifies directory listing
+- [ ] QEMU test launches Text Editor and verifies text entry
+- [ ] QEMU test minimizes and restores a window
+- [ ] QEMU test closes a window and verifies desktop redraw
+- [ ] QEMU test switches focus between overlapping windows
+- [ ] QEMU test repeats app open/close cycle without losing desktop
+- [ ] QEMU test records no panic during a 60-second interaction run
+- [ ] Screenshot-based regression detects empty/dark desktop after actions
+- [ ] Framebuffer/compositor test verifies non-empty wallpaper, taskbar, and at least one window
+
+---
+
 # Phase 19 — Performance
 - [ ] Hardware acceleration
 - [ ] Optimized compositor
@@ -512,6 +710,12 @@
 - [x] Mouse drag/click path check
 - [x] Desktop redraw path check
 - [x] Graphics primitive rendering path check
+- [ ] Full compositor redraw visual regression
+- [ ] Dirty-rectangle fallback regression
+- [ ] Active window focus visual regression
+- [ ] Taskbar active/minimized state regression
+- [ ] Cursor damage regression
+- [ ] Window sizing and centering regression
 
 ## Regression Tests
 - [x] Automated local test runner
@@ -523,6 +727,17 @@
 
 ## Integration Tests
 - [ ] Userspace application launch
+- [ ] Launcher opens every registered native app
+- [ ] App launch creates process, window, and taskbar entry
+- [ ] Launching existing app focuses/restores it
+- [ ] Window close releases GUI and process state
+- [ ] App open/close loop preserves desktop contents
+- [ ] Terminal keyboard input integration
+- [ ] File Manager directory navigation integration
+- [ ] Text Editor open/edit/save integration
+- [ ] Calculator click and keyboard integration
+- [ ] Settings page navigation integration
+- [ ] Task Manager process list integration
 - [ ] Filesystem stress test
 - [ ] Network stress test
 - [ ] SMP stress test
