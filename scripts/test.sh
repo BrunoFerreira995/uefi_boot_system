@@ -129,6 +129,16 @@ require_text "$ROOT_DIR/kernel/src/security.cpp" "RunPermissionsSelfTest" "secur
 require_text "$ROOT_DIR/kernel/src/security.cpp" "RunAccessControlSelfTest" "security access control self-test present"
 require_text "$ROOT_DIR/kernel/src/security.cpp" "RunProcessIsolationSelfTest" "security process isolation self-test present"
 require_text "$ROOT_DIR/kernel/src/security.cpp" "RunVirtualMemoryProtectionSelfTest" "security virtual memory protection self-test present"
+require_text "$ROOT_DIR/kernel/src/security.cpp" "RunAslrSelfTest" "security ASLR self-test present"
+require_text "$ROOT_DIR/kernel/src/security.cpp" "RunStackCanarySelfTest" "security stack canary self-test present"
+require_text "$ROOT_DIR/kernel/src/security.cpp" "RunNxPagesSelfTest" "security NX pages self-test present"
+require_text "$ROOT_DIR/kernel/src/security.cpp" "RunSecureRandomSelfTest" "security random generator self-test present"
+require_text "$ROOT_DIR/kernel/src/security.cpp" "RunKaslrSelfTest" "security KASLR self-test present"
+require_text "$ROOT_DIR/kernel/include/security.hpp" "aslr_ready" "security ASLR status present"
+require_text "$ROOT_DIR/kernel/include/security.hpp" "stack_canaries_ready" "security stack canary status present"
+require_text "$ROOT_DIR/kernel/include/security.hpp" "nx_pages_ready" "security NX pages status present"
+require_text "$ROOT_DIR/kernel/include/security.hpp" "secure_random_ready" "security random generator status present"
+require_text "$ROOT_DIR/kernel/include/security.hpp" "kaslr_ready" "security KASLR status present"
 
 echo
 echo "== Driver tests =="

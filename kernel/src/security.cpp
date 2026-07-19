@@ -57,16 +57,32 @@ struct VmRegionPolicy {
     bool active;
 };
 
+struct RandomGenerator {
+    uint64_t state;
+    bool seeded;
+};
+
+struct StackCanary {
+    uint64_t value;
+    bool active;
+};
+
 static constexpr uint32_t kMaxUsers = 8;
 static constexpr uint32_t kMaxPolicies = 8;
 static constexpr uint32_t kMaxDomains = 8;
 static constexpr uint32_t kMaxVmRegions = 8;
+static constexpr uint64_t kUserAslrBase = 0x400000;
+static constexpr uint64_t kKernelAslrBase = 0xFFFFFFFF80000000ull;
+static constexpr uint64_t kAslrPageMask = 0xFFFFFull;
+static constexpr uint64_t kStackCanaryTerminator = 0x00FF0A0000000000ull;
 
 SecurityStatus g_Status {};
 SecurityUser g_Users[kMaxUsers];
 AccessPolicy g_Policies[kMaxPolicies];
 ProcessIsolationDomain g_Domains[kMaxDomains];
 VmRegionPolicy g_VmRegions[kMaxVmRegions];
+RandomGenerator g_Random {};
+StackCanary g_StackCanary {};
 
 bool StringEquals(const char* a, const char* b) {
     if (!a || !b) {
@@ -90,6 +106,11 @@ void ResetSecurityStatus() {
     g_Status.access_control_ready = false;
     g_Status.process_isolation_ready = false;
     g_Status.virtual_memory_protection_ready = false;
+    g_Status.aslr_ready = false;
+    g_Status.stack_canaries_ready = false;
+    g_Status.nx_pages_ready = false;
+    g_Status.secure_random_ready = false;
+    g_Status.kaslr_ready = false;
     g_Status.user_count = 0;
     g_Status.policy_count = 0;
 
@@ -123,6 +144,11 @@ void ResetSecurityStatus() {
         g_VmRegions[i].protection = 0;
         g_VmRegions[i].active = false;
     }
+
+    g_Random.state = 0;
+    g_Random.seeded = false;
+    g_StackCanary.value = 0;
+    g_StackCanary.active = false;
 }
 
 SecurityUser* CreateUser(uint32_t uid, const char* name, SecurityRole role, uint16_t permissions) {
@@ -265,6 +291,70 @@ bool VmAccessAllowed(const VmRegionPolicy& region, bool write, bool execute, boo
     return true;
 }
 
+bool VmRegionHasNx(const VmRegionPolicy& region) {
+    return (region.protection & NoExecute) != 0;
+}
+
+uint64_t MixSecurityEntropy(uint64_t value) {
+    value ^= value >> 33;
+    value *= 0xFF51AFD7ED558CCDull;
+    value ^= value >> 33;
+    value *= 0xC4CEB9FE1A85EC53ull;
+    value ^= value >> 33;
+    return value;
+}
+
+bool SeedSecureRandom(uint64_t seed) {
+    if (seed == 0) {
+        return false;
+    }
+
+    g_Random.state = MixSecurityEntropy(seed);
+    g_Random.seeded = g_Random.state != 0;
+    return g_Random.seeded;
+}
+
+uint64_t SecureRandom64() {
+    if (!g_Random.seeded) {
+        return 0;
+    }
+
+    uint64_t x = g_Random.state;
+    x ^= x << 13;
+    x ^= x >> 7;
+    x ^= x << 17;
+    g_Random.state = x;
+    return x;
+}
+
+uint64_t GenerateAslrOffset(uint64_t image_id, uint64_t salt) {
+    const uint64_t mixed = MixSecurityEntropy(image_id ^ salt);
+    return (mixed & kAslrPageMask) << 12;
+}
+
+uint64_t ApplyUserAslr(uint64_t image_id, uint64_t salt) {
+    return kUserAslrBase + GenerateAslrOffset(image_id, salt);
+}
+
+uint64_t ApplyKernelAslr(uint64_t boot_seed) {
+    return kKernelAslrBase + GenerateAslrOffset(0xC0DEF00Dull, boot_seed);
+}
+
+uint64_t GenerateStackCanary(uint64_t thread_id) {
+    const uint64_t random = SecureRandom64();
+    if (random == 0 || thread_id == 0) {
+        return 0;
+    }
+
+    g_StackCanary.value = (random ^ thread_id) | kStackCanaryTerminator;
+    g_StackCanary.active = true;
+    return g_StackCanary.value;
+}
+
+bool CheckStackCanary(uint64_t expected, uint64_t observed) {
+    return g_StackCanary.active && expected == observed && observed == g_StackCanary.value;
+}
+
 bool RunUsersSelfTest() {
     return CreateUser(1, "root", SecurityRole::Admin, Read | Write | Execute | Network | Admin) &&
         CreateUser(1000, "shell", SecurityRole::User, Read | Write | Execute | Network) &&
@@ -315,6 +405,58 @@ bool RunVirtualMemoryProtectionSelfTest() {
         VmAccessAllowed(*kernel, false, false, true);
 }
 
+bool RunAslrSelfTest() {
+    const uint64_t first = ApplyUserAslr(0x1000, 0xABCD);
+    const uint64_t second = ApplyUserAslr(0x1000, 0xBCDE);
+    return first >= kUserAslrBase &&
+        second >= kUserAslrBase &&
+        first != second &&
+        (first & 0xFFF) == 0 &&
+        (second & 0xFFF) == 0;
+}
+
+bool RunStackCanarySelfTest() {
+    if (!SeedSecureRandom(0x5152535455565758ull)) {
+        return false;
+    }
+
+    const uint64_t canary = GenerateStackCanary(42);
+    return canary != 0 &&
+        CheckStackCanary(canary, canary) &&
+        !CheckStackCanary(canary, canary ^ 1);
+}
+
+bool RunNxPagesSelfTest() {
+    VmRegionPolicy* stack = AddVmRegion(0x700000, 0x4000, UserReadable | UserWritable | NoExecute);
+    VmRegionPolicy* code = AddVmRegion(0x800000, 0x4000, UserReadable | UserExecutable);
+    return stack &&
+        code &&
+        VmRegionHasNx(*stack) &&
+        !VmAccessAllowed(*stack, false, true, false) &&
+        !VmRegionHasNx(*code) &&
+        VmAccessAllowed(*code, false, true, false);
+}
+
+bool RunSecureRandomSelfTest() {
+    if (!SeedSecureRandom(0xA5A55A5ADEADBEEFull)) {
+        return false;
+    }
+
+    const uint64_t first = SecureRandom64();
+    const uint64_t second = SecureRandom64();
+    return first != 0 && second != 0 && first != second;
+}
+
+bool RunKaslrSelfTest() {
+    const uint64_t first = ApplyKernelAslr(0x12345678);
+    const uint64_t second = ApplyKernelAslr(0x87654321);
+    return first >= kKernelAslrBase &&
+        second >= kKernelAslrBase &&
+        first != second &&
+        (first & 0xFFF) == 0 &&
+        (second & 0xFFF) == 0;
+}
+
 } // namespace
 
 bool KernelSecurityInit() {
@@ -326,13 +468,23 @@ bool KernelSecurityInit() {
     g_Status.process_isolation_ready = g_Status.access_control_ready && RunProcessIsolationSelfTest();
     g_Status.virtual_memory_protection_ready =
         g_Status.process_isolation_ready && RunVirtualMemoryProtectionSelfTest();
+    g_Status.aslr_ready = g_Status.virtual_memory_protection_ready && RunAslrSelfTest();
+    g_Status.stack_canaries_ready = g_Status.aslr_ready && RunStackCanarySelfTest();
+    g_Status.nx_pages_ready = g_Status.stack_canaries_ready && RunNxPagesSelfTest();
+    g_Status.secure_random_ready = g_Status.nx_pages_ready && RunSecureRandomSelfTest();
+    g_Status.kaslr_ready = g_Status.secure_random_ready && RunKaslrSelfTest();
 
     KernelLog(LogLevel::Info, "Phase 15 security initialized");
     return g_Status.users_ready &&
         g_Status.permissions_ready &&
         g_Status.access_control_ready &&
         g_Status.process_isolation_ready &&
-        g_Status.virtual_memory_protection_ready;
+        g_Status.virtual_memory_protection_ready &&
+        g_Status.aslr_ready &&
+        g_Status.stack_canaries_ready &&
+        g_Status.nx_pages_ready &&
+        g_Status.secure_random_ready &&
+        g_Status.kaslr_ready;
 }
 
 const SecurityStatus& KernelSecurityStatus() {
@@ -350,4 +502,14 @@ void PrintSecurityInfo() {
         g_Status.process_isolation_ready ? "Process isolation policy ready" : "Process isolation unavailable");
     KernelLog(g_Status.virtual_memory_protection_ready ? LogLevel::Info : LogLevel::Warn,
         g_Status.virtual_memory_protection_ready ? "Virtual memory protection policy ready" : "Virtual memory protection unavailable");
+    KernelLog(g_Status.aslr_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.aslr_ready ? "ASLR offsets ready" : "ASLR offsets unavailable");
+    KernelLog(g_Status.stack_canaries_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.stack_canaries_ready ? "Stack canaries ready" : "Stack canaries unavailable");
+    KernelLog(g_Status.nx_pages_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.nx_pages_ready ? "NX page policy ready" : "NX page policy unavailable");
+    KernelLog(g_Status.secure_random_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.secure_random_ready ? "Secure random generator ready" : "Secure random generator unavailable");
+    KernelLog(g_Status.kaslr_ready ? LogLevel::Info : LogLevel::Warn,
+        g_Status.kaslr_ready ? "Kernel ASLR offsets ready" : "Kernel ASLR offsets unavailable");
 }

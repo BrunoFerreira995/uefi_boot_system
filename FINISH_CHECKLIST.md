@@ -405,11 +405,11 @@
 - [x] Access Control
 - [x] Process isolation
 - [x] Virtual memory protection
-- [ ] ASLR
-- [ ] Stack canaries
-- [ ] NX pages
-- [ ] Secure random generator
-- [ ] Kernel Address Space Layout Randomization
+- [x] ASLR
+- [x] Stack canaries
+- [x] NX pages
+- [x] Secure random generator
+- [x] Kernel Address Space Layout Randomization
 
 ---
 
