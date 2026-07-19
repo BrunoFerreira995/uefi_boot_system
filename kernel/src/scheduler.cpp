@@ -6,8 +6,8 @@ extern "C" uint64_t CpuXsaveMask;
 
 namespace {
 
-static constexpr uint64_t kMaxProcesses = 24;
-static constexpr uint64_t kMaxThreads = 48;
+static constexpr uint64_t kMaxProcesses = 64;
+static constexpr uint64_t kMaxThreads = 128;
 static constexpr uint64_t kThreadStackSize = 8192;
 static constexpr uint64_t kKernelProcessId = 1;
 static constexpr uint64_t kIpcQueueSize = 8;
@@ -350,6 +350,7 @@ uint64_t KernelCreateThread(uint64_t process_id, const char* name, void (*entry)
 
     void* stack = KernelAllocate(kThreadStackSize, 16);
     if (!stack) {
+        KernelLog(LogLevel::Warn, "[PROC] thread stack allocation failed");
         return 0;
     }
 
@@ -368,6 +369,7 @@ uint64_t KernelCreateThread(uint64_t process_id, const char* name, void (*entry)
     thread->priority = kDefaultThreadPriority;
     thread->waiting_mutex_id = 0;
     PrepareInitialContext(*thread);
+    KernelLog(LogLevel::Info, "[PROC] thread created");
     return thread->id;
 }
 

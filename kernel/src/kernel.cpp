@@ -367,7 +367,7 @@ static constexpr uint32_t kEfiConventionalMemory = 7;
 static constexpr uint64_t kPageSize = 4096;
 static constexpr uint64_t kManagedMemoryLimit = 0x100000000ULL;
 static constexpr uint64_t kManagedPageCount = kManagedMemoryLimit / kPageSize;
-static constexpr uint64_t kHeapInitialPages = 16;
+static constexpr uint64_t kHeapInitialPages = 128;
 static constexpr uint64_t kCowTrackedPages = 128;
 static constexpr uint64_t kSharedSegmentCount = 8;
 static constexpr uint64_t kSharedSegmentMaxPages = 4;
@@ -1589,6 +1589,7 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     PrintGuiInfo();
     KernelEnableInterrupts();
     KernelLog(LogLevel::Info, "Hardware interrupts enabled");
+    KernelGuiRenderNow();
 
     while (true) {
         KernelGuiPumpEvents();

@@ -170,10 +170,10 @@ struct CompatibilityTarget {
     bool available;
 };
 
-static constexpr uint64_t kMaxUserProcesses = 24;
+static constexpr uint64_t kMaxUserProcesses = 64;
 static constexpr uint32_t kMaxDynamicSymbols = 24;
 static constexpr uint32_t kMaxPosixFileDescriptors = 8;
-static constexpr uint32_t kMaxLoaderCacheEntries = 32;
+static constexpr uint32_t kMaxLoaderCacheEntries = 64;
 static constexpr uint32_t kMaxEnvironmentVariables = 12;
 static constexpr uint32_t kMaxSharedLibraries = 16;
 static constexpr uint32_t kMaxSignalHandlers = 8;
@@ -1629,6 +1629,7 @@ bool KernelStartUserApplicationEventLoop(uint64_t process_id, const char* app_id
     thread_id = KernelCreateThread(process_id, app_id, AppProcessMain,
         reinterpret_cast<void*>(process_id));
     if (thread_id == 0) {
+        KernelLog(LogLevel::Warn, "[APP] event loop thread creation failed");
         return false;
     }
 

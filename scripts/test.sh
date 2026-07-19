@@ -36,6 +36,24 @@ require_text() {
     pass "$label"
 }
 
+require_order() {
+    local file="$1"
+    local first="$2"
+    local second="$3"
+    local label="$4"
+    local first_line
+    local second_line
+
+    first_line=$(grep -n -- "$first" "$file" | head -n 1 | cut -d: -f1)
+    second_line=$(grep -n -- "$second" "$file" | head -n 1 | cut -d: -f1)
+    if [ -z "$first_line" ] || [ -z "$second_line" ] || [ "$first_line" -ge "$second_line" ]; then
+        echo "[FAIL] $label"
+        echo "       Expected '$first' before '$second' in $file"
+        exit 1
+    fi
+    pass "$label"
+}
+
 echo "== Build tests =="
 "$SCRIPT_DIR/build.sh"
 require_file "$BOOTLOADER_EFI" "bootloader artifact exists"
@@ -49,6 +67,9 @@ require_text "$ROOT_DIR/scripts/run.sh" "EFI/BOOT/BOOTX64.EFI" "run script packa
 require_text "$ROOT_DIR/scripts/run.sh" "kernel/kernel.elf" "run script packages kernel handoff path"
 require_text "$ROOT_DIR/kernel/src/kernel.cpp" "KernelPanic" "kernel panic path present"
 require_text "$ROOT_DIR/kernel/src/kernel.cpp" "KernelGuiInit" "desktop startup path present"
+require_text "$ROOT_DIR/kernel/src/kernel.cpp" "GUI initialization failed" "GUI init panic message present"
+require_text "$ROOT_DIR/kernel/src/kernel.cpp" "KernelGuiRenderNow" "GUI repaint after kernel logs present"
+require_order "$ROOT_DIR/kernel/src/kernel.cpp" "Hardware interrupts enabled" "KernelGuiRenderNow" "GUI repaint happens after final boot log"
 require_text "$ROOT_DIR/kernel/src/userspace.cpp" "SysExit" "userspace exit path present"
 
 echo
@@ -209,6 +230,14 @@ require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalAutocompleteCommand" "termi
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "ExecuteTerminalScript" "terminal shell scripting present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "RunApplicationsSelfTest" "application registry self-test present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "RunStableInterfaceSelfTest" "stable interface self-test present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "GUI framebuffer unavailable" "GUI init framebuffer failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "GUI window manager init failed" "GUI init window-manager failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Desktop/window/image/font self-test failed" "GUI init desktop self-test failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Application registry self-test failed" "GUI init app registry failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Stable interface self-test failed" "GUI init stable interface failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Window placement self-test failed" "GUI init placement failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Terminal command self-test failed" "GUI init terminal failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "Phase 10 GUI initialized" "GUI init success diagnostic present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "FocusWindow" "window focus manager present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "g_DebugFullRedraw" "full redraw debug fallback present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "kBackBufferMaxWidth = 2048" "large backbuffer compositor present"
@@ -234,7 +263,10 @@ echo "== Regression tests =="
 require_text "$ROOT_DIR/scripts/test.sh" "scripts/run.sh" "automated local test runner present"
 require_text "$ROOT_DIR/kernel/src/kernel.cpp" "KernelLog" "boot log check target present"
 require_text "$ROOT_DIR/kernel/src/kernel.cpp" "FreePages" "memory regression check target present"
+require_text "$ROOT_DIR/kernel/src/kernel.cpp" "kHeapInitialPages = 128" "kernel heap capacity protects GUI launch threads"
 require_text "$ROOT_DIR/kernel/src/scheduler.cpp" "priority" "scheduler fairness regression target present"
+require_text "$ROOT_DIR/kernel/src/scheduler.cpp" "thread stack allocation failed" "thread allocation failure diagnostic present"
+require_text "$ROOT_DIR/kernel/src/userspace.cpp" "event loop thread creation failed" "app event-loop failure diagnostic present"
 require_text "$ROOT_DIR/kernel/src/filesystem.cpp" "KernelFileSystemInit" "filesystem regression target present"
 
 echo

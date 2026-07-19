@@ -1428,7 +1428,14 @@ bool RunApplicationsSelfTest() {
         launch_all_ok = LaunchApplicationById(kApplications[i].id) && launch_all_ok;
     }
 
-    const bool taskbar_running_ok = g_Status.window_count >= kApplicationCount;
+    bool taskbar_running_ok = true;
+    for (uint32_t i = 0; i < kApplicationCount; i++) {
+        const AppRuntimeState* runtime = FindAppRuntime(kApplications[i].app);
+        taskbar_running_ok = taskbar_running_ok &&
+            runtime &&
+            runtime->state == AppLifecycleState::Running &&
+            FindWindowByApp(kApplications[i].app, kApplications[i].desktop) >= 0;
+    }
     const bool missing_id_ok = !LaunchApplicationById("missing") &&
         g_NotificationText &&
         g_NotificationColor == kTheme.close;
@@ -1485,13 +1492,19 @@ bool RunApplicationsSelfTest() {
 
 bool RunStableInterfaceSelfTest() {
     Window saved_windows[kMaxWindows];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
     for (uint32_t i = 0; i < kMaxWindows; i++) {
         CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
     }
     const uint32_t saved_window_count = g_Status.window_count;
     const uint8_t saved_desktop = g_ActiveDesktop;
     const int32_t saved_active = g_ActiveWindowIndex;
     const bool saved_full_redraw = g_DebugFullRedraw;
+    const char* saved_notification = g_NotificationText;
+    const uint32_t saved_notification_color = g_NotificationColor;
 
     g_DebugFullRedraw = true;
     const bool switched = SwitchVirtualDesktop(0);
@@ -1524,10 +1537,15 @@ bool RunStableInterfaceSelfTest() {
     for (uint32_t i = 0; i < kMaxWindows; i++) {
         CopyWindow(g_Windows[i], saved_windows[i]);
     }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
     g_Status.window_count = saved_window_count;
     g_ActiveDesktop = saved_desktop;
     g_ActiveWindowIndex = saved_active;
     g_DebugFullRedraw = saved_full_redraw;
+    g_NotificationText = saved_notification;
+    g_NotificationColor = saved_notification_color;
 
     return switched &&
         focus_file_ok &&
@@ -2628,6 +2646,7 @@ bool KernelGuiInit(const BootInfo& boot_info) {
     g_Status.mouse_ready = true;
 
     if (!InitWindowManager()) {
+        KernelLog(LogLevel::Warn, "GUI window manager init failed");
         return false;
     }
 
@@ -2697,6 +2716,13 @@ void KernelGuiPumpEvents() {
     GuiEvent event;
     while (KernelGuiPollEvent(event)) {
         DispatchEvent(event);
+    }
+}
+
+void KernelGuiRenderNow() {
+    if (g_Status.window_manager_ready) {
+        g_Status.compositor_ready = ComposeDesktop();
+        g_Status.desktop_ready = g_Status.compositor_ready && g_Status.window_manager_ready;
     }
 }
 

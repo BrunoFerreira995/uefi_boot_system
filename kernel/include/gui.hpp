@@ -45,4 +45,5 @@ const GuiStatus& KernelGuiStatus();
 bool KernelGuiPostEvent(const GuiEvent& event);
 bool KernelGuiPollEvent(GuiEvent& event);
 void KernelGuiPumpEvents();
+void KernelGuiRenderNow();
 void PrintGuiInfo();
