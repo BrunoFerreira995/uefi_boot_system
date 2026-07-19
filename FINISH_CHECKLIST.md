@@ -556,75 +556,75 @@
 - [x] ANSI handling scaffold
 - [x] History scaffold
 - [x] Scrollback scaffold
-- [ ] `mkdir`
-- [ ] `touch`
-- [ ] `echo`
-- [ ] `ps`
-- [ ] `kill`
-- [ ] Blinking cursor
-- [ ] Text selection
-- [ ] Clipboard copy from selection
-- [ ] Consistent keyboard input path
-- [ ] Real PTY-backed terminal IO
-- [ ] Terminal resize reflows visible rows/columns
-- [ ] Terminal command tests run through keyboard events, not only direct parser calls
+- [x] `mkdir`
+- [x] `touch`
+- [x] `echo`
+- [x] `ps`
+- [x] `kill`
+- [x] Blinking cursor
+- [x] Text selection
+- [x] Clipboard copy from selection
+- [x] Consistent keyboard input path
+- [x] Real PTY-backed terminal IO
+- [x] Terminal resize reflows visible rows/columns
+- [x] Terminal command tests run through keyboard events, not only direct parser calls
 
 ### File Manager
-- [ ] List directories from VFS
-- [ ] Open folders
-- [ ] Back navigation
-- [ ] Forward navigation
-- [ ] Create folder
-- [ ] Rename file/folder
-- [ ] Copy file/folder
-- [ ] Move file/folder
-- [ ] Delete file/folder
-- [ ] Open files by association
-- [ ] Show filesystem errors in UI
-- [ ] Path bar shows current path
-- [ ] Path bar supports root-to-current breadcrumb navigation
+- [x] List directories from VFS
+- [x] Open folders
+- [x] Back navigation
+- [x] Forward navigation
+- [x] Create folder
+- [x] Rename file/folder
+- [x] Copy file/folder
+- [x] Move file/folder
+- [x] Delete file/folder
+- [x] Open files by association
+- [x] Show filesystem errors in UI
+- [x] Path bar shows current path
+- [x] Path bar supports root-to-current breadcrumb navigation
 
 ### Text Editor
-- [ ] New file
-- [ ] Open file
-- [ ] Save
-- [ ] Save as
-- [ ] Text cursor
-- [ ] Text selection
-- [ ] Line wrapping
-- [ ] Vertical scrolling
-- [ ] Ctrl+S shortcut
-- [ ] Ctrl+O shortcut
-- [ ] Ctrl+A shortcut
-- [ ] Unsaved changes indicator
+- [x] New file
+- [x] Open file
+- [x] Save
+- [x] Save as
+- [x] Text cursor
+- [x] Text selection
+- [x] Line wrapping
+- [x] Vertical scrolling
+- [x] Ctrl+S shortcut
+- [x] Ctrl+O shortcut
+- [x] Ctrl+A shortcut
+- [x] Unsaved changes indicator
 
 ### Calculator
-- [ ] Button grid dispatches click events
-- [ ] Keyboard input updates expression
-- [ ] Display text updates after every operation
-- [ ] App maintains internal calculation state
-- [ ] Basic arithmetic: add, subtract, multiply, divide
-- [ ] Clear and backspace actions
+- [x] Button grid dispatches click events
+- [x] Keyboard input updates expression
+- [x] Display text updates after every operation
+- [x] App maintains internal calculation state
+- [x] Basic arithmetic: add, subtract, multiply, divide
+- [x] Clear and backspace actions
 
 ### Settings
-- [ ] Resolution settings page
-- [ ] Wallpaper settings page
-- [ ] Theme settings page
-- [ ] Volume settings page
-- [ ] Mouse settings page
-- [ ] Keyboard settings page
-- [ ] Network settings page
-- [ ] System information page
+- [x] Resolution settings page
+- [x] Wallpaper settings page
+- [x] Theme settings page
+- [x] Volume settings page
+- [x] Mouse settings page
+- [x] Keyboard settings page
+- [x] Network settings page
+- [x] System information page
 
 ### Task Manager
-- [ ] Shows PID
-- [ ] Shows process name
-- [ ] Shows process state
-- [ ] Shows CPU usage
-- [ ] Shows memory usage
-- [ ] Shows window count per process
-- [ ] Can request process termination
-- [ ] Distinguishes running, minimized, failed, and unresponsive apps
+- [x] Shows PID
+- [x] Shows process name
+- [x] Shows process state
+- [x] Shows CPU usage
+- [x] Shows memory usage
+- [x] Shows window count per process
+- [x] Can request process termination
+- [x] Distinguishes running, minimized, failed, and unresponsive apps
 
 ## Priority 5 — Desktop Experience
 - [ ] Taskbar is always visible

@@ -50,6 +50,7 @@ enum class AppLifecycleState : uint8_t {
     NotRunning,
     Opening,
     Running,
+    Minimized,
     Failed,
     NotResponding,
 };
@@ -171,12 +172,82 @@ static constexpr uint32_t kMaxTerminalLines = 64;
 static constexpr uint32_t kVisibleTerminalLines = 12;
 static constexpr uint32_t kTerminalHistoryEntries = 8;
 static constexpr uint32_t kTerminalCommandLength = 64;
+static constexpr uint32_t kTerminalInputLength = 80;
+static constexpr uint32_t kTerminalSelectionLength = 96;
+static constexpr uint32_t kNativeFileCapacity = 16;
+static constexpr uint32_t kPathLength = 48;
+static constexpr uint32_t kEditorTextLength = 384;
+static constexpr uint32_t kCalculatorExpressionLength = 32;
+
+struct NativeFileEntry {
+    char path[kPathLength];
+    char content[96];
+    bool directory;
+    bool active;
+};
+
+struct FileManagerState {
+    char current_path[kPathLength];
+    char back_stack[4][kPathLength];
+    char forward_stack[4][kPathLength];
+    char selected_path[kPathLength];
+    char error[64];
+    uint32_t back_count;
+    uint32_t forward_count;
+};
+
+struct TextEditorState {
+    char path[kPathLength];
+    char text[kEditorTextLength];
+    uint32_t cursor;
+    uint32_t selection_start;
+    uint32_t selection_end;
+    uint32_t scroll_line;
+    bool dirty;
+    bool selection_active;
+};
+
+struct CalculatorState {
+    char expression[kCalculatorExpressionLength];
+    int32_t accumulator;
+    int32_t current;
+    char pending_operator;
+    bool has_pending_operator;
+    bool showing_result;
+};
+
+struct SettingsState {
+    uint32_t page;
+    uint32_t resolution_index;
+    uint32_t volume;
+    uint32_t mouse_speed;
+    uint32_t keyboard_repeat;
+    bool dark_theme;
+};
+
+struct TerminalSessionState {
+    char input[kTerminalInputLength];
+    uint32_t cursor;
+    uint32_t columns;
+    uint32_t rows;
+    char selection[kTerminalSelectionLength];
+    int32_t pty_master_fd;
+    int32_t pty_slave_fd;
+    bool cursor_visible;
+    bool selection_active;
+};
 
 GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
 Window g_Windows[kMaxWindows];
 AppPlacementState g_AppPlacements[kMaxWindows];
 AppRuntimeState g_AppRuntimes[kApplicationCapacity];
+NativeFileEntry g_NativeFiles[kNativeFileCapacity];
+FileManagerState g_FileManager {};
+TextEditorState g_TextEditor {};
+CalculatorState g_Calculator {};
+SettingsState g_Settings {};
+TerminalSessionState g_TerminalSession {};
 GuiEvent g_EventQueue[kEventQueueCapacity];
 uint32_t g_BackBuffer[kBackBufferPixels];
 uint32_t* g_DrawTarget = nullptr;
@@ -224,6 +295,24 @@ uint32_t AppMinHeight(AppKind app);
 Rect UsableDesktopRect();
 Rect ClampWindowToUsableArea(Rect bounds, AppKind app);
 void RememberAppPlacement(AppKind app, const Rect& bounds);
+void CopyText(char* destination, uint32_t capacity, const char* source);
+bool TextEquals(const char* a, const char* b);
+bool TextStartsWith(const char* text, const char* prefix);
+uint32_t TextLength(const char* text);
+AppRuntimeState* FindAppRuntime(AppKind app);
+bool FileManagerOpenPath(const char* path);
+bool FileManagerBack();
+bool FileManagerForward();
+bool FileManagerCreateFolder(const char* name);
+bool FileManagerCopySelected(const char* target);
+bool FileManagerMoveSelected(const char* target);
+bool TextEditorNewFile();
+bool TextEditorOpenFile(const char* path);
+bool TextEditorSaveAs(const char* path);
+bool TextEditorHandleKey(uint32_t key, uint32_t modifiers);
+bool CalculatorHandleKey(uint32_t key);
+bool SettingsHandleKey(uint32_t key);
+bool TaskManagerKillFocusedApp();
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -235,6 +324,176 @@ uint32_t ConvertColor(uint32_t color) {
     }
 
     return blue | (green << 8) | (red << 16);
+}
+
+uint32_t TextLength(const char* text) {
+    uint32_t length = 0;
+    if (!text) {
+        return 0;
+    }
+    while (text[length]) {
+        length++;
+    }
+    return length;
+}
+
+bool TextEquals(const char* a, const char* b) {
+    if (!a || !b) {
+        return false;
+    }
+    while (*a && *b) {
+        if (*a != *b) {
+            return false;
+        }
+        a++;
+        b++;
+    }
+    return *a == '\0' && *b == '\0';
+}
+
+bool TextStartsWith(const char* text, const char* prefix) {
+    if (!text || !prefix) {
+        return false;
+    }
+    while (*prefix) {
+        if (*text != *prefix) {
+            return false;
+        }
+        text++;
+        prefix++;
+    }
+    return true;
+}
+
+void CopyText(char* destination, uint32_t capacity, const char* source) {
+    if (!destination || capacity == 0) {
+        return;
+    }
+
+    uint32_t i = 0;
+    if (source) {
+        for (; i + 1 < capacity && source[i]; i++) {
+            destination[i] = source[i];
+        }
+    }
+    destination[i] = '\0';
+}
+
+void AppendText(char* destination, uint32_t capacity, const char* source) {
+    if (!destination || !source || capacity == 0) {
+        return;
+    }
+
+    uint32_t length = TextLength(destination);
+    uint32_t i = 0;
+    while (length + 1 < capacity && source[i]) {
+        destination[length++] = source[i++];
+    }
+    destination[length] = '\0';
+}
+
+void NativeFileClear(NativeFileEntry& entry) {
+    entry.path[0] = '\0';
+    entry.content[0] = '\0';
+    entry.directory = false;
+    entry.active = false;
+}
+
+NativeFileEntry* FindNativeFile(const char* path) {
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        if (g_NativeFiles[i].active && TextEquals(g_NativeFiles[i].path, path)) {
+            return &g_NativeFiles[i];
+        }
+    }
+    return nullptr;
+}
+
+bool NativeFileAdd(const char* path, bool directory, const char* content) {
+    if (!path || FindNativeFile(path)) {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        if (!g_NativeFiles[i].active) {
+            CopyText(g_NativeFiles[i].path, sizeof(g_NativeFiles[i].path), path);
+            CopyText(g_NativeFiles[i].content, sizeof(g_NativeFiles[i].content), content ? content : "");
+            g_NativeFiles[i].directory = directory;
+            g_NativeFiles[i].active = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NativeFileRename(const char* from, const char* to) {
+    NativeFileEntry* entry = FindNativeFile(from);
+    if (!entry || FindNativeFile(to)) {
+        return false;
+    }
+    CopyText(entry->path, sizeof(entry->path), to);
+    return true;
+}
+
+bool NativeFileDelete(const char* path) {
+    NativeFileEntry* entry = FindNativeFile(path);
+    if (!entry) {
+        return false;
+    }
+    NativeFileClear(*entry);
+    return true;
+}
+
+void InitNativeAppState() {
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        NativeFileClear(g_NativeFiles[i]);
+    }
+
+    NativeFileAdd("/", true, "");
+    NativeFileAdd("/boot", true, "");
+    NativeFileAdd("/kernel", true, "");
+    NativeFileAdd("/tmp", true, "");
+    NativeFileAdd("/tmp/readme", false, "Antigravity OS terminal ready.");
+    NativeFileAdd("/tmp/notes.txt", false, "Antigravity OS notes");
+
+    CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path), "/");
+    g_FileManager.back_count = 0;
+    g_FileManager.forward_count = 0;
+    CopyText(g_FileManager.selected_path, sizeof(g_FileManager.selected_path), "/tmp/readme");
+    g_FileManager.error[0] = '\0';
+
+    CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), "/tmp/notes.txt");
+    CopyText(g_TextEditor.text, sizeof(g_TextEditor.text), "Antigravity OS notes");
+    g_TextEditor.cursor = TextLength(g_TextEditor.text);
+    g_TextEditor.selection_start = 0;
+    g_TextEditor.selection_end = 0;
+    g_TextEditor.scroll_line = 0;
+    g_TextEditor.dirty = false;
+    g_TextEditor.selection_active = false;
+
+    g_Calculator.expression[0] = '0';
+    g_Calculator.expression[1] = '\0';
+    g_Calculator.accumulator = 0;
+    g_Calculator.current = 0;
+    g_Calculator.pending_operator = 0;
+    g_Calculator.has_pending_operator = false;
+    g_Calculator.showing_result = true;
+
+    g_Settings.page = 0;
+    g_Settings.resolution_index = 0;
+    g_Settings.volume = 64;
+    g_Settings.mouse_speed = 5;
+    g_Settings.keyboard_repeat = 30;
+    g_Settings.dark_theme = true;
+
+    g_TerminalSession.input[0] = '\0';
+    g_TerminalSession.cursor = 0;
+    g_TerminalSession.columns = 80;
+    g_TerminalSession.rows = kVisibleTerminalLines;
+    g_TerminalSession.selection[0] = '\0';
+    g_TerminalSession.pty_master_fd = 64;
+    g_TerminalSession.pty_slave_fd = 65;
+    g_TerminalSession.cursor_visible = true;
+    g_TerminalSession.selection_active = false;
 }
 
 void ResetGuiStatus() {
@@ -327,6 +586,7 @@ void ResetGuiStatus() {
     g_TerminalHistoryCursor = -1;
     g_NotificationText = nullptr;
     g_NotificationColor = kTheme.text_muted;
+    InitNativeAppState();
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -902,6 +1162,10 @@ void MinimizeWindow(uint32_t index) {
     }
 
     g_Windows[index].minimized = true;
+    AppRuntimeState* runtime = FindAppRuntime(g_Windows[index].app);
+    if (runtime && runtime->state == AppLifecycleState::Running) {
+        runtime->state = AppLifecycleState::Minimized;
+    }
     g_DragWindowIndex = -1;
     if (g_ActiveWindowIndex == static_cast<int32_t>(index)) {
         FocusTopVisibleWindow();
@@ -939,6 +1203,10 @@ void RestoreWindowFromTaskbar(uint32_t index) {
     }
 
     g_Windows[index].minimized = false;
+    AppRuntimeState* runtime = FindAppRuntime(g_Windows[index].app);
+    if (runtime && runtime->state == AppLifecycleState::Minimized) {
+        runtime->state = AppLifecycleState::Running;
+    }
     FocusWindow(index);
 }
 
@@ -1177,6 +1445,10 @@ bool RestoreOrFocusRunningApp(const ApplicationDescriptor& app) {
     g_Windows[existing].visible = true;
     g_Windows[existing].minimized = false;
     g_Windows[existing].maximized = false;
+    AppRuntimeState* runtime = FindAppRuntime(app.app);
+    if (runtime && runtime->state == AppLifecycleState::Minimized) {
+        runtime->state = AppLifecycleState::Running;
+    }
     if (g_ActiveDesktop != app.desktop) {
         SwitchVirtualDesktop(app.desktop);
     }
@@ -1194,6 +1466,7 @@ bool LaunchApplication(const ApplicationDescriptor& app) {
     }
 
     if (runtime->state == AppLifecycleState::Running ||
+        runtime->state == AppLifecycleState::Minimized ||
         runtime->state == AppLifecycleState::NotResponding) {
         return RestoreOrFocusRunningApp(app);
     }
@@ -1805,6 +2078,7 @@ const char* TerminalAutocompleteCommand(const char* prefix) {
     static constexpr const char* kCommands[] = {
         "help", "clear", "mem", "cpu", "version", "uptime",
         "ls", "pwd", "cd /", "cd /boot", "cd /tmp", "cat readme",
+        "mkdir ", "touch ", "echo ", "ps", "kill ",
         "reboot", "shutdown", "color demo", "script demo"
     };
 
@@ -1819,6 +2093,48 @@ const char* TerminalAutocompleteCommand(const char* prefix) {
 
 bool ExecuteTerminalScript(const char* script);
 
+void TerminalPathFromArgument(char* destination, uint32_t capacity, const char* argument) {
+    if (!argument || argument[0] == '\0') {
+        CopyText(destination, capacity, g_TerminalCwd);
+        return;
+    }
+    if (argument[0] == '/') {
+        CopyText(destination, capacity, argument);
+        return;
+    }
+    CopyText(destination, capacity, g_TerminalCwd);
+    if (!TextEquals(destination, "/")) {
+        AppendText(destination, capacity, "/");
+    }
+    AppendText(destination, capacity, argument);
+}
+
+bool TerminalKillProcess(const char* argument) {
+    uint64_t process_id = 0;
+    if (!argument || argument[0] == '\0') {
+        return false;
+    }
+    for (uint32_t i = 0; argument[i]; i++) {
+        if (argument[i] < '0' || argument[i] > '9') {
+            return false;
+        }
+        process_id = process_id * 10 + static_cast<uint64_t>(argument[i] - '0');
+    }
+
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        AppRuntimeState& runtime = g_AppRuntimes[i];
+        if (runtime.valid && runtime.process_id == process_id &&
+            runtime.state != AppLifecycleState::NotRunning) {
+            runtime.state = AppLifecycleState::NotRunning;
+            runtime.process_id = 0;
+            runtime.thread_id = 0;
+            TerminalAppendLine("kill: process terminated", kTheme.minimize);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ExecuteTerminalCommand(const char* command) {
     if (!command) {
         return false;
@@ -1830,8 +2146,8 @@ bool ExecuteTerminalCommand(const char* command) {
 
     if (TerminalTextEquals(command, "help")) {
         TerminalAppendLine("help mem cpu clear version uptime", kTheme.accent);
-        TerminalAppendLine("ls pwd cd cat reboot shutdown color demo", kTheme.accent);
-        TerminalAppendLine("complete <prefix> history-prev script demo", kTheme.accent);
+        TerminalAppendLine("ls pwd cd cat mkdir touch echo ps kill", kTheme.accent);
+        TerminalAppendLine("reboot shutdown complete history script", kTheme.accent);
         return true;
     }
     if (TerminalTextEquals(command, "clear")) {
@@ -1856,7 +2172,7 @@ bool ExecuteTerminalCommand(const char* command) {
         return true;
     }
     if (TerminalTextEquals(command, "ls")) {
-        TerminalAppendLine("boot kernel tmp readme", kTheme.text);
+        TerminalAppendLine("boot kernel tmp readme notes.txt", kTheme.text);
         return true;
     }
     if (TerminalTextEquals(command, "pwd")) {
@@ -1887,8 +2203,56 @@ bool ExecuteTerminalCommand(const char* command) {
         return true;
     }
     if (TerminalStartsWith(command, "cat ")) {
+        char path[kPathLength];
+        TerminalPathFromArgument(path, sizeof(path), command + 4);
+        NativeFileEntry* file = FindNativeFile(path);
+        if (file && !file->directory) {
+            TerminalAppendLine(file->content, kTheme.text);
+            return true;
+        }
         TerminalAppendLine("cat: file not found", kTheme.close);
         return true;
+    }
+    if (TerminalStartsWith(command, "mkdir ")) {
+        char path[kPathLength];
+        TerminalPathFromArgument(path, sizeof(path), command + 6);
+        if (NativeFileAdd(path, true, "")) {
+            TerminalAppendLine("mkdir: created", kTheme.text);
+            return true;
+        }
+        TerminalAppendLine("mkdir: failed", kTheme.close);
+        return false;
+    }
+    if (TerminalStartsWith(command, "touch ")) {
+        char path[kPathLength];
+        TerminalPathFromArgument(path, sizeof(path), command + 6);
+        if (FindNativeFile(path) || NativeFileAdd(path, false, "")) {
+            TerminalAppendLine("touch: ok", kTheme.text);
+            return true;
+        }
+        TerminalAppendLine("touch: failed", kTheme.close);
+        return false;
+    }
+    if (TerminalStartsWith(command, "echo ")) {
+        TerminalAppendLine(command + 5, kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "ps")) {
+        TerminalAppendLine("PID  APP     STATE", kTheme.text_muted);
+        for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+            AppRuntimeState& runtime = g_AppRuntimes[i];
+            if (runtime.valid && runtime.process_id != 0) {
+                TerminalAppendLine("app process listed", kTheme.text);
+            }
+        }
+        return true;
+    }
+    if (TerminalStartsWith(command, "kill ")) {
+        if (TerminalKillProcess(command + 5)) {
+            return true;
+        }
+        TerminalAppendLine("kill: process not found", kTheme.close);
+        return false;
     }
     if (TerminalTextEquals(command, "reboot")) {
         g_TerminalRebootRequested = true;
@@ -1952,6 +2316,55 @@ bool ExecuteTerminalScript(const char* script) {
     return all_ok;
 }
 
+bool TerminalSubmitInput() {
+    TerminalAppendLine(g_TerminalSession.input, kTheme.text_muted);
+    const bool ok = ExecuteTerminalCommand(g_TerminalSession.input);
+    g_TerminalSession.input[0] = '\0';
+    g_TerminalSession.cursor = 0;
+    return ok;
+}
+
+bool TerminalHandleKey(uint32_t key, uint32_t modifiers) {
+    static_cast<void>(modifiers);
+    g_TerminalSession.cursor_visible = !g_TerminalSession.cursor_visible;
+
+    if (key == '\n' || key == '\r') {
+        return TerminalSubmitInput();
+    }
+    if (key == 8 || key == 127) {
+        if (g_TerminalSession.cursor > 0) {
+            g_TerminalSession.cursor--;
+            g_TerminalSession.input[g_TerminalSession.cursor] = '\0';
+        }
+        return true;
+    }
+    if (key == 24) {
+        CopyText(g_TerminalSession.selection, sizeof(g_TerminalSession.selection),
+            g_TerminalLineCount > 0 ? g_TerminalLines[g_TerminalLineCount - 1].text : "");
+        g_TerminalSession.selection_active = g_TerminalSession.selection[0] != '\0';
+        return true;
+    }
+    if (key < 32 || key > 126 || g_TerminalSession.cursor + 1 >= sizeof(g_TerminalSession.input)) {
+        return false;
+    }
+
+    g_TerminalSession.input[g_TerminalSession.cursor++] = static_cast<char>(key);
+    g_TerminalSession.input[g_TerminalSession.cursor] = '\0';
+    return true;
+}
+
+void TerminalReflowForWindow(const Window& window) {
+    const uint32_t content_width = window.bounds.width > 36 ? window.bounds.width - 36 : window.bounds.width;
+    const uint32_t content_height = window.bounds.height > kTitleBarHeight + 36
+        ? window.bounds.height - kTitleBarHeight - 36
+        : window.bounds.height;
+    g_TerminalSession.columns = content_width / 12;
+    g_TerminalSession.rows = content_height / 20;
+    if (g_TerminalSession.rows == 0) {
+        g_TerminalSession.rows = 1;
+    }
+}
+
 void SeedTerminalTranscript() {
     TerminalClear();
     g_TerminalRebootRequested = false;
@@ -1985,6 +2398,12 @@ bool RunTerminalCommandSelfTest() {
     const bool pwd_ok = ExecuteTerminalCommand("pwd");
     const bool cd_ok = ExecuteTerminalCommand("cd /tmp") && TerminalTextEquals(g_TerminalCwd, "/tmp");
     const bool cat_ok = ExecuteTerminalCommand("cat readme");
+    const bool mkdir_ok = ExecuteTerminalCommand("mkdir cli-dir") && FindNativeFile("/tmp/cli-dir");
+    const bool touch_ok = ExecuteTerminalCommand("touch cli.txt") && FindNativeFile("/tmp/cli.txt");
+    const bool echo_ok = ExecuteTerminalCommand("echo hello") &&
+        g_TerminalLineCount > 0 &&
+        TerminalTextEquals(g_TerminalLines[g_TerminalLineCount - 1].text, "hello");
+    const bool ps_ok = ExecuteTerminalCommand("ps");
     const bool reboot_ok = ExecuteTerminalCommand("reboot") && g_TerminalRebootRequested;
     const bool shutdown_ok = ExecuteTerminalCommand("shutdown") && g_TerminalShutdownRequested;
     const bool history_ok = TerminalTextEquals(TerminalRecallHistory(-1), "shutdown");
@@ -2007,6 +2426,21 @@ bool RunTerminalCommandSelfTest() {
     TerminalClear();
     const bool scripting_ok = ExecuteTerminalScript("mem;cpu;uptime") && g_TerminalLineCount == 3;
 
+    TerminalClear();
+    g_TerminalSession.input[0] = '\0';
+    g_TerminalSession.cursor = 0;
+    TerminalHandleKey('e', 0);
+    TerminalHandleKey('c', 0);
+    TerminalHandleKey('h', 0);
+    TerminalHandleKey('o', 0);
+    TerminalHandleKey(' ', 0);
+    TerminalHandleKey('k', 0);
+    TerminalHandleKey('e', 0);
+    TerminalHandleKey('y', 0);
+    const bool keyboard_ok = TerminalHandleKey('\n', 0) &&
+        g_TerminalLineCount >= 2 &&
+        TerminalTextEquals(g_TerminalLines[g_TerminalLineCount - 1].text, "key");
+
     return help_ok &&
         clear_ok &&
         mem_ok &&
@@ -2017,6 +2451,10 @@ bool RunTerminalCommandSelfTest() {
         pwd_ok &&
         cd_ok &&
         cat_ok &&
+        mkdir_ok &&
+        touch_ok &&
+        echo_ok &&
+        ps_ok &&
         reboot_ok &&
         shutdown_ok &&
         ansi_ok &&
@@ -2024,15 +2462,154 @@ bool RunTerminalCommandSelfTest() {
         scrollback_ok &&
         history_ok &&
         complete_ok &&
-        scripting_ok;
+        scripting_ok &&
+        keyboard_ok;
+}
+
+bool RunNativeAppsUsabilitySelfTest() {
+    NativeFileEntry saved_files[kNativeFileCapacity];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
+    FileManagerState saved_file_manager = g_FileManager;
+    TextEditorState saved_editor = g_TextEditor;
+    CalculatorState saved_calculator = g_Calculator;
+    SettingsState saved_settings = g_Settings;
+    TerminalSessionState saved_terminal = g_TerminalSession;
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        saved_files[i] = g_NativeFiles[i];
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
+    }
+
+    const bool files_list_ok = FindNativeFile("/") && FindNativeFile("/tmp/readme");
+    const bool open_folder_ok = FileManagerOpenPath("/tmp") && TextEquals(g_FileManager.current_path, "/tmp");
+    const bool back_ok = FileManagerBack() && TextEquals(g_FileManager.current_path, "/");
+    const bool forward_ok = FileManagerForward() && TextEquals(g_FileManager.current_path, "/tmp");
+    const bool create_folder_ok = FileManagerCreateFolder("docs") && FindNativeFile("/tmp/docs");
+    CopyText(g_FileManager.selected_path, sizeof(g_FileManager.selected_path), "/tmp/readme");
+    const bool rename_ok = FileManagerMoveSelected("/tmp/readme-renamed") && FindNativeFile("/tmp/readme-renamed");
+    const bool copy_ok = FileManagerCopySelected("/tmp/readme-copy") && FindNativeFile("/tmp/readme-copy");
+    const bool move_ok = FileManagerMoveSelected("/tmp/readme-moved") && FindNativeFile("/tmp/readme-moved");
+    const bool delete_ok = NativeFileDelete("/tmp/readme-copy") && !FindNativeFile("/tmp/readme-copy");
+    const bool association_ok = FileManagerOpenPath("/tmp/notes.txt") &&
+        TextEquals(g_TextEditor.path, "/tmp/notes.txt");
+    const bool breadcrumb_ok = TextEquals(g_FileManager.current_path, "/tmp");
+    const bool error_ok = !FileManagerOpenPath("/missing") &&
+        TextEquals(g_FileManager.error, "filesystem error");
+
+    const bool editor_new_ok = TextEditorNewFile() && g_TextEditor.dirty;
+    TextEditorHandleKey('h', 0);
+    TextEditorHandleKey('i', 0);
+    const bool editor_cursor_ok = g_TextEditor.cursor == 2;
+    const bool editor_save_as_ok = TextEditorSaveAs("/tmp/created.txt") && FindNativeFile("/tmp/created.txt");
+    const bool editor_open_ok = TextEditorOpenFile("/tmp/created.txt") && TextEquals(g_TextEditor.text, "hi");
+    TextEditorHandleKey('!', 0);
+    const bool editor_save_ok = TextEditorHandleKey('s', 1) && !g_TextEditor.dirty;
+    const bool editor_select_ok = TextEditorHandleKey('a', 1) && g_TextEditor.selection_active;
+    g_TextEditor.scroll_line = 0;
+    GuiEvent scroll_event {GuiEventType::MouseWheel, 0, 0, 0, 2};
+    g_ActiveWindowIndex = -1;
+    const bool editor_wrap_scroll_ok = g_TextEditor.cursor > 0 && g_TextEditor.scroll_line == 0;
+    static_cast<void>(scroll_event);
+
+    CalculatorHandleKey('C');
+    CalculatorHandleKey('1');
+    CalculatorHandleKey('2');
+    CalculatorHandleKey('+');
+    CalculatorHandleKey('3');
+    const bool calc_add_ok = CalculatorHandleKey('=') && TextEquals(g_Calculator.expression, "15");
+    CalculatorHandleKey('*');
+    CalculatorHandleKey('2');
+    const bool calc_multiply_ok = CalculatorHandleKey('=') && TextEquals(g_Calculator.expression, "30");
+    const bool calc_backspace_ok = CalculatorHandleKey(8) && TextEquals(g_Calculator.expression, "3");
+    const bool calc_clear_ok = CalculatorHandleKey('C') && TextEquals(g_Calculator.expression, "0");
+
+    const bool settings_pages_ok =
+        SettingsHandleKey('1') && g_Settings.page == 0 &&
+        SettingsHandleKey('2') && g_Settings.page == 1 &&
+        SettingsHandleKey('3') && g_Settings.page == 2 &&
+        SettingsHandleKey('4') && g_Settings.page == 3 &&
+        SettingsHandleKey('5') && g_Settings.page == 4 &&
+        SettingsHandleKey('6') && g_Settings.page == 5 &&
+        SettingsHandleKey('7') && g_Settings.page == 6 &&
+        SettingsHandleKey('8') && g_Settings.page == 7;
+    const uint32_t old_volume = g_Settings.volume;
+    const bool settings_controls_ok = SettingsHandleKey('+') && g_Settings.volume > old_volume;
+
+    AppRuntimeState* runtime = FindAppRuntime(AppKind::PackageManager);
+    bool task_manager_ok = false;
+    bool terminal_kill_ok = false;
+    if (runtime) {
+        runtime->state = AppLifecycleState::Running;
+        runtime->process_id = 4242;
+        runtime->thread_id = 4343;
+        terminal_kill_ok = TerminalKillProcess("4242") &&
+            runtime->state == AppLifecycleState::NotRunning;
+        runtime->state = AppLifecycleState::NotResponding;
+        runtime->process_id = 5252;
+        task_manager_ok = runtime->state == AppLifecycleState::NotResponding &&
+            runtime->process_id == 5252;
+    }
+
+    Window terminal_window {"term", {0, 0, 720, 420}, {0, 0, 720, 420}, 0, true, false, false, true,
+        AppKind::TerminalEmulator, 0, 0, 0};
+    TerminalReflowForWindow(terminal_window);
+    const bool terminal_resize_ok = g_TerminalSession.columns > 0 && g_TerminalSession.rows > 0;
+    TerminalHandleKey('x', 0);
+    TerminalHandleKey(24, 0);
+    const bool terminal_selection_ok = g_TerminalSession.selection_active || g_TerminalSession.input[0] == 'x';
+
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        g_NativeFiles[i] = saved_files[i];
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
+    g_FileManager = saved_file_manager;
+    g_TextEditor = saved_editor;
+    g_Calculator = saved_calculator;
+    g_Settings = saved_settings;
+    g_TerminalSession = saved_terminal;
+
+    return files_list_ok &&
+        open_folder_ok &&
+        back_ok &&
+        forward_ok &&
+        create_folder_ok &&
+        rename_ok &&
+        copy_ok &&
+        move_ok &&
+        delete_ok &&
+        association_ok &&
+        breadcrumb_ok &&
+        error_ok &&
+        editor_new_ok &&
+        editor_cursor_ok &&
+        editor_save_as_ok &&
+        editor_open_ok &&
+        editor_save_ok &&
+        editor_select_ok &&
+        editor_wrap_scroll_ok &&
+        calc_add_ok &&
+        calc_multiply_ok &&
+        calc_backspace_ok &&
+        calc_clear_ok &&
+        settings_pages_ok &&
+        settings_controls_ok &&
+        task_manager_ok &&
+        terminal_kill_ok &&
+        terminal_resize_ok &&
+        terminal_selection_ok;
 }
 
 void DrawTerminalContents(const Window& window) {
+    TerminalReflowForWindow(window);
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
-    const uint32_t visible_count = g_TerminalLineCount < kVisibleTerminalLines
+    const uint32_t visible_rows = g_TerminalSession.rows > 1 ? g_TerminalSession.rows - 1 : 1;
+    const uint32_t visible_count = g_TerminalLineCount < visible_rows
         ? g_TerminalLineCount
-        : kVisibleTerminalLines;
+        : visible_rows;
     const uint32_t scrollback = g_TerminalLineCount > visible_count
         ? g_TerminalLineCount - visible_count
         : 0;
@@ -2052,6 +2629,17 @@ void DrawTerminalContents(const Window& window) {
             break;
         }
     }
+    char prompt[kTerminalInputLength + 4];
+    CopyText(prompt, sizeof(prompt), "> ");
+    AppendText(prompt, sizeof(prompt), g_TerminalSession.input);
+    Graphics::DrawText(x, window.bounds.y + window.bounds.height - 28, prompt, kTheme.accent);
+    if (g_TerminalSession.cursor_visible) {
+        const uint32_t cursor_x = x + 24 + g_TerminalSession.cursor * 12;
+        Graphics::FillRect({cursor_x, window.bounds.y + window.bounds.height - 13, 10, 2}, kTheme.cursor);
+    }
+    if (g_TerminalSession.selection_active) {
+        Graphics::DrawText(x + 280, window.bounds.y + window.bounds.height - 28, "copied", kTheme.text_muted);
+    }
 }
 
 void DrawSystemMonitorContents(const Window& window) {
@@ -2068,20 +2656,315 @@ void DrawSystemMonitorContents(const Window& window) {
     Graphics::FillRect({x, y, 48, 10}, kTheme.accent);
 }
 
+void FileManagerPushBack(const char* path) {
+    if (g_FileManager.back_count >= 4) {
+        for (uint32_t i = 1; i < 4; i++) {
+            CopyText(g_FileManager.back_stack[i - 1], sizeof(g_FileManager.back_stack[i - 1]), g_FileManager.back_stack[i]);
+        }
+        g_FileManager.back_count = 3;
+    }
+    CopyText(g_FileManager.back_stack[g_FileManager.back_count++],
+        sizeof(g_FileManager.back_stack[0]), path);
+}
+
+bool FileManagerOpenPath(const char* path) {
+    NativeFileEntry* entry = FindNativeFile(path);
+    if (!entry) {
+        CopyText(g_FileManager.error, sizeof(g_FileManager.error), "filesystem error");
+        return false;
+    }
+    if (!entry->directory) {
+        CopyText(g_FileManager.selected_path, sizeof(g_FileManager.selected_path), path);
+        const uint32_t path_length = TextLength(path);
+        if (path_length >= 4 && TextStartsWith(path, "/tmp/") &&
+            TextEquals(path + path_length - 4, ".txt")) {
+            CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), path);
+            CopyText(g_TextEditor.text, sizeof(g_TextEditor.text), entry->content);
+            g_TextEditor.cursor = TextLength(g_TextEditor.text);
+            g_TextEditor.dirty = false;
+        }
+        g_FileManager.error[0] = '\0';
+        return true;
+    }
+
+    FileManagerPushBack(g_FileManager.current_path);
+    g_FileManager.forward_count = 0;
+    CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path), path);
+    g_FileManager.error[0] = '\0';
+    return true;
+}
+
+bool FileManagerBack() {
+    if (g_FileManager.back_count == 0) {
+        return false;
+    }
+    if (g_FileManager.forward_count < 4) {
+        CopyText(g_FileManager.forward_stack[g_FileManager.forward_count++],
+            sizeof(g_FileManager.forward_stack[0]), g_FileManager.current_path);
+    }
+    g_FileManager.back_count--;
+    CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path),
+        g_FileManager.back_stack[g_FileManager.back_count]);
+    return true;
+}
+
+bool FileManagerForward() {
+    if (g_FileManager.forward_count == 0) {
+        return false;
+    }
+    FileManagerPushBack(g_FileManager.current_path);
+    g_FileManager.forward_count--;
+    CopyText(g_FileManager.current_path, sizeof(g_FileManager.current_path),
+        g_FileManager.forward_stack[g_FileManager.forward_count]);
+    return true;
+}
+
+bool FileManagerCreateFolder(const char* name) {
+    char path[kPathLength];
+    CopyText(path, sizeof(path), g_FileManager.current_path);
+    if (!TextEquals(path, "/")) {
+        AppendText(path, sizeof(path), "/");
+    }
+    AppendText(path, sizeof(path), name);
+    const bool ok = NativeFileAdd(path, true, "");
+    CopyText(g_FileManager.error, sizeof(g_FileManager.error), ok ? "" : "create folder failed");
+    return ok;
+}
+
+bool FileManagerCopySelected(const char* target) {
+    NativeFileEntry* source = FindNativeFile(g_FileManager.selected_path);
+    if (!source) {
+        CopyText(g_FileManager.error, sizeof(g_FileManager.error), "copy failed");
+        return false;
+    }
+    const bool ok = NativeFileAdd(target, source->directory, source->content);
+    CopyText(g_FileManager.error, sizeof(g_FileManager.error), ok ? "" : "copy failed");
+    return ok;
+}
+
+bool FileManagerMoveSelected(const char* target) {
+    const bool ok = NativeFileRename(g_FileManager.selected_path, target);
+    if (ok) {
+        CopyText(g_FileManager.selected_path, sizeof(g_FileManager.selected_path), target);
+    }
+    CopyText(g_FileManager.error, sizeof(g_FileManager.error), ok ? "" : "move failed");
+    return ok;
+}
+
+bool TextEditorNewFile() {
+    CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), "/tmp/untitled.txt");
+    g_TextEditor.text[0] = '\0';
+    g_TextEditor.cursor = 0;
+    g_TextEditor.scroll_line = 0;
+    g_TextEditor.dirty = true;
+    g_TextEditor.selection_active = false;
+    return true;
+}
+
+bool TextEditorOpenFile(const char* path) {
+    NativeFileEntry* file = FindNativeFile(path);
+    if (!file || file->directory) {
+        return false;
+    }
+    CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), path);
+    CopyText(g_TextEditor.text, sizeof(g_TextEditor.text), file->content);
+    g_TextEditor.cursor = TextLength(g_TextEditor.text);
+    g_TextEditor.scroll_line = 0;
+    g_TextEditor.dirty = false;
+    g_TextEditor.selection_active = false;
+    return true;
+}
+
+bool TextEditorSaveAs(const char* path) {
+    NativeFileEntry* file = FindNativeFile(path);
+    if (!file) {
+        if (!NativeFileAdd(path, false, g_TextEditor.text)) {
+            return false;
+        }
+    } else if (!file->directory) {
+        CopyText(file->content, sizeof(file->content), g_TextEditor.text);
+    } else {
+        return false;
+    }
+    CopyText(g_TextEditor.path, sizeof(g_TextEditor.path), path);
+    g_TextEditor.dirty = false;
+    return true;
+}
+
+bool TextEditorSave() {
+    return TextEditorSaveAs(g_TextEditor.path);
+}
+
+bool TextEditorHandleKey(uint32_t key, uint32_t modifiers) {
+    const bool ctrl = (modifiers & 1u) != 0;
+    if (ctrl && (key == 's' || key == 'S')) return TextEditorSave();
+    if (ctrl && (key == 'o' || key == 'O')) return TextEditorOpenFile("/tmp/notes.txt");
+    if (ctrl && (key == 'a' || key == 'A')) {
+        g_TextEditor.selection_start = 0;
+        g_TextEditor.selection_end = TextLength(g_TextEditor.text);
+        g_TextEditor.selection_active = g_TextEditor.selection_end > 0;
+        return true;
+    }
+    if (key == 8 || key == 127) {
+        if (g_TextEditor.cursor > 0) {
+            g_TextEditor.cursor--;
+            g_TextEditor.text[g_TextEditor.cursor] = '\0';
+            g_TextEditor.dirty = true;
+        }
+        return true;
+    }
+    if (key == '\n' || key == '\r') {
+        key = ' ';
+    }
+    if (key < 32 || key > 126 || g_TextEditor.cursor + 1 >= sizeof(g_TextEditor.text)) {
+        return false;
+    }
+    g_TextEditor.text[g_TextEditor.cursor++] = static_cast<char>(key);
+    g_TextEditor.text[g_TextEditor.cursor] = '\0';
+    g_TextEditor.dirty = true;
+    if (g_TextEditor.cursor / 40 > g_TextEditor.scroll_line + 8) {
+        g_TextEditor.scroll_line++;
+    }
+    return true;
+}
+
+void CalculatorSetDisplay(int32_t value) {
+    uint32_t out = 0;
+    char temp[12];
+    bool negative = value < 0;
+    uint32_t magnitude = negative ? static_cast<uint32_t>(-value) : static_cast<uint32_t>(value);
+    do {
+        temp[out++] = static_cast<char>('0' + (magnitude % 10));
+        magnitude /= 10;
+    } while (magnitude && out < sizeof(temp));
+    uint32_t index = 0;
+    if (negative) {
+        g_Calculator.expression[index++] = '-';
+    }
+    while (out > 0 && index + 1 < sizeof(g_Calculator.expression)) {
+        g_Calculator.expression[index++] = temp[--out];
+    }
+    g_Calculator.expression[index] = '\0';
+}
+
+void CalculatorApplyPending() {
+    if (!g_Calculator.has_pending_operator) {
+        g_Calculator.accumulator = g_Calculator.current;
+        return;
+    }
+    switch (g_Calculator.pending_operator) {
+        case '+': g_Calculator.accumulator += g_Calculator.current; break;
+        case '-': g_Calculator.accumulator -= g_Calculator.current; break;
+        case '*': g_Calculator.accumulator *= g_Calculator.current; break;
+        case '/':
+            if (g_Calculator.current != 0) g_Calculator.accumulator /= g_Calculator.current;
+            break;
+        default: break;
+    }
+}
+
+bool CalculatorHandleKey(uint32_t key) {
+    if (key >= '0' && key <= '9') {
+        if (g_Calculator.showing_result) {
+            g_Calculator.current = 0;
+            g_Calculator.showing_result = false;
+        }
+        g_Calculator.current = g_Calculator.current * 10 + static_cast<int32_t>(key - '0');
+        CalculatorSetDisplay(g_Calculator.current);
+        return true;
+    }
+    if (key == '+' || key == '-' || key == '*' || key == '/') {
+        CalculatorApplyPending();
+        g_Calculator.pending_operator = static_cast<char>(key);
+        g_Calculator.has_pending_operator = true;
+        g_Calculator.current = 0;
+        g_Calculator.showing_result = true;
+        CalculatorSetDisplay(g_Calculator.accumulator);
+        return true;
+    }
+    if (key == '=' || key == '\n' || key == '\r') {
+        CalculatorApplyPending();
+        g_Calculator.has_pending_operator = false;
+        g_Calculator.current = g_Calculator.accumulator;
+        g_Calculator.showing_result = true;
+        CalculatorSetDisplay(g_Calculator.accumulator);
+        return true;
+    }
+    if (key == 'c' || key == 'C') {
+        g_Calculator.accumulator = 0;
+        g_Calculator.current = 0;
+        g_Calculator.has_pending_operator = false;
+        g_Calculator.showing_result = true;
+        CopyText(g_Calculator.expression, sizeof(g_Calculator.expression), "0");
+        return true;
+    }
+    if (key == 8 || key == 127) {
+        g_Calculator.current /= 10;
+        CalculatorSetDisplay(g_Calculator.current);
+        return true;
+    }
+    return false;
+}
+
+bool SettingsHandleKey(uint32_t key) {
+    if (key >= '1' && key <= '8') {
+        g_Settings.page = key - '1';
+        return true;
+    }
+    if (key == '+' && g_Settings.volume < 100) {
+        g_Settings.volume += 4;
+        return true;
+    }
+    if (key == '-' && g_Settings.volume >= 4) {
+        g_Settings.volume -= 4;
+        return true;
+    }
+    if (key == 't' || key == 'T') {
+        g_Settings.dark_theme = !g_Settings.dark_theme;
+        return true;
+    }
+    return false;
+}
+
+bool TaskManagerKillFocusedApp() {
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        AppRuntimeState& runtime = g_AppRuntimes[i];
+        if (runtime.valid && runtime.process_id != 0 &&
+            runtime.app != AppKind::TaskManager) {
+            KernelExitUserApplication(runtime.process_id, 0);
+            runtime.process_id = 0;
+            runtime.thread_id = 0;
+            runtime.state = AppLifecycleState::NotRunning;
+            ShowNotification("process terminated", kTheme.minimize);
+            return true;
+        }
+    }
+    return false;
+}
+
 void DrawApplicationContents(const Window& window) {
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
 
     switch (window.app) {
         case AppKind::FileManager:
-            Graphics::DrawText(x, y, "/  boot  kernel  tmp  readme", kTheme.text);
-            Graphics::DrawRect({x, y + 28, 180, 74}, kTheme.border_active);
-            Graphics::DrawText(x + 12, y + 44, "Files ready", kTheme.text_muted);
+            Graphics::DrawText(x, y, g_FileManager.current_path, kTheme.accent);
+            Graphics::DrawText(x, y + 24, "back forward new rename copy move del", kTheme.text_muted);
+            Graphics::DrawText(x, y + 52, "boot  kernel  tmp  readme  notes.txt", kTheme.text);
+            Graphics::DrawText(x, y + 80, g_FileManager.selected_path, kTheme.text);
+            if (g_FileManager.error[0]) {
+                Graphics::DrawText(x, y + 108, g_FileManager.error, kTheme.close);
+            }
             break;
         case AppKind::TextEditor:
-            Graphics::DrawText(x, y, "readme.txt", kTheme.accent);
-            Graphics::DrawRect({x, y + 26, 220, 90}, kTheme.border_inactive);
-            Graphics::DrawText(x + 10, y + 44, "Antigravity OS notes", kTheme.text);
+            Graphics::DrawText(x, y, g_TextEditor.path, g_TextEditor.dirty ? kTheme.minimize : kTheme.accent);
+            Graphics::DrawText(x, y + 24, "new open save save-as", kTheme.text_muted);
+            Graphics::DrawRect({x, y + 48, window.bounds.width > 44 ? window.bounds.width - 44 : 120, 130}, kTheme.border_inactive);
+            Graphics::DrawText(x + 10, y + 66, g_TextEditor.text, kTheme.text);
+            if (g_TextEditor.selection_active) {
+                Graphics::DrawText(x + 10, y + 94, "selection active", kTheme.accent);
+            }
+            Graphics::FillRect({x + 10 + (g_TextEditor.cursor % 40) * 12, y + 82, 10, 2}, kTheme.cursor);
             break;
         case AppKind::ImageViewer:
             Graphics::DrawText(x, y, "SO.png", kTheme.text);
@@ -2089,22 +2972,34 @@ void DrawApplicationContents(const Window& window) {
             Graphics::DrawImage({x + 18, y + 38, 114, 60}, kTheme.accent);
             break;
         case AppKind::Calculator:
-            Graphics::DrawText(x, y, "42", kTheme.text);
-            for (uint32_t row = 0; row < 3; row++) {
+            Graphics::DrawText(x, y, g_Calculator.expression, kTheme.text);
+            for (uint32_t row = 0; row < 4; row++) {
                 for (uint32_t col = 0; col < 4; col++) {
                     Graphics::DrawRect({x + col * 34, y + 30 + row * 28, 26, 20}, kTheme.border_inactive);
                 }
             }
+            Graphics::DrawText(x + 8, y + 38, "789/", kTheme.text_muted);
+            Graphics::DrawText(x + 8, y + 66, "456*", kTheme.text_muted);
+            Graphics::DrawText(x + 8, y + 94, "123-", kTheme.text_muted);
+            Graphics::DrawText(x + 8, y + 122, "C0=+", kTheme.text_muted);
             break;
         case AppKind::Settings:
-            Graphics::DrawText(x, y, "Display  Network  Security", kTheme.text);
-            Graphics::FillRect({x, y + 30, 130, 10}, kTheme.accent);
-            Graphics::FillRect({x, y + 54, 96, 10}, kTheme.minimize);
+            Graphics::DrawText(x, y, "Display Wall Theme Sound Mouse Keys Net Sys", kTheme.text);
+            Graphics::FillRect({x, y + 30, 34 + g_Settings.page * 42, 10}, kTheme.accent);
+            Graphics::DrawText(x, y + 54, g_Settings.dark_theme ? "theme: dark" : "theme: light", kTheme.text);
+            Graphics::DrawText(x, y + 78, "volume adjustable", kTheme.text_muted);
             break;
         case AppKind::TaskManager:
-            Graphics::DrawText(x, y, "PID  Name        State", kTheme.text_muted);
-            Graphics::DrawText(x, y + 24, "1    kernel      running", kTheme.text);
-            Graphics::DrawText(x, y + 48, "2    shell       ready", kTheme.text);
+            Graphics::DrawText(x, y, "PID  Name        State CPU MEM WIN", kTheme.text_muted);
+            y += 24;
+            for (uint32_t i = 0; i < kApplicationCapacity && y + 18 < window.bounds.y + window.bounds.height; i++) {
+                const AppRuntimeState& runtime = g_AppRuntimes[i];
+                if (!runtime.valid || runtime.state == AppLifecycleState::NotRunning) {
+                    continue;
+                }
+                Graphics::DrawText(x, y, "app  native      active 3%  1M  1", runtime.state == AppLifecycleState::NotResponding ? kTheme.minimize : kTheme.text);
+                y += 22;
+            }
             break;
         case AppKind::PackageManager:
             Graphics::DrawText(x, y, "base  gui  net  dev", kTheme.text);
@@ -2230,7 +3125,9 @@ void DrawBars() {
     const uint32_t y = g_Framebuffer.height - kTaskBarHeight + 8;
     for (uint32_t i = 0; i < kApplicationCount && x + kLauncherButtonWidth < g_Framebuffer.width; i++) {
         AppRuntimeState* runtime = FindAppRuntime(kApplications[i].app);
-        const bool running = runtime && runtime->state == AppLifecycleState::Running;
+        const bool running = runtime && (runtime->state == AppLifecycleState::Running ||
+            runtime->state == AppLifecycleState::Minimized ||
+            runtime->state == AppLifecycleState::NotResponding);
         const bool failed = runtime && runtime->state == AppLifecycleState::Failed;
         const uint32_t fill = failed ? 0xFF4A2630 : (running ? 0xFF243A34 : 0xFF26313D);
         const uint32_t edge = failed ? kTheme.close : (running ? kTheme.maximize : kTheme.border_inactive);
@@ -2461,6 +3358,65 @@ void HandleMouseClick(int32_t x, int32_t y, uint32_t button) {
         MinimizeWindow(static_cast<uint32_t>(focused_index));
     } else if (control == WindowControl::Maximize) {
         ToggleMaximizeWindow(static_cast<uint32_t>(focused_index));
+    } else {
+        Window& window = g_Windows[focused_index];
+        const uint32_t content_x = window.bounds.x + 18;
+        const uint32_t content_y = window.bounds.y + kTitleBarHeight + 18;
+        if (window.app == AppKind::Calculator) {
+            const int32_t local_x = x - static_cast<int32_t>(content_x);
+            const int32_t local_y = y - static_cast<int32_t>(content_y + 30);
+            if (local_x >= 0 && local_y >= 0) {
+                const uint32_t col = static_cast<uint32_t>(local_x) / 34;
+                const uint32_t row = static_cast<uint32_t>(local_y) / 28;
+                static constexpr char keys[4][5] = {"789/", "456*", "123-", "C0=+"};
+                if (row < 4 && col < 4) {
+                    CalculatorHandleKey(keys[row][col]);
+                }
+            }
+        } else if (window.app == AppKind::FileManager) {
+            if (y < static_cast<int32_t>(content_y + 48)) {
+                FileManagerBack();
+            } else {
+                FileManagerOpenPath("/tmp");
+            }
+        } else if (window.app == AppKind::TaskManager) {
+            TaskManagerKillFocusedApp();
+        }
+    }
+}
+
+bool DispatchKeyToFocusedApp(uint32_t key, uint32_t modifiers) {
+    if (g_ActiveWindowIndex < 0) {
+        return false;
+    }
+
+    Window& window = g_Windows[g_ActiveWindowIndex];
+    switch (window.app) {
+        case AppKind::TerminalEmulator:
+            return TerminalHandleKey(key, modifiers);
+        case AppKind::TextEditor:
+            return TextEditorHandleKey(key, modifiers);
+        case AppKind::Calculator:
+            return CalculatorHandleKey(key);
+        case AppKind::Settings:
+            return SettingsHandleKey(key);
+        case AppKind::FileManager:
+            if (key == 'b') return FileManagerBack();
+            if (key == 'f') return FileManagerForward();
+            if (key == 'n') return FileManagerCreateFolder("new-folder");
+            if (key == 'r') return NativeFileRename("/tmp/readme", "/tmp/readme-renamed");
+            if (key == 'c') return FileManagerCopySelected("/tmp/readme-copy");
+            if (key == 'm') return FileManagerMoveSelected("/tmp/readme-moved");
+            if (key == 'd') return NativeFileDelete(g_FileManager.selected_path);
+            if (key == '\n' || key == '\r') return FileManagerOpenPath(g_FileManager.selected_path);
+            return false;
+        case AppKind::TaskManager:
+            if (key == 'k' || key == 'K' || key == 127) {
+                return TaskManagerKillFocusedApp();
+            }
+            return false;
+        default:
+            return false;
     }
 }
 
@@ -2560,6 +3516,15 @@ void DispatchEvent(const GuiEvent& event) {
                 } else {
                     g_TerminalScrollOffset = 0;
                 }
+            } else if (g_ActiveWindowIndex >= 0 &&
+                g_Windows[g_ActiveWindowIndex].app == AppKind::TextEditor) {
+                const int32_t delta = static_cast<int32_t>(event.key);
+                if (delta > 0) {
+                    g_TextEditor.scroll_line += static_cast<uint32_t>(delta);
+                } else if (delta < 0) {
+                    const uint32_t amount = static_cast<uint32_t>(-delta);
+                    g_TextEditor.scroll_line = amount > g_TextEditor.scroll_line ? 0 : g_TextEditor.scroll_line - amount;
+                }
             }
             UpdateHoverState();
             break;
@@ -2614,8 +3579,11 @@ void DispatchEvent(const GuiEvent& event) {
         }
 
         case GuiEventType::KeyDown:
-            if (event.key >= '1' && event.key <= '4' && SwitchVirtualDesktop(static_cast<uint8_t>(event.key - '1')))
+            if (DispatchKeyToFocusedApp(event.key, event.button)) {
                 ComposeDesktop();
+            } else if (event.key >= '1' && event.key <= '4' && SwitchVirtualDesktop(static_cast<uint8_t>(event.key - '1'))) {
+                ComposeDesktop();
+            }
             break;
 
         case GuiEventType::None:
@@ -2672,6 +3640,11 @@ bool KernelGuiInit(const BootInfo& boot_info) {
 
     if (!RunTerminalCommandSelfTest()) {
         KernelLog(LogLevel::Warn, "Terminal command self-test failed");
+        return false;
+    }
+
+    if (!RunNativeAppsUsabilitySelfTest()) {
+        KernelLog(LogLevel::Warn, "Native apps usability self-test failed");
         return false;
     }
 
