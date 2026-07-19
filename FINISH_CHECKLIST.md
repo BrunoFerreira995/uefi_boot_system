@@ -370,12 +370,12 @@
 - [x] cat
 - [x] reboot
 - [x] shutdown
-- [ ] ANSI escape sequences
-- [ ] Colors
-- [ ] Scrollback buffer
-- [ ] Command history
-- [ ] Auto-complete
-- [ ] Shell scripting
+- [x] ANSI escape sequences
+- [x] Colors
+- [x] Scrollback buffer
+- [x] Command history
+- [x] Auto-complete
+- [x] Shell scripting
 
 ---
 

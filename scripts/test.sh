@@ -151,6 +151,12 @@ require_text "$ROOT_DIR/kernel/src/gui.cpp" "CacheFontGlyph" "font glyph cache p
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "ExecuteTerminalCommand" "terminal command dispatcher present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "cat readme" "terminal cat command present"
 require_text "$ROOT_DIR/kernel/src/gui.cpp" "shutdown: request queued" "terminal shutdown command present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalParseAnsiLine" "terminal ANSI escape parser present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalColorFromAnsiCode" "terminal color mapping present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "kVisibleTerminalLines" "terminal scrollback buffer present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalRecallHistory" "terminal command history present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "TerminalAutocompleteCommand" "terminal autocomplete present"
+require_text "$ROOT_DIR/kernel/src/gui.cpp" "ExecuteTerminalScript" "terminal shell scripting present"
 
 echo
 echo "== Regression tests =="

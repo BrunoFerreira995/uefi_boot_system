@@ -115,11 +115,14 @@ enum class CursorKind : uint8_t {
 };
 
 struct TerminalLine {
-    const char* text;
+    char text[96];
     uint32_t color;
 };
 
-static constexpr uint32_t kMaxTerminalLines = 12;
+static constexpr uint32_t kMaxTerminalLines = 64;
+static constexpr uint32_t kVisibleTerminalLines = 12;
+static constexpr uint32_t kTerminalHistoryEntries = 8;
+static constexpr uint32_t kTerminalCommandLength = 64;
 
 GuiStatus g_Status {};
 FramebufferInfo g_Framebuffer {};
@@ -155,6 +158,9 @@ uint32_t g_TerminalLineCount = 0;
 const char* g_TerminalCwd = "/";
 bool g_TerminalRebootRequested = false;
 bool g_TerminalShutdownRequested = false;
+char g_TerminalHistory[kTerminalHistoryEntries][kTerminalCommandLength];
+uint32_t g_TerminalHistoryCount = 0;
+int32_t g_TerminalHistoryCursor = -1;
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect);
 
@@ -229,9 +235,14 @@ void ResetGuiStatus() {
     g_TerminalRebootRequested = false;
     g_TerminalShutdownRequested = false;
     for (uint32_t i = 0; i < kMaxTerminalLines; i++) {
-        g_TerminalLines[i].text = nullptr;
+        g_TerminalLines[i].text[0] = '\0';
         g_TerminalLines[i].color = 0;
     }
+    for (uint32_t i = 0; i < kTerminalHistoryEntries; i++) {
+        g_TerminalHistory[i][0] = '\0';
+    }
+    g_TerminalHistoryCount = 0;
+    g_TerminalHistoryCursor = -1;
 }
 
 bool FramebufferValid(const FramebufferInfo& framebuffer) {
@@ -931,6 +942,72 @@ bool TerminalStartsWith(const char* text, const char* prefix) {
     return true;
 }
 
+void TerminalCopyText(char* destination, uint32_t capacity, const char* source) {
+    if (!destination || capacity == 0) {
+        return;
+    }
+
+    uint32_t i = 0;
+    if (source) {
+        for (; i + 1 < capacity && source[i]; i++) {
+            destination[i] = source[i];
+        }
+    }
+    destination[i] = '\0';
+}
+
+bool TerminalTextEmpty(const char* text) {
+    return !text || text[0] == '\0';
+}
+
+uint32_t TerminalColorFromAnsiCode(uint32_t code, uint32_t fallback) {
+    switch (code) {
+        case 0: return kTheme.text;
+        case 30: return 0xFF1E252E;
+        case 31: return kTheme.close;
+        case 32: return kTheme.maximize;
+        case 33: return kTheme.minimize;
+        case 34: return kTheme.border_active;
+        case 35: return 0xFFC678DD;
+        case 36: return kTheme.accent;
+        case 37: return kTheme.text;
+        default: return fallback;
+    }
+}
+
+bool TerminalParseAnsiLine(const char* text, char* stripped, uint32_t capacity, uint32_t& color) {
+    if (!text || !stripped || capacity == 0) {
+        return false;
+    }
+
+    bool parsed_escape = false;
+    uint32_t out = 0;
+    for (uint32_t i = 0; text[i] && out + 1 < capacity; i++) {
+        if (text[i] == 0x1B && text[i + 1] == '[') {
+            i += 2;
+            uint32_t code = 0;
+            bool has_digit = false;
+            while (text[i] >= '0' && text[i] <= '9') {
+                has_digit = true;
+                code = code * 10 + static_cast<uint32_t>(text[i] - '0');
+                i++;
+            }
+            if (text[i] == 'm') {
+                color = TerminalColorFromAnsiCode(has_digit ? code : 0, color);
+                parsed_escape = true;
+                continue;
+            }
+            if (!text[i]) {
+                break;
+            }
+        }
+
+        stripped[out++] = text[i];
+    }
+    stripped[out] = '\0';
+    return parsed_escape;
+}
+
 void TerminalAppendLine(const char* text, uint32_t color = kTheme.text) {
     if (!text) {
         return;
@@ -943,27 +1020,101 @@ void TerminalAppendLine(const char* text, uint32_t color = kTheme.text) {
         g_TerminalLineCount = kMaxTerminalLines - 1;
     }
 
-    g_TerminalLines[g_TerminalLineCount].text = text;
-    g_TerminalLines[g_TerminalLineCount].color = color;
+    uint32_t line_color = color;
+    if (!TerminalParseAnsiLine(text, g_TerminalLines[g_TerminalLineCount].text,
+            sizeof(g_TerminalLines[g_TerminalLineCount].text), line_color)) {
+        TerminalCopyText(g_TerminalLines[g_TerminalLineCount].text,
+            sizeof(g_TerminalLines[g_TerminalLineCount].text), text);
+    }
+    g_TerminalLines[g_TerminalLineCount].color = line_color;
     g_TerminalLineCount++;
+
+    const int32_t max_scroll = g_TerminalLineCount > kVisibleTerminalLines
+        ? static_cast<int32_t>(g_TerminalLineCount - kVisibleTerminalLines)
+        : 0;
+    if (g_TerminalScrollOffset > max_scroll) {
+        g_TerminalScrollOffset = max_scroll;
+    }
 }
 
 void TerminalClear() {
     g_TerminalLineCount = 0;
+    g_TerminalScrollOffset = 0;
     for (uint32_t i = 0; i < kMaxTerminalLines; i++) {
-        g_TerminalLines[i].text = nullptr;
+        g_TerminalLines[i].text[0] = '\0';
         g_TerminalLines[i].color = 0;
     }
 }
+
+void TerminalRecordHistory(const char* command) {
+    if (TerminalTextEmpty(command)) {
+        return;
+    }
+
+    if (g_TerminalHistoryCount >= kTerminalHistoryEntries) {
+        for (uint32_t i = 1; i < kTerminalHistoryEntries; i++) {
+            TerminalCopyText(g_TerminalHistory[i - 1], sizeof(g_TerminalHistory[i - 1]), g_TerminalHistory[i]);
+        }
+        g_TerminalHistoryCount = kTerminalHistoryEntries - 1;
+    }
+
+    TerminalCopyText(g_TerminalHistory[g_TerminalHistoryCount],
+        sizeof(g_TerminalHistory[g_TerminalHistoryCount]), command);
+    g_TerminalHistoryCount++;
+    g_TerminalHistoryCursor = static_cast<int32_t>(g_TerminalHistoryCount);
+}
+
+const char* TerminalRecallHistory(int32_t delta) {
+    if (g_TerminalHistoryCount == 0) {
+        return "";
+    }
+
+    if (g_TerminalHistoryCursor < 0) {
+        g_TerminalHistoryCursor = static_cast<int32_t>(g_TerminalHistoryCount);
+    }
+
+    g_TerminalHistoryCursor += delta;
+    if (g_TerminalHistoryCursor < 0) {
+        g_TerminalHistoryCursor = 0;
+    }
+    if (g_TerminalHistoryCursor >= static_cast<int32_t>(g_TerminalHistoryCount)) {
+        g_TerminalHistoryCursor = static_cast<int32_t>(g_TerminalHistoryCount - 1);
+    }
+
+    return g_TerminalHistory[g_TerminalHistoryCursor];
+}
+
+const char* TerminalAutocompleteCommand(const char* prefix) {
+    static constexpr const char* kCommands[] = {
+        "help", "clear", "mem", "cpu", "version", "uptime",
+        "ls", "pwd", "cd /", "cd /boot", "cd /tmp", "cat readme",
+        "reboot", "shutdown", "color demo", "script demo"
+    };
+
+    for (uint32_t i = 0; i < sizeof(kCommands) / sizeof(kCommands[0]); i++) {
+        if (TerminalStartsWith(kCommands[i], prefix)) {
+            return kCommands[i];
+        }
+    }
+
+    return prefix;
+}
+
+bool ExecuteTerminalScript(const char* script);
 
 bool ExecuteTerminalCommand(const char* command) {
     if (!command) {
         return false;
     }
 
+    if (!TerminalTextEquals(command, "history-prev") && !TerminalStartsWith(command, "complete ")) {
+        TerminalRecordHistory(command);
+    }
+
     if (TerminalTextEquals(command, "help")) {
         TerminalAppendLine("help mem cpu clear version uptime", kTheme.accent);
-        TerminalAppendLine("ls pwd cd cat reboot shutdown", kTheme.accent);
+        TerminalAppendLine("ls pwd cd cat reboot shutdown color demo", kTheme.accent);
+        TerminalAppendLine("complete <prefix> history-prev script demo", kTheme.accent);
         return true;
     }
     if (TerminalTextEquals(command, "clear")) {
@@ -1032,9 +1183,56 @@ bool ExecuteTerminalCommand(const char* command) {
         TerminalAppendLine("shutdown: request queued", kTheme.minimize);
         return true;
     }
+    if (TerminalTextEquals(command, "color demo")) {
+        TerminalAppendLine("\x1B[31mred \x1B[32mgreen \x1B[36mcyan", kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "history-prev")) {
+        TerminalAppendLine(TerminalRecallHistory(-1), kTheme.text_muted);
+        return true;
+    }
+    if (TerminalStartsWith(command, "complete ")) {
+        TerminalAppendLine(TerminalAutocompleteCommand(command + 9), kTheme.text);
+        return true;
+    }
+    if (TerminalTextEquals(command, "script demo")) {
+        TerminalAppendLine("script: mem;cpu;uptime", kTheme.text_muted);
+        return ExecuteTerminalScript("mem;cpu;uptime");
+    }
 
     TerminalAppendLine("shell: unknown command", kTheme.close);
     return false;
+}
+
+bool ExecuteTerminalScript(const char* script) {
+    if (!script) {
+        return false;
+    }
+
+    bool all_ok = true;
+    char command[kTerminalCommandLength];
+    uint32_t command_length = 0;
+
+    for (uint32_t i = 0;; i++) {
+        const char c = script[i];
+        if (c == ';' || c == '\0') {
+            command[command_length] = '\0';
+            if (command_length > 0 && !ExecuteTerminalCommand(command)) {
+                all_ok = false;
+            }
+            command_length = 0;
+            if (c == '\0') {
+                break;
+            }
+            continue;
+        }
+
+        if (command_length + 1 < sizeof(command)) {
+            command[command_length++] = c;
+        }
+    }
+
+    return all_ok;
 }
 
 void SeedTerminalTranscript() {
@@ -1058,6 +1256,8 @@ void SeedTerminalTranscript() {
 
 bool RunTerminalCommandSelfTest() {
     TerminalClear();
+    g_TerminalHistoryCount = 0;
+    g_TerminalHistoryCursor = -1;
     const bool help_ok = ExecuteTerminalCommand("help");
     const bool clear_ok = ExecuteTerminalCommand("clear") && g_TerminalLineCount == 1;
     const bool mem_ok = ExecuteTerminalCommand("mem");
@@ -1070,6 +1270,25 @@ bool RunTerminalCommandSelfTest() {
     const bool cat_ok = ExecuteTerminalCommand("cat readme");
     const bool reboot_ok = ExecuteTerminalCommand("reboot") && g_TerminalRebootRequested;
     const bool shutdown_ok = ExecuteTerminalCommand("shutdown") && g_TerminalShutdownRequested;
+    const bool history_ok = TerminalTextEquals(TerminalRecallHistory(-1), "shutdown");
+    const bool complete_ok = TerminalTextEquals(TerminalAutocompleteCommand("ver"), "version");
+
+    TerminalAppendLine("\x1B[31mansi color");
+    const bool ansi_ok = g_TerminalLineCount > 0 &&
+        TerminalTextEquals(g_TerminalLines[g_TerminalLineCount - 1].text, "ansi color");
+    const bool colors_ok = g_TerminalLineCount > 0 &&
+        g_TerminalLines[g_TerminalLineCount - 1].color == kTheme.close;
+
+    TerminalClear();
+    for (uint32_t i = 0; i < kVisibleTerminalLines + 3; i++) {
+        TerminalAppendLine("scrollback entry", kTheme.text);
+    }
+    g_TerminalScrollOffset = 2;
+    const bool scrollback_ok = g_TerminalLineCount == kVisibleTerminalLines + 3 &&
+        g_TerminalScrollOffset == 2;
+
+    TerminalClear();
+    const bool scripting_ok = ExecuteTerminalScript("mem;cpu;uptime") && g_TerminalLineCount == 3;
 
     return help_ok &&
         clear_ok &&
@@ -1082,15 +1301,33 @@ bool RunTerminalCommandSelfTest() {
         cd_ok &&
         cat_ok &&
         reboot_ok &&
-        shutdown_ok;
+        shutdown_ok &&
+        ansi_ok &&
+        colors_ok &&
+        scrollback_ok &&
+        history_ok &&
+        complete_ok &&
+        scripting_ok;
 }
 
 void DrawTerminalContents(const Window& window) {
     const uint32_t x = window.bounds.x + 18;
     uint32_t y = window.bounds.y + kTitleBarHeight + 18;
+    const uint32_t visible_count = g_TerminalLineCount < kVisibleTerminalLines
+        ? g_TerminalLineCount
+        : kVisibleTerminalLines;
+    const uint32_t scrollback = g_TerminalLineCount > visible_count
+        ? g_TerminalLineCount - visible_count
+        : 0;
+    uint32_t start = scrollback;
 
-    for (uint32_t i = 0; i < g_TerminalLineCount; i++) {
-        if (g_TerminalLines[i].text) {
+    if (g_TerminalScrollOffset > 0) {
+        const uint32_t offset = static_cast<uint32_t>(g_TerminalScrollOffset);
+        start = offset > scrollback ? 0 : scrollback - offset;
+    }
+
+    for (uint32_t i = start; i < g_TerminalLineCount; i++) {
+        if (g_TerminalLines[i].text[0]) {
             Graphics::DrawText(x, y, g_TerminalLines[i].text, g_TerminalLines[i].color);
         }
         y += 20;
@@ -1499,6 +1736,12 @@ void DispatchEvent(const GuiEvent& event) {
             // Wheel delta is carried as a signed value in key for scrollable clients.
             g_TerminalScrollOffset += static_cast<int32_t>(event.key);
             if (g_TerminalScrollOffset < 0) g_TerminalScrollOffset = 0;
+            if (g_TerminalLineCount > kVisibleTerminalLines) {
+                const int32_t max_scroll = static_cast<int32_t>(g_TerminalLineCount - kVisibleTerminalLines);
+                if (g_TerminalScrollOffset > max_scroll) g_TerminalScrollOffset = max_scroll;
+            } else {
+                g_TerminalScrollOffset = 0;
+            }
             UpdateHoverState();
             break;
 
