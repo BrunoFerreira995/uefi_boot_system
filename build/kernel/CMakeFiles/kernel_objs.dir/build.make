@@ -181,10 +181,24 @@ CMakeFiles/kernel_objs.dir/src/network.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kernel_objs.dir/src/network.cpp.s"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/kernel/src/network.cpp -o CMakeFiles/kernel_objs.dir/src/network.cpp.s
 
+CMakeFiles/kernel_objs.dir/src/performance.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
+CMakeFiles/kernel_objs.dir/src/performance.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/performance.cpp
+CMakeFiles/kernel_objs.dir/src/performance.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/kernel_objs.dir/src/performance.cpp.obj"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/performance.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/performance.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/performance.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/performance.cpp
+
+CMakeFiles/kernel_objs.dir/src/performance.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/kernel_objs.dir/src/performance.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/bucha/dev/uefi_boot_system/kernel/src/performance.cpp > CMakeFiles/kernel_objs.dir/src/performance.cpp.i
+
+CMakeFiles/kernel_objs.dir/src/performance.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/kernel_objs.dir/src/performance.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/bucha/dev/uefi_boot_system/kernel/src/performance.cpp -o CMakeFiles/kernel_objs.dir/src/performance.cpp.s
+
 CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
 CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/scheduler.cpp
 CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/scheduler.cpp
 
 CMakeFiles/kernel_objs.dir/src/scheduler.cpp.i: cmake_force
@@ -198,7 +212,7 @@ CMakeFiles/kernel_objs.dir/src/scheduler.cpp.s: cmake_force
 CMakeFiles/kernel_objs.dir/src/security.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
 CMakeFiles/kernel_objs.dir/src/security.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/security.cpp
 CMakeFiles/kernel_objs.dir/src/security.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/kernel_objs.dir/src/security.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/kernel_objs.dir/src/security.cpp.obj"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/security.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/security.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/security.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/security.cpp
 
 CMakeFiles/kernel_objs.dir/src/security.cpp.i: cmake_force
@@ -212,7 +226,7 @@ CMakeFiles/kernel_objs.dir/src/security.cpp.s: cmake_force
 CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
 CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/userspace.cpp
 CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/userspace.cpp
 
 CMakeFiles/kernel_objs.dir/src/userspace.cpp.i: cmake_force
@@ -226,7 +240,7 @@ CMakeFiles/kernel_objs.dir/src/userspace.cpp.s: cmake_force
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: CMakeFiles/kernel_objs.dir/flags.make
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: CMakeFiles/kernel_objs.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/bucha/dev/uefi_boot_system/build/kernel/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -MF CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d -o CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj -c /Users/bucha/dev/uefi_boot_system/kernel/src/kernel.cpp
 
 CMakeFiles/kernel_objs.dir/src/kernel.cpp.i: cmake_force
@@ -245,6 +259,7 @@ kernel_objs: CMakeFiles/kernel_objs.dir/src/drivers.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/filesystem.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/gui.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/network.cpp.obj
+kernel_objs: CMakeFiles/kernel_objs.dir/src/performance.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/security.cpp.obj
 kernel_objs: CMakeFiles/kernel_objs.dir/src/userspace.cpp.obj

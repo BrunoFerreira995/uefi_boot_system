@@ -310,6 +310,30 @@ src/network.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/network.cpp.s
 .PHONY : src/network.cpp.s
 
+src/performance.obj: src/performance.cpp.obj
+.PHONY : src/performance.obj
+
+# target to build an object file
+src/performance.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/performance.cpp.obj
+.PHONY : src/performance.cpp.obj
+
+src/performance.i: src/performance.cpp.i
+.PHONY : src/performance.i
+
+# target to preprocess a source file
+src/performance.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/performance.cpp.i
+.PHONY : src/performance.cpp.i
+
+src/performance.s: src/performance.cpp.s
+.PHONY : src/performance.s
+
+# target to generate assembly for a file
+src/performance.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kernel_objs.dir/build.make CMakeFiles/kernel_objs.dir/src/performance.cpp.s
+.PHONY : src/performance.cpp.s
+
 src/scheduler.obj: src/scheduler.cpp.obj
 .PHONY : src/scheduler.obj
 
@@ -413,6 +437,9 @@ help:
 	@echo "... src/network.obj"
 	@echo "... src/network.i"
 	@echo "... src/network.s"
+	@echo "... src/performance.obj"
+	@echo "... src/performance.i"
+	@echo "... src/performance.s"
 	@echo "... src/scheduler.obj"
 	@echo "... src/scheduler.i"
 	@echo "... src/scheduler.s"

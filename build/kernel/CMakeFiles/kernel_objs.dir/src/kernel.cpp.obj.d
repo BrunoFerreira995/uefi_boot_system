@@ -8,6 +8,7 @@ CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj: \
   /Users/bucha/dev/uefi_boot_system/kernel/include/filesystem.hpp \
   /Users/bucha/dev/uefi_boot_system/kernel/include/gui.hpp \
   /Users/bucha/dev/uefi_boot_system/kernel/include/network.hpp \
+  /Users/bucha/dev/uefi_boot_system/kernel/include/performance.hpp \
   /Users/bucha/dev/uefi_boot_system/kernel/include/scheduler.hpp \
   /Users/bucha/dev/uefi_boot_system/kernel/include/security.hpp \
   /Users/bucha/dev/uefi_boot_system/kernel/include/userspace.hpp

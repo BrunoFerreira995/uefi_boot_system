@@ -14,6 +14,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/kernel_objs.dir/src/kernel.cpp.obj.d"
   "CMakeFiles/kernel_objs.dir/src/network.cpp.obj"
   "CMakeFiles/kernel_objs.dir/src/network.cpp.obj.d"
+  "CMakeFiles/kernel_objs.dir/src/performance.cpp.obj"
+  "CMakeFiles/kernel_objs.dir/src/performance.cpp.obj.d"
   "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj"
   "CMakeFiles/kernel_objs.dir/src/scheduler.cpp.obj.d"
   "CMakeFiles/kernel_objs.dir/src/security.cpp.obj"

@@ -4,6 +4,7 @@
 #include "filesystem.hpp"
 #include "gui.hpp"
 #include "network.hpp"
+#include "performance.hpp"
 #include "scheduler.hpp"
 #include "security.hpp"
 #include "userspace.hpp"
@@ -1557,6 +1558,12 @@ extern "C" void kernel_main(BootInfo* boot_info) {
     }
 
     PrintDriverInfo();
+
+    if (!KernelPerformanceInit(*boot_info)) {
+        KernelLog(LogLevel::Warn, "Performance services unavailable");
+    }
+
+    PrintPerformanceInfo();
 
     if (!KernelFileSystemInit()) {
         KernelPanic("Filesystem initialization failed");

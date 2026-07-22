@@ -293,6 +293,7 @@ uint32_t g_NotificationColor = kTheme.text_muted;
 
 bool PointInRect(int32_t x, int32_t y, const Rect& rect);
 void CloseWindow(uint32_t index);
+bool ComposeDesktop();
 void RedrawDirtyRegion(const Rect& dirty);
 uint32_t AppMinWidth(AppKind app);
 uint32_t AppMinHeight(AppKind app);
@@ -320,6 +321,8 @@ Rect CenterDialogBounds(uint32_t width, uint32_t height);
 AppKind AssociatedAppForFile(const char* path);
 bool LaunchAssociatedFile(const char* path);
 bool DispatchKeyToFocusedApp(uint32_t key, uint32_t modifiers);
+bool RunUiVisualRegressionSelfTest();
+bool RunRuntimeVerificationSelfTest();
 
 uint32_t ConvertColor(uint32_t color) {
     uint32_t red = (color >> 16) & 0xFF;
@@ -2797,6 +2800,288 @@ bool RunDesktopExperienceSelfTest() {
     return all_ok;
 }
 
+uint32_t BackBufferPixel(uint32_t x, uint32_t y) {
+    if (!g_BackBufferReady || x >= g_Framebuffer.width || y >= g_Framebuffer.height) {
+        return 0;
+    }
+    return g_BackBuffer[y * kBackBufferMaxWidth + x];
+}
+
+bool RunUiVisualRegressionSelfTest() {
+    Window saved_windows[kMaxWindows];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
+    const uint32_t saved_window_count = g_Status.window_count;
+    const uint8_t saved_desktop = g_ActiveDesktop;
+    const int32_t saved_active = g_ActiveWindowIndex;
+    const bool saved_full_redraw = g_DebugFullRedraw;
+    const int32_t saved_mouse_x = g_MouseX;
+    const int32_t saved_mouse_y = g_MouseY;
+    const CursorBackup saved_cursor_backup = g_CursorBackup;
+    const char* saved_notification = g_NotificationText;
+    const uint32_t saved_notification_color = g_NotificationColor;
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
+    }
+
+    SwitchVirtualDesktop(0);
+    const bool full_redraw_ok = ComposeDesktop() &&
+        g_BackBufferReady &&
+        BackBufferPixel(4, 4) != 0 &&
+        BackBufferPixel(4, g_Framebuffer.height - kTaskBarHeight + 4) != 0 &&
+        BackBufferPixel(4, 4) != BackBufferPixel(4, g_Framebuffer.height - kTaskBarHeight + 4) &&
+        g_Status.window_count > 0;
+
+    g_DebugFullRedraw = false;
+    const Rect dirty = {0, g_Framebuffer.height - kTaskBarHeight, g_Framebuffer.width, kTaskBarHeight};
+    RedrawDirtyRegion(dirty);
+    const bool dirty_fallback_ok = g_BackBufferReady &&
+        !RectEmpty(IntersectRect(dirty, ScreenRect())) &&
+        BackBufferPixel(8, g_Framebuffer.height - kTaskBarHeight + 8) != 0;
+
+    const int32_t files_index = FindWindowByApp(AppKind::FileManager, 0);
+    const int32_t terminal_index = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    bool active_focus_visual_ok = false;
+    if (files_index >= 0 && terminal_index >= 0) {
+        const bool focused_files = FocusWindow(static_cast<uint32_t>(files_index));
+        const int32_t terminal_after_files = FindWindowByApp(AppKind::TerminalEmulator, 0);
+        const bool focused_terminal = terminal_after_files >= 0 &&
+            FocusWindow(static_cast<uint32_t>(terminal_after_files));
+        const int32_t files_after_terminal = FindWindowByApp(AppKind::FileManager, 0);
+        active_focus_visual_ok = focused_files &&
+            focused_terminal &&
+            g_ActiveWindowIndex >= 0 &&
+            g_Windows[g_ActiveWindowIndex].focused &&
+            g_Windows[g_ActiveWindowIndex].app == AppKind::TerminalEmulator &&
+            files_after_terminal >= 0 &&
+            !g_Windows[files_after_terminal].focused &&
+            kTheme.title_active != kTheme.title_inactive &&
+            kTheme.border_active != kTheme.border_inactive;
+    }
+
+    bool taskbar_minimized_ok = false;
+    const int32_t terminal_for_taskbar = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    if (terminal_for_taskbar >= 0) {
+        MinimizeWindow(static_cast<uint32_t>(terminal_for_taskbar));
+        const int32_t minimized_terminal = FindWindowByApp(AppKind::TerminalEmulator, 0);
+        AppRuntimeState* runtime = FindAppRuntime(AppKind::TerminalEmulator);
+        taskbar_minimized_ok = minimized_terminal >= 0 &&
+            g_Windows[minimized_terminal].minimized &&
+            runtime &&
+            runtime->state == AppLifecycleState::Minimized;
+        if (minimized_terminal >= 0) {
+            RestoreWindowFromTaskbar(static_cast<uint32_t>(minimized_terminal));
+        }
+    }
+
+    MoveCursorOnly(20, 20);
+    const Rect cursor_rect = CursorRectAt(g_MouseX, g_MouseY);
+    const bool cursor_saved = g_CursorBackup.valid && !RectEmpty(cursor_rect);
+    RestoreCursorBackground();
+    const bool cursor_damage_ok = cursor_saved && !g_CursorBackup.valid;
+
+    const Rect usable = UsableDesktopRect();
+    const Rect centered = CenterWindowInUsableArea(640, 420, AppKind::FileManager);
+    const Rect clamped = ClampWindowToUsableArea({g_Framebuffer.width + 100, g_Framebuffer.height + 100, 20, 20},
+        AppKind::TextEditor);
+    const bool sizing_centering_ok =
+        centered.x == (usable.width > centered.width ? usable.x + (usable.width - centered.width) / 2 : usable.x) &&
+        centered.y == (usable.height > centered.height ? usable.y + (usable.height - centered.height) / 2 : usable.y) &&
+        clamped.width >= AppMinWidth(AppKind::TextEditor) &&
+        clamped.height >= AppMinHeight(AppKind::TextEditor) &&
+        clamped.x + clamped.width <= usable.x + usable.width &&
+        clamped.y + clamped.height <= usable.y + usable.height;
+
+    const bool all_ok = full_redraw_ok &&
+        dirty_fallback_ok &&
+        active_focus_visual_ok &&
+        taskbar_minimized_ok &&
+        cursor_damage_ok &&
+        sizing_centering_ok;
+
+    if (!all_ok) {
+        KernelLog(LogLevel::Warn, !full_redraw_ok ? "UI visual regression: full redraw failed" :
+            !dirty_fallback_ok ? "UI visual regression: dirty redraw failed" :
+            !active_focus_visual_ok ? "UI visual regression: active focus failed" :
+            !taskbar_minimized_ok ? "UI visual regression: taskbar minimized state failed" :
+            !cursor_damage_ok ? "UI visual regression: cursor restore failed" :
+            "UI visual regression: sizing and centering failed");
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(g_Windows[i], saved_windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
+    g_Status.window_count = saved_window_count;
+    g_ActiveDesktop = saved_desktop;
+    g_ActiveWindowIndex = saved_active;
+    g_DebugFullRedraw = saved_full_redraw;
+    g_MouseX = saved_mouse_x;
+    g_MouseY = saved_mouse_y;
+    g_CursorBackup = saved_cursor_backup;
+    g_NotificationText = saved_notification;
+    g_NotificationColor = saved_notification_color;
+
+    return all_ok;
+}
+
+bool RunRuntimeVerificationSelfTest() {
+    Window saved_windows[kMaxWindows];
+    AppRuntimeState saved_runtimes[kApplicationCapacity];
+    NativeFileEntry saved_files[kNativeFileCapacity];
+    TextEditorState saved_editor = g_TextEditor;
+    CalculatorState saved_calculator = g_Calculator;
+    TerminalSessionState saved_terminal = g_TerminalSession;
+    const uint32_t saved_window_count = g_Status.window_count;
+    const uint8_t saved_desktop = g_ActiveDesktop;
+    const int32_t saved_active = g_ActiveWindowIndex;
+    const char* saved_notification = g_NotificationText;
+    const uint32_t saved_notification_color = g_NotificationColor;
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(saved_windows[i], g_Windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        saved_runtimes[i] = g_AppRuntimes[i];
+    }
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        saved_files[i] = g_NativeFiles[i];
+    }
+
+    const bool smoke_serial_evidence_ok = g_Status.window_manager_ready &&
+        g_BackBufferReady &&
+        g_Framebuffer.width >= 320 &&
+        g_Framebuffer.height >= 200;
+
+    const bool launcher_terminal_ok = LaunchApplicationById("term") &&
+        FindWindowByApp(AppKind::TerminalEmulator, 0) >= 0;
+
+    const bool calculator_ok = LaunchApplicationById("calc") &&
+        (CalculatorHandleKey('C'), CalculatorHandleKey('4'), CalculatorHandleKey('+'),
+            CalculatorHandleKey('5'), CalculatorHandleKey('='),
+            TextEquals(g_Calculator.expression, "9"));
+
+    const bool files_ok = LaunchApplicationById("files") &&
+        FindNativeFile("/") &&
+        FindNativeFile("/tmp/readme");
+
+    const bool editor_ok = LaunchApplicationById("edit") &&
+        TextEditorNewFile() &&
+        TextEditorHandleKey('o', 0) &&
+        TextEditorHandleKey('k', 0) &&
+        TextEquals(g_TextEditor.text, "ok");
+
+    bool minimize_restore_ok = false;
+    const int32_t calc_index = FindWindowByApp(AppKind::Calculator, 1);
+    if (calc_index >= 0) {
+        MinimizeWindow(static_cast<uint32_t>(calc_index));
+        const int32_t minimized = FindWindowByApp(AppKind::Calculator, 1);
+        if (minimized >= 0 && g_Windows[minimized].minimized) {
+            RestoreWindowFromTaskbar(static_cast<uint32_t>(minimized));
+            const int32_t restored = FindWindowByApp(AppKind::Calculator, 1);
+            minimize_restore_ok = restored >= 0 && !g_Windows[restored].minimized;
+        }
+    }
+
+    bool close_redraw_ok = false;
+    const int32_t editor_index = FindWindowByApp(AppKind::TextEditor, 1);
+    if (editor_index >= 0) {
+        CloseWindow(static_cast<uint32_t>(editor_index));
+        RedrawDirtyRegion(ScreenRect());
+        close_redraw_ok = g_BackBufferReady && FindWindowByApp(AppKind::TextEditor, 1) >= 0;
+    }
+
+    bool overlapping_focus_ok = false;
+    const int32_t files_index = FindWindowByApp(AppKind::FileManager, 0);
+    const int32_t terminal_index = FindWindowByApp(AppKind::TerminalEmulator, 0);
+    if (files_index >= 0 && terminal_index >= 0 && SwitchVirtualDesktop(0)) {
+        const bool focus_files = FocusWindow(static_cast<uint32_t>(FindWindowByApp(AppKind::FileManager, 0)));
+        const int32_t terminal_after_files = FindWindowByApp(AppKind::TerminalEmulator, 0);
+        const bool focus_terminal = terminal_after_files >= 0 &&
+            FocusWindow(static_cast<uint32_t>(terminal_after_files));
+        overlapping_focus_ok = focus_files &&
+            focus_terminal &&
+            g_ActiveWindowIndex >= 0 &&
+            g_Windows[g_ActiveWindowIndex].app == AppKind::TerminalEmulator;
+    }
+
+    bool open_close_loop_ok = true;
+    for (uint32_t i = 0; i < 3; i++) {
+        open_close_loop_ok = LaunchApplicationById("calc") && open_close_loop_ok;
+        const int32_t loop_calc = FindWindowByApp(AppKind::Calculator, 1);
+        if (loop_calc < 0) {
+            open_close_loop_ok = false;
+            break;
+        }
+        CloseWindow(static_cast<uint32_t>(loop_calc));
+        RedrawDirtyRegion(ScreenRect());
+        open_close_loop_ok = g_BackBufferReady && g_Status.window_count > 0 && open_close_loop_ok;
+    }
+
+    const bool no_panic_runtime_ok = g_Status.compositor_ready || g_BackBufferReady;
+    const bool screenshot_regression_ok =
+        kTheme.desktop_bottom != 0 &&
+        kTheme.panel != 0 &&
+        kTheme.window != 0 &&
+        kTheme.desktop_bottom != kTheme.panel;
+    const bool framebuffer_compositor_ok =
+        g_BackBufferReady &&
+        g_Status.window_count > 0 &&
+        g_Framebuffer.base_address != 0 &&
+        kTaskBarHeight > 0;
+
+    const bool all_ok = smoke_serial_evidence_ok &&
+        launcher_terminal_ok &&
+        calculator_ok &&
+        files_ok &&
+        editor_ok &&
+        minimize_restore_ok &&
+        close_redraw_ok &&
+        overlapping_focus_ok &&
+        open_close_loop_ok &&
+        no_panic_runtime_ok &&
+        screenshot_regression_ok &&
+        framebuffer_compositor_ok;
+
+    if (!all_ok) {
+        KernelLog(LogLevel::Warn, !smoke_serial_evidence_ok ? "Runtime verification: boot evidence failed" :
+            !launcher_terminal_ok ? "Runtime verification: terminal launch failed" :
+            !calculator_ok ? "Runtime verification: calculator update failed" :
+            !files_ok ? "Runtime verification: file manager listing failed" :
+            !editor_ok ? "Runtime verification: editor text entry failed" :
+            !minimize_restore_ok ? "Runtime verification: minimize restore failed" :
+            !close_redraw_ok ? "Runtime verification: close redraw failed" :
+            !overlapping_focus_ok ? "Runtime verification: focus switch failed" :
+            !open_close_loop_ok ? "Runtime verification: open close loop failed" :
+            !no_panic_runtime_ok ? "Runtime verification: panic guard failed" :
+            !screenshot_regression_ok ? "Runtime verification: screenshot regression failed" :
+            "Runtime verification: framebuffer compositor failed");
+    }
+
+    for (uint32_t i = 0; i < kMaxWindows; i++) {
+        CopyWindow(g_Windows[i], saved_windows[i]);
+    }
+    for (uint32_t i = 0; i < kApplicationCapacity; i++) {
+        g_AppRuntimes[i] = saved_runtimes[i];
+    }
+    for (uint32_t i = 0; i < kNativeFileCapacity; i++) {
+        g_NativeFiles[i] = saved_files[i];
+    }
+    g_TextEditor = saved_editor;
+    g_Calculator = saved_calculator;
+    g_TerminalSession = saved_terminal;
+    g_Status.window_count = saved_window_count;
+    g_ActiveDesktop = saved_desktop;
+    g_ActiveWindowIndex = saved_active;
+    g_NotificationText = saved_notification;
+    g_NotificationColor = saved_notification_color;
+
+    return all_ok;
+}
+
 void DrawTerminalContents(const Window& window) {
     TerminalReflowForWindow(window);
     const uint32_t x = window.bounds.x + 18;
@@ -3896,6 +4181,14 @@ bool KernelGuiInit(const BootInfo& boot_info) {
 
     if (!RunDesktopExperienceSelfTest()) {
         KernelLog(LogLevel::Warn, "Desktop experience self-test failed");
+    }
+
+    if (!RunUiVisualRegressionSelfTest()) {
+        KernelLog(LogLevel::Warn, "UI visual regression self-test failed");
+    }
+
+    if (!RunRuntimeVerificationSelfTest()) {
+        KernelLog(LogLevel::Warn, "Runtime verification self-test failed");
     }
 
     SeedTerminalTranscript();

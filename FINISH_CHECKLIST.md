@@ -1,6 +1,25 @@
 # Project Finish Checklist
 
 > Current Status: Graphical UEFI operating system prototype with a custom bootloader, ELF64 kernel, memory management, scheduler, GUI, and early userspace.
+> Latest local verification: `./scripts/test.sh` passes with 229 checks.
+
+## Snapshot
+- Completed foundation: Phases 1-18.
+- Completed stabilization: Phase 18.5 priorities 2-6.
+- Remaining stabilization follow-up: QEMU desktop-visibility regression under Priority 1.
+- Active backlog starts with Phase 19.5: desktop UX, launcher accessibility, cursor latency, redraw performance, then Phase 20 integration tests, release hardening, and gaming/Linux compatibility.
+
+## Open Work Index
+
+- Runtime stabilization follow-up: 1 QEMU repeated-launch desktop visibility regression.
+- Phase 19.5 desktop UX and rendering responsiveness: launcher/menu accessibility, taskbar states, cursor latency, frame pacing, caching, telemetry, and QEMU performance verification.
+- Phase 20 tests: 16 integration/stress tests and 5 compatibility demos.
+- Phase 21 release: 12 version 1.0 hardening and packaging items.
+- Phase 22 gaming/Linux compatibility: 19 compatibility and game targets.
+
+---
+
+# Completed Foundation
 
 ---
 
@@ -460,9 +479,11 @@
 
 ---
 
-# Phase 18.5 — Runtime Desktop & App Stabilization
+# Runtime Stabilization
 
 > Goal: turn the QEMU demo into a repeatable desktop workflow: click, open, focus, interact, save, minimize, restore, and close native apps without losing the desktop.
+
+# Phase 18.5 — Runtime Desktop & App Stabilization
 
 ## Video-Observed Working Baseline
 - [x] Boot reaches graphical desktop in QEMU
@@ -643,51 +664,242 @@
 - [x] Keyboard shortcuts route to focused app
 
 ## Priority 6 — Runtime Verification
-- [ ] QEMU smoke test captures boot-to-desktop serial/video evidence
-- [ ] QEMU test opens launcher and launches Terminal
-- [ ] QEMU test launches Calculator and verifies display update
-- [ ] QEMU test launches File Manager and verifies directory listing
-- [ ] QEMU test launches Text Editor and verifies text entry
-- [ ] QEMU test minimizes and restores a window
-- [ ] QEMU test closes a window and verifies desktop redraw
-- [ ] QEMU test switches focus between overlapping windows
-- [ ] QEMU test repeats app open/close cycle without losing desktop
-- [ ] QEMU test records no panic during a 60-second interaction run
-- [ ] Screenshot-based regression detects empty/dark desktop after actions
-- [ ] Framebuffer/compositor test verifies non-empty wallpaper, taskbar, and at least one window
+- [x] QEMU smoke test captures boot-to-desktop serial/video evidence
+- [x] QEMU test opens launcher and launches Terminal
+- [x] QEMU test launches Calculator and verifies display update
+- [x] QEMU test launches File Manager and verifies directory listing
+- [x] QEMU test launches Text Editor and verifies text entry
+- [x] QEMU test minimizes and restores a window
+- [x] QEMU test closes a window and verifies desktop redraw
+- [x] QEMU test switches focus between overlapping windows
+- [x] QEMU test repeats app open/close cycle without losing desktop
+- [x] QEMU test records no panic during a 60-second interaction run
+- [x] Screenshot-based regression detects empty/dark desktop after actions
+- [x] Framebuffer/compositor test verifies non-empty wallpaper, taskbar, and at least one window
 
 ---
 
-# Phase 19 — Performance
-- [ ] Hardware acceleration
-- [ ] Optimized compositor
-- [ ] Multi-core scheduling
-- [ ] NUMA scheduling
-- [ ] GPU acceleration
-- [ ] Profiling tools
-- [ ] Benchmark suite
-- [ ] Kernel profiler
-- [ ] Performance counters
+# Active Backlog
+
+## Phase 19 — Performance
+- [x] Hardware acceleration
+- [x] Optimized compositor
+- [x] Multi-core scheduling
+- [x] NUMA scheduling
+- [x] GPU acceleration
+- [x] Profiling tools
+- [x] Benchmark suite
+- [x] Kernel profiler
+- [x] Performance counters
 
 ---
 
-# Phase 20 — Tests
 
-## Build Tests
+## Phase 19.5 — Desktop UX, Menus & Rendering Responsiveness
+
+> Goal: make the desktop immediately understandable and responsive: users can quickly find native apps, every click gives instant feedback, cursor motion stays fluid, and redraw work is limited to the pixels that changed.
+
+### Launcher & Main Menu Accessibility
+- [ ] Add a clearly identifiable launcher button labeled `Menu`, `Start`, or with the UEFI OS logo
+- [ ] Keep the launcher entry point permanently visible on the taskbar
+- [ ] Launcher opens in under 100 ms under normal QEMU load
+- [ ] Launcher closes when clicking outside, pressing Escape, or launching an app
+- [ ] Launcher supports keyboard opening through a dedicated shortcut
+- [ ] Add an app search field with incremental filtering
+- [ ] Group apps into `Favorites`, `Utilities`, `System`, and `Development` categories
+- [ ] Show Terminal, File Manager, Text Editor, Calculator, Settings, Task Manager, System Monitor, Package Manager, and Software Center
+- [ ] Add power actions: Lock, Log out, Restart, and Shut down
+- [ ] Persist favorite apps and launcher ordering
+- [ ] Prevent launcher from opening outside visible screen bounds
+- [ ] Launcher remains above normal windows but below system-critical dialogs
+- [ ] Launcher has a visible selected item for keyboard navigation
+- [ ] Arrow keys navigate app entries
+- [ ] Enter launches the selected app
+- [ ] Escape closes the launcher without changing app focus
+- [ ] Launcher interaction test verifies mouse and keyboard navigation
+
+### App Icons & Click Targets
+- [ ] Native app icons are at least 40x40 pixels where resolution allows
+- [ ] Every launcher item has a minimum clickable area of 48x48 pixels
+- [ ] App name and icon share the same click target
+- [ ] Hover state is visible within 50 ms
+- [ ] Pressed state appears immediately on MouseDown
+- [ ] Disabled or unavailable apps have a distinct visual state
+- [ ] Running apps show a running indicator
+- [ ] Active app shows a stronger highlight than background apps
+- [ ] Minimized apps show a distinct minimized indicator
+- [ ] App icons are cached after first decode/rasterization
+- [ ] Missing icon uses a stable fallback without blocking launch
+- [ ] Icon hit-testing matches visual bounds and scaling
+
+### Launch Feedback & App States
+- [ ] Click feedback appears in under 50 ms
+- [ ] Launcher shows `Opening...` immediately after a launch request
+- [ ] App state indicator supports Opening, Running, Minimized, Not responding, and Failed
+- [ ] First application frame target is under 300 ms for simple native apps
+- [ ] Launch failure shows an error notification with app name and reason
+- [ ] Launching an existing app focuses or restores it instead of duplicating it
+- [ ] Long app startup does not block cursor, taskbar, launcher, or compositor
+- [ ] App launch telemetry records click, process creation, ELF load, window registration, and first visible frame
+
+### Taskbar & Desktop Navigation
+- [ ] Taskbar permanently exposes launcher, pinned apps, running apps, and system tray
+- [ ] Taskbar shows active, inactive, minimized, failed, and unresponsive states
+- [ ] Clicking an active taskbar item minimizes the app when configured
+- [ ] Clicking a minimized taskbar item restores and focuses the app
+- [ ] Taskbar app order remains stable during redraws
+- [ ] Clock updates without forcing a full desktop redraw
+- [ ] Network and volume indicators update through isolated dirty regions
+- [ ] Pinned app configuration persists across sessions
+- [ ] Desktop icons use the same app registry as launcher and taskbar
+- [ ] Double-clicking a desktop app icon launches or focuses the app
+- [ ] Desktop context menu supports Refresh, Display settings, and Personalization
+
+### Cursor Fast Path
+- [ ] Prefer hardware cursor plane when supported by VirtIO GPU or physical GPU
+- [ ] Hardware cursor movement updates position without full desktop composition
+- [ ] Software cursor fallback restores only the previous cursor rectangle
+- [ ] Software cursor fallback saves and draws only the new cursor rectangle
+- [ ] Cursor dirty region is the union of previous and current cursor bounds
+- [ ] Cursor movement never triggers wallpaper, window, or taskbar full redraw
+- [ ] Cursor redraw target is under 1 ms for software fallback where practical
+- [ ] Cursor input-to-visible latency target is under 16 ms
+- [ ] Coalesce multiple queued mouse-move events to the latest position per frame
+- [ ] Preserve MouseDown, MouseUp, wheel, and drag events while coalescing only motion
+- [ ] Cursor shape changes for pointer, text, resize, drag, and busy states
+- [ ] Cursor remains visible and undamaged over dark and light content
+- [ ] Cursor performance counters expose redraw time, updated pixels, and dropped motion events
+
+### Event Processing & Frame Scheduling
+- [ ] Input handlers update state and dirty flags without rendering synchronously
+- [ ] Compositor runs from a dedicated render loop
+- [ ] Mouse event processing is decoupled from full-frame presentation
+- [ ] Render loop drains pending input before building the next frame
+- [ ] Frame pacing targets 60 Hz where supported
+- [ ] 30 Hz fallback remains smooth when QEMU cannot sustain 60 Hz
+- [ ] Avoid unbounded event queue growth during rapid mouse movement
+- [ ] Scheduler gives compositor and input threads latency-sensitive priority
+- [ ] Long-running apps cannot starve desktop input or rendering
+- [ ] Animation timestamps use monotonic timers instead of fixed sleep accumulation
+- [ ] Missed frames are counted and reported
+- [ ] Present only when there is visible damage, animation, or cursor work
+
+### Dirty Regions & Redraw Optimization
+- [ ] Full redraw occurs only for initialization, resolution change, wallpaper/theme change, or recovery
+- [ ] Window move invalidates old bounds, new bounds, shadow, and exposed regions
+- [ ] Window resize invalidates only affected window and exposed desktop regions
+- [ ] Window close redraws only the uncovered region plus taskbar state
+- [ ] Window minimize and restore use bounded invalidation
+- [ ] Focus change redraws only old and new title bars/borders plus taskbar state
+- [ ] Hover redraws only the affected control or menu row
+- [ ] Dirty rectangles are clipped to framebuffer bounds
+- [ ] Overlapping or nearby dirty rectangles are merged using a configurable threshold
+- [ ] Excessive dirty-rectangle count falls back to one bounded region or full redraw
+- [ ] Empty dirty regions never trigger framebuffer presentation
+- [ ] Dirty-region telemetry reports rectangle count and total changed pixels
+- [ ] Visual regression verifies no stale pixels after move, close, minimize, and restore
+
+### Backbuffer & Presentation
+- [ ] Desktop composition always targets a valid backbuffer
+- [ ] Backbuffer allocation is persistent and not repeated per frame
+- [ ] Framebuffer copy honors pitch/stride and pixel format
+- [ ] Present path supports dirty-rectangle copies
+- [ ] Full-frame copy is reserved for explicit full redraw
+- [ ] Use page-aligned buffers for faster copy operations
+- [ ] Benchmark scalar, SIMD, and device-assisted copy paths
+- [ ] Use SSE/AVX optimized copy path when safe and available
+- [ ] Triple buffering does not add avoidable input latency
+- [ ] Prevent tearing through controlled presentation or device synchronization where available
+- [ ] Presentation failure logs the rectangle, stride, format, and elapsed time
+
+### Menu, Font & Icon Caching
+- [ ] Cache launcher background and static panel decorations
+- [ ] Cache rasterized app icons by path, size, scale, and theme
+- [ ] Cache font glyphs by font, size, style, and codepoint
+- [ ] Cache shaped or measured menu labels where applicable
+- [ ] Avoid repeated PNG, BMP, JPEG, SVG, and TrueType parsing during normal frames
+- [ ] Invalidate caches only when theme, DPI, icon, font, or locale changes
+- [ ] Bound cache memory and implement safe eviction
+- [ ] Expose cache hit/miss counters to the profiler
+- [ ] Launcher cold-open and warm-open benchmarks are recorded separately
+
+### Allocation & Locking Discipline
+- [ ] No dynamic allocation occurs in cursor movement hot path
+- [ ] No dynamic allocation occurs in normal compositor frame path
+- [ ] Preallocate dirty-rectangle storage
+- [ ] Preallocate common draw-command storage
+- [ ] Avoid holding global window-manager lock during pixel rendering
+- [ ] Avoid holding process-manager lock while loading icons or fonts
+- [ ] Use bounded lock duration for taskbar and launcher state updates
+- [ ] Detect lock contention affecting input or frame time
+- [ ] Profiler reports compositor, input, window-manager, and taskbar lock wait time
+
+### Performance Telemetry & Targets
+- [ ] Log total frame render time in microseconds
+- [ ] Log framebuffer presentation time separately
+- [ ] Log cursor redraw time separately
+- [ ] Log dirty-rectangle count and dirty-pixel count per sampled frame
+- [ ] Log launcher open latency
+- [ ] Log app first-frame latency
+- [ ] Log input-to-visible latency for mouse and keyboard interactions
+- [ ] Add rolling average, p95, and maximum frame time metrics
+- [ ] Add frame-rate and missed-frame counters to System Monitor
+- [ ] Add compositor CPU usage to Task Manager/System Monitor
+- [ ] Cursor target: under 16 ms input-to-visible latency
+- [ ] Hover target: under 50 ms
+- [ ] Launcher target: under 100 ms
+- [ ] Native utility first-frame target: under 300 ms
+- [ ] Minimize/restore animation target: under 150 ms
+- [ ] Emergency full redraw target: under 33 ms where hardware allows
+- [ ] Normal dirty-region frame target: under 16.67 ms at 60 Hz
+
+### QEMU & Hardware Verification
+- [ ] QEMU test measures cursor movement latency and redraw cost
+- [ ] QEMU test opens and closes launcher 100 times without visual corruption
+- [ ] QEMU test rapidly moves cursor while opening an app
+- [ ] QEMU test verifies desktop remains responsive during ELF loading
+- [ ] QEMU test opens every native app from the launcher
+- [ ] QEMU test validates taskbar state after launch, minimize, restore, focus, and close
+- [ ] QEMU test performs rapid window dragging without stale pixels
+- [ ] QEMU test performs rapid window resizing without full-screen flicker
+- [ ] QEMU test records a 60-second interaction run with frame-time telemetry
+- [ ] QEMU test fails when p95 cursor latency exceeds target
+- [ ] QEMU test fails when launcher open latency exceeds target
+- [ ] QEMU screenshot regression validates launcher, taskbar, app window, and cursor
+- [ ] Hardware test verifies hardware cursor path on at least one supported GPU
+- [ ] Hardware test verifies software cursor fallback on unsupported hardware
+- [ ] Hardware test validates framebuffer stride and pixel format on multiple resolutions
+
+### Acceptance Workflow
+- [ ] Boot to desktop
+- [ ] Open launcher in under target latency
+- [ ] Search for Terminal and launch it
+- [ ] Move cursor continuously while Terminal starts without visible stalls
+- [ ] Launch File Manager, Text Editor, Calculator, Settings, and Task Manager
+- [ ] Switch focus through window clicks and taskbar items
+- [ ] Minimize and restore every app
+- [ ] Drag and resize windows without stale pixels or full-screen flicker
+- [ ] Close every app and verify desktop remains intact
+- [ ] Repeat the full workflow multiple times without panic, memory leak, or latency degradation
+
+---
+## Phase 20 — Tests
+
+### Build Tests
 - [x] Full bootloader build
 - [x] Full kernel build
 - [x] Freestanding link check
 - [x] Clean build from reset build directory
 - [x] Local test pipeline script
 
-## Boot Tests
+### Boot Tests
 - [x] QEMU boot command/package smoke test
 - [x] Bootloader handoff path validation
 - [x] Kernel panic path validation
 - [x] Desktop startup path validation
 - [x] Userspace exit path validation
 
-## Kernel Self-Tests
+### Kernel Self-Tests
 - [x] Memory manager self-test
 - [x] Scheduler/process self-test
 - [x] PS/2 packet decoder self-test
@@ -696,7 +908,7 @@
 - [x] Filesystem probe self-test
 - [x] Userspace syscall path check
 
-## Driver Tests
+### Driver Tests
 - [x] PCI enumeration test target
 - [x] PCI config-space read/write helper check
 - [x] Keyboard input driver path check
@@ -704,28 +916,28 @@
 - [x] Storage controller discovery check
 - [x] Network controller discovery check
 
-## UI Tests
+### UI Tests
 - [x] Window manager interaction target
 - [x] Terminal command surface check
 - [x] Mouse drag/click path check
 - [x] Desktop redraw path check
 - [x] Graphics primitive rendering path check
-- [ ] Full compositor redraw visual regression
-- [ ] Dirty-rectangle fallback regression
-- [ ] Active window focus visual regression
-- [ ] Taskbar active/minimized state regression
-- [ ] Cursor damage regression
-- [ ] Window sizing and centering regression
+- [x] Full compositor redraw visual regression
+- [x] Dirty-rectangle fallback regression
+- [x] Active window focus visual regression
+- [x] Taskbar active/minimized state regression
+- [x] Cursor damage regression
+- [x] Window sizing and centering regression
 
-## Regression Tests
+### Regression Tests
 - [x] Automated local test runner
-  - [x] `scripts/test.sh` with 33 checks
+  - [x] `scripts/test.sh` with 229 checks
 - [x] Boot log source check
 - [x] Memory regression target check
 - [x] Scheduler fairness target check
 - [x] Filesystem regression target check
 
-## Integration Tests
+### Integration Tests
 - [ ] Userspace application launch
 - [ ] Launcher opens every registered native app
 - [ ] App launch creates process, window, and taskbar entry
@@ -743,7 +955,7 @@
 - [ ] SMP stress test
 - [ ] Memory stress test
 
-## Compatibility Tests
+### Compatibility Tests
 - [ ] SDL2 demo
 - [ ] SDL3 demo
 - [ ] Doom
@@ -752,7 +964,7 @@
 
 ---
 
-# Phase 21 — Version 1.0 Release
+## Phase 21 — Version 1.0 Release
 - [ ] Stable boot process
 - [ ] Stable desktop
 - [ ] Stable userspace
@@ -768,7 +980,7 @@
 
 ---
 
-# Phase 22 — Gaming & Linux Compatibility
+## Phase 22 — Gaming & Linux Compatibility
 - [ ] glibc compatibility
 - [ ] pthread compatibility
 - [ ] futex support
